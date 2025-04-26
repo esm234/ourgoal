@@ -12,11 +12,15 @@ const Performance = () => {
   const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('ar-SA', {
+      weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    });
+      hour: 'numeric',
+      minute: 'numeric',
+    }).format(date);
   };
 
   return (
@@ -55,7 +59,7 @@ const Performance = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">التاريخ</TableHead>
+                        <TableHead className="text-right">التاريخ والوقت</TableHead>
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
@@ -64,7 +68,7 @@ const Performance = () => {
                     <TableBody>
                       {testResults.map((result, index) => (
                         <TableRow key={index}>
-                          <TableCell>{formatDate(result.date)}</TableCell>
+                          <TableCell className="text-right">{formatDate(result.date)}</TableCell>
                           <TableCell>
                             {result.type === 'verbal' ? 'لفظي' : 
                              result.type === 'quantitative' ? 'كمي' : 'مختلط'}
