@@ -1,5 +1,8 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+
+import React, { useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import Layout from "@/components/Layout";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,15 +15,21 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <Layout>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
+          <p className="text-xl text-muted-foreground mb-6">
+            عذراً، الصفحة التي تبحث عنها غير موجودة
+          </p>
+          <Link to="/">
+            <Button className="bg-primary hover:bg-primary/90">
+              العودة إلى الصفحة الرئيسية
+            </Button>
+          </Link>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
