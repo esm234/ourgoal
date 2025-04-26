@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home";
 import QiyasTests from "@/pages/QiyasTests";
+import TakeTest from "@/pages/TakeTest";
 import Performance from "@/pages/Performance";
 import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
 import Login from "@/pages/Login";
