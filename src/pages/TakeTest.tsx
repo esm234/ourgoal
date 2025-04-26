@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { testQuestions } from "@/data/testQuestions";
 import { useToast } from "@/components/ui/use-toast";
+import type { TestResult } from "@/types/testResults";
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -27,6 +28,20 @@ const TakeTest = () => {
     );
   }
 
+  const saveTestResult = (score: number, correctAnswers: number) => {
+    const result: TestResult = {
+      testId,
+      score,
+      correctAnswers,
+      totalQuestions: test.questions.length,
+      date: new Date().toISOString(),
+      type: 'mixed'
+    };
+
+    const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+    localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
+  };
+
   const handleAnswer = (answerIndex: number) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerIndex;
@@ -41,12 +56,15 @@ const TakeTest = () => {
       }, 0);
       const score = Math.round((correctAnswers / test.questions.length) * 100);
 
+      // Save test result
+      saveTestResult(score, correctAnswers);
+
       toast({
         title: "تم إنهاء الاختبار",
         description: `حصلت على ${score}% (${correctAnswers} من ${test.questions.length})`,
       });
       
-      navigate("/qiyas-tests");
+      navigate("/performance");
     }
   };
 
