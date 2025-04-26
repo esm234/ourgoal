@@ -1,4 +1,3 @@
-
 import React from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { testQuestions } from "@/data/testQuestions";
 
 interface TestType {
   id: string;
@@ -65,12 +65,16 @@ const QiyasTests = () => {
   const { toast } = useToast();
 
   const handleStartTest = (testId: string) => {
-    // In a real app, this would navigate to the test page
-    // For now, show a toast indicating this feature is coming soon
-    toast({
-      title: "قريباً",
-      description: "سيتم إطلاق الاختبارات التجريبية قريباً",
-    });
+    const testData = testQuestions.find(test => test.testId === testId);
+    
+    if (testData) {
+      navigate(`/qiyas-tests/${testId}`);
+    } else {
+      toast({
+        title: "قريباً",
+        description: "سيتم إطلاق هذا الاختبار التجريبي قريباً",
+      });
+    }
   };
 
   return (
