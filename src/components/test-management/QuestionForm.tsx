@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash, Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const optionSchema = z.object({
   text: z.string().min(1, "نص الخيار مطلوب"),
@@ -72,6 +73,7 @@ const QuestionForm = ({
   isEdit = false,
 }: QuestionFormProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(defaultValues?.image_url || null);
+  const [isUploading, setIsUploading] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
@@ -109,6 +111,37 @@ const QuestionForm = ({
 
   // Toggle between text and image mode
   const mode = form.watch("mode");
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      // Create a unique file name
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `question-images/${fileName}`;
+
+      // Upload file to Supabase storage
+      const { error: uploadError, data } = await supabase.storage
+        .from('questions')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('questions')
+        .getPublicUrl(filePath);
+
+      // Update form and preview
+      form.setValue('image_url', publicUrl);
+      setImagePreview(publicUrl);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      // You might want to show an error toast here
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -177,13 +210,18 @@ const QuestionForm = ({
                       onChange={e => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          const url = URL.createObjectURL(file);
-                          setImagePreview(url);
-                          // For now, just preview. For real upload, integrate with Supabase Storage or similar.
-                          // You may want to upload the file and set the resulting URL in field.onChange
+                          // Show local preview immediately
+                          const localUrl = URL.createObjectURL(file);
+                          setImagePreview(localUrl);
+                          // Upload to Supabase
+                          handleFileUpload(file);
                         }
                       }}
+                      disabled={isUploading}
                     />
+                    {isUploading && (
+                      <p className="text-sm text-muted-foreground mt-2">جاري رفع الصورة...</p>
+                    )}
                     {imagePreview && (
                       <img src={imagePreview} alt="معاينة الصورة" className="mt-2 max-h-40 rounded border" />
                     )}
