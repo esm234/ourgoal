@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,10 +8,70 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Performance = () => {
-  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
-  const [expandedResult, setExpandedResult] = useState<number | null>(null);
+  const { isLoggedIn, user } = useAuth();
+  const { toast } = useToast();
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchResults();
+  }, [isLoggedIn]);
+
+  const fetchResults = async () => {
+    setLoading(true);
+    try {
+      if (isLoggedIn && user) {
+        // Fetch results from database for logged-in users
+        const { data, error } = await supabase
+          .from("exam_results")
+          .select(`
+            *,
+            tests (
+              title,
+              type
+            )
+          `)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Transform database results to match TestResult type
+        const transformedResults: TestResult[] = data.map(result => ({
+          testId: result.test_id,
+          score: result.score,
+          correctAnswers: Math.round((result.score / 100) * result.total_questions),
+          totalQuestions: result.total_questions,
+          date: result.created_at,
+          type: result.tests?.type || 'mixed',
+          questions: result.questions_data || []
+        }));
+
+        setTestResults(transformedResults);
+      } else {
+        // Use localStorage for non-logged-in users
+        const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+        setTestResults(localResults);
+      }
+    } catch (error: any) {
+      console.error("Error fetching results:", error);
+      toast({
+        title: "خطأ في جلب النتائج",
+        description: "حدث خطأ أثناء جلب نتائج الاختبارات",
+        variant: "destructive"
+      });
+      // Fallback to localStorage on error
+      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+      setTestResults(localResults);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -24,6 +84,18 @@ const Performance = () => {
       minute: 'numeric',
     }).format(date);
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <section className="py-16 px-4">
+          <div className="container mx-auto text-center">
+            <p>جاري تحميل النتائج...</p>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -55,7 +127,7 @@ const Performance = () => {
                   </Link>
                 </CardContent>
               </Card>
-            ) : (
+            ) :
               <Card className="w-full max-w-4xl">
                 <CardContent className="p-6">
                   <Table>
@@ -113,44 +185,46 @@ const Performance = () => {
                                       <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
                                       <p>نسبة النجاح: {result.score}%</p>
                                     </div>
-                                    <div className="border-t pt-4 mt-4">
-                                      <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
-                                      <div className="space-y-6">
-                                        {result.questions?.map((question, qIndex) => {
-                                          const isCorrect = question.userAnswer === question.correctAnswer;
-                                          return (
-                                            <div 
-                                              key={question.id} 
-                                              className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}
-                                            >
-                                              <div className="flex items-center justify-between mb-2">
-                                                <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
-                                                <Badge variant={isCorrect ? "success" : "destructive"}>
-                                                  {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
-                                                </Badge>
+                                    {result.questions && result.questions.length > 0 && (
+                                      <div className="border-t pt-4 mt-4">
+                                        <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
+                                        <div className="space-y-6">
+                                          {result.questions.map((question, qIndex) => {
+                                            const isCorrect = question.userAnswer === question.correctAnswer;
+                                            return (
+                                              <div 
+                                                key={question.id} 
+                                                className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}
+                                              >
+                                                <div className="flex items-center justify-between mb-2">
+                                                  <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
+                                                  <Badge variant={isCorrect ? "success" : "destructive"}>
+                                                    {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
+                                                  </Badge>
+                                                </div>
+                                                <p className="mb-2 text-black">{question.text}</p>
+                                                <div className="space-y-2">
+                                                  <p className="font-semibold text-black">إجابتك:</p>
+                                                  <p className="text-black">{question.options[question.userAnswer]}</p>
+                                                  {!isCorrect && (
+                                                    <>
+                                                      <p className="font-semibold text-black">الإجابة الصحيحة:</p>
+                                                      <p className="text-black">{question.options[question.correctAnswer]}</p>
+                                                      {question.explanation && (
+                                                        <>
+                                                          <p className="font-semibold text-black">الشرح:</p>
+                                                          <p className="text-black">{question.explanation}</p>
+                                                        </>
+                                                      )}
+                                                    </>
+                                                  )}
+                                                </div>
                                               </div>
-                                              <p className="mb-2 text-black">{question.text}</p>
-                                              <div className="space-y-2">
-                                                <p className="font-semibold text-black">إجابتك:</p>
-                                                <p className="text-black">{question.options[question.userAnswer]}</p>
-                                                {!isCorrect && (
-                                                  <>
-                                                    <p className="font-semibold text-black">الإجابة الصحيحة:</p>
-                                                    <p className="text-black">{question.options[question.correctAnswer]}</p>
-                                                    {question.explanation && (
-                                                      <>
-                                                        <p className="font-semibold text-black">الشرح:</p>
-                                                        <p className="text-black">{question.explanation}</p>
-                                                      </>
-                                                    )}
-                                                  </>
-                                                )}
-                                              </div>
-                                            </div>
-                                          );
-                                        })}
+                                            );
+                                          })}
+                                        </div>
                                       </div>
-                                    </div>
+                                    )}
                                   </div>
                                 </DialogContent>
                               </Dialog>
