@@ -241,9 +241,9 @@ const Home = () => {
       <section className="py-20 px-4 bg-[#1A2237]">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">خبراؤنا</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">مشرفين المنصة</h2>
             <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-              فريق من الخبراء المتخصصين في مجال التعليم والتدريب
+              
             </p>
           </div>
 
