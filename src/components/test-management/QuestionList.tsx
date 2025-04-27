@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Question } from "@/types/testManagement";
 import { Button } from "@/components/ui/button";
@@ -12,9 +11,10 @@ interface QuestionListProps {
   questions: Question[];
   loading: boolean;
   onDelete: (id: string) => void;
+  onEdit: (question: Question) => void;
 }
 
-const QuestionList = ({ questions, loading, onDelete }: QuestionListProps) => {
+const QuestionList = ({ questions, loading, onDelete, onEdit }: QuestionListProps) => {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -99,6 +99,17 @@ const QuestionList = ({ questions, loading, onDelete }: QuestionListProps) => {
                   )}
 
                   <div className="flex justify-end gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(question);
+                      }}
+                    >
+                      <PenLine className="h-4 w-4 mr-1" />
+                      تعديل
+                    </Button>
                     <Button
                       variant="destructive"
                       size="sm"
