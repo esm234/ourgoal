@@ -34,7 +34,7 @@ const formSchema = z.object({
   text: z.string().optional(),
   type: z.enum(["verbal", "quantitative", "mixed"]),
   explanation: z.string().optional(),
-  image_url: z.string().url("رابط الصورة غير صالح").optional().or(z.literal("").optional()),
+  image_url: z.string().optional(),
   options: z
     .array(optionSchema)
     .min(2, "يجب إضافة خيارين على الأقل")
@@ -50,10 +50,10 @@ const formSchema = z.object({
       path: ["text"],
     });
   }
-  if (data.mode === "image" && (!data.image_url || !data.image_url.trim())) {
+  if (data.mode === "image" && !data.image_url) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "رابط الصورة مطلوب",
+      message: "يرجى رفع صورة للسؤال",
       path: ["image_url"],
     });
   }
