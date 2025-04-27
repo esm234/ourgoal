@@ -21,7 +21,7 @@ const Home = () => {
           <div className="flex flex-col lg:flex-row items-center justify-between">
             <div className="lg:w-1/2 mb-10 lg:mb-0">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-foreground">
-                منصة الإعداد لاختبارات <span className="text-primary">اسرار للتفوق</span>
+                منصة  لاختبارات <span className="text-primary">اسرار للتفوق</span>
               </h1>
               <p className="text-xl mb-8 text-muted-foreground">
                 تدرب على اختبارات قياس المختلطة (لفظي + كمي) وحسن معدلك التقديري للمعادلة المصرية في السعودية
