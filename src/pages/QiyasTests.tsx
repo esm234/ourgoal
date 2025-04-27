@@ -151,81 +151,94 @@ const QiyasTests = () => {
             </div>
           )}
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs 
+            defaultValue="sample-tests"
+            value={activeTab} 
+            onValueChange={setActiveTab}
+            className="max-w-3xl mx-auto mb-8"
+          >
+            <TabsList className="grid grid-cols-2 w-[400px] mx-auto">
               <TabsTrigger value="sample-tests">اختبارات نموذجية</TabsTrigger>
-              <TabsTrigger value="weekly-tests">اختبارات اسبوعيه</TabsTrigger>
+              <TabsTrigger value="user-tests">اختبارات المستخدمين</TabsTrigger>
             </TabsList>
+          </Tabs>
 
-            <div className="mt-8">
-              {activeTab === "sample-tests" ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {mockTests.map((test) => (
-                    <Card key={test.id} className="overflow-hidden border-2 border-border bg-secondary hover:border-primary transition-colors">
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-bold">{test.title}</h3>
-                          {isLoggedIn && role === "admin" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditTest(test.id)}
-                            >
-                              <PenLine className="h-4 w-4 mr-1" />
-                              تعديل
-                            </Button>
-                          )}
-                        </div>
-                        <p className="text-muted-foreground mb-4">{test.description}</p>
-                        <div className="flex justify-between text-sm text-muted-foreground mb-6">
-                          <span className="flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 ml-1 text-primary"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            {test.numberOfQuestions} سؤال
-                          </span>
-                          <span className="flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 ml-1 text-primary"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            {test.duration} دقيقة
-                          </span>
-                        </div>
+          {activeTab === "sample-tests" && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {mockTests.map((test) => (
+                <Card key={test.id} className="overflow-hidden border-2 border-border bg-secondary hover:border-primary transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-bold">{test.title}</h3>
+                      {isLoggedIn && role === "admin" && (
                         <Button
-                          className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
-                          onClick={() => handleStartTest(test.id)}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditTest(test.id)}
                         >
-                          ابدأ الاختبار
-                          <ArrowRight className="mr-2" size={16} />
+                          <PenLine className="h-4 w-4 mr-1" />
+                          تعديل
                         </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      )}
+                    </div>
+                    <p className="text-muted-foreground mb-4">{test.description}</p>
+                    <div className="flex justify-between text-sm text-muted-foreground mb-6">
+                      <span className="flex items-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 ml-1 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {test.numberOfQuestions} سؤال
+                      </span>
+                      <span className="flex items-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 ml-1 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {test.duration} دقيقة
+                      </span>
+                    </div>
+                    <Button
+                      className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
+                      onClick={() => handleStartTest(test.id)}
+                    >
+                      ابدأ الاختبار
+                      <ArrowRight className="mr-2" size={16} />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "user-tests" && (
+            <div>
+              {loading ? (
+                <div className="text-center py-10">
+                  <p>جاري تحميل الاختبارات...</p>
                 </div>
-              ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              ) : userTests.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {userTests.map((test) => (
                     <Card key={test.id} className="overflow-hidden border-2 border-border bg-secondary hover:border-primary transition-colors">
                       <CardContent className="p-6">
@@ -278,9 +291,29 @@ const QiyasTests = () => {
                     </Card>
                   ))}
                 </div>
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground mb-4">لا توجد اختبارات منشورة من المستخدمين حتى الآن</p>
+                  {isLoggedIn && role === "admin" ? (
+                    <Link to="/test-management">
+                      <Button className="bg-primary hover:bg-primary/90">
+                        <Plus className="mr-2" size={16} />
+                        كن أول من ينشئ اختباراً
+                      </Button>
+                    </Link>
+                  ) : isLoggedIn ? (
+                    <p>يمكن للمشرفين فقط إنشاء اختبارات جديدة</p>
+                  ) : (
+                    <Link to="/login">
+                      <Button className="bg-primary hover:bg-primary/90">
+                        تسجيل الدخول
+                      </Button>
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
-          </Tabs>
+          )}
         </div>
       </section>
     </Layout>
