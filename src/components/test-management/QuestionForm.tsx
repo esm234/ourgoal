@@ -1,0 +1,231 @@
+
+import React from "react";
+import { z } from "zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Trash, Plus } from "lucide-react";
+
+const optionSchema = z.object({
+  text: z.string().min(1, "نص الخيار مطلوب"),
+  is_correct: z.boolean().default(false),
+});
+
+const formSchema = z.object({
+  text: z.string().min(1, "نص السؤال مطلوب"),
+  type: z.enum(["verbal", "quantitative", "mixed"]),
+  explanation: z.string().optional(),
+  options: z
+    .array(optionSchema)
+    .min(2, "يجب إضافة خيارين على الأقل")
+    .max(6, "يمكنك إضافة 6 خيارات كحد أقصى")
+    .refine((options) => options.some((option) => option.is_correct), {
+      message: "يجب تحديد إجابة صحيحة واحدة على الأقل",
+    }),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+interface QuestionFormProps {
+  onSubmit: (data: FormData) => void;
+  defaultValues?: FormData;
+  isEdit?: boolean;
+}
+
+const QuestionForm = ({
+  onSubmit,
+  defaultValues,
+  isEdit = false,
+}: QuestionFormProps) => {
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaultValues || {
+      text: "",
+      type: "mixed",
+      explanation: "",
+      options: [
+        { text: "", is_correct: false },
+        { text: "", is_correct: false },
+        { text: "", is_correct: false },
+        { text: "", is_correct: false },
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "options",
+  });
+
+  // Make sure only one option can be marked as correct
+  const handleCorrectChange = (index: number, value: boolean) => {
+    if (value) {
+      // If this option is being marked as correct, unmark all others
+      const options = [...form.getValues("options")];
+      options.forEach((option, i) => {
+        if (i !== index) {
+          form.setValue(`options.${i}.is_correct`, false);
+        }
+      });
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="text"
+          render={({ field }) => (
+            <FormItem className="text-right">
+              <FormLabel>نص السؤال</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="أدخل نص السؤال هنا"
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem className="text-right">
+              <FormLabel>نوع السؤال</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر نوع السؤال" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="verbal">لفظي</SelectItem>
+                  <SelectItem value="quantitative">كمي</SelectItem>
+                  <SelectItem value="mixed">مختلط</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <FormLabel>الخيارات</FormLabel>
+            {fields.length < 6 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ text: "", is_correct: false })}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                إضافة خيار
+              </Button>
+            )}
+          </div>
+
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="flex items-start space-x-2 space-x-reverse"
+            >
+              <FormField
+                control={form.control}
+                name={`options.${index}.text`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input placeholder={`الخيار ${index + 1}`} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`options.${index}.is_correct`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col items-center">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(value) => {
+                          field.onChange(value);
+                          handleCorrectChange(index, value as boolean);
+                        }}
+                      />
+                    </FormControl>
+                    <div className="text-xs">صحيح</div>
+                  </FormItem>
+                )}
+              />
+
+              {fields.length > 2 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => remove(index)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <FormMessage>{form.formState.errors.options?.message}</FormMessage>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="explanation"
+          render={({ field }) => (
+            <FormItem className="text-right">
+              <FormLabel>شرح الإجابة (اختياري)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="أدخل شرحاً للإجابة الصحيحة (اختياري)"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">
+          {isEdit ? "تحديث السؤال" : "إضافة السؤال"}
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+export default QuestionForm;

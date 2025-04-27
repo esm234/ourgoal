@@ -12,6 +12,9 @@ import Performance from "@/pages/Performance";
 import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
+import TestManagement from "@/pages/TestManagement";
+import TestQuestions from "@/pages/TestQuestions";
+import EditTest from "@/pages/EditTest";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +32,9 @@ const App = () => (
             <Route path="/performance" element={<Performance />} />
             <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/test-management" element={<TestManagement />} />
+            <Route path="/test-management/:testId/questions" element={<TestQuestions />} />
+            <Route path="/test-management/:testId/edit" element={<EditTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

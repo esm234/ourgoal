@@ -1,8 +1,23 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -11,129 +26,251 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { LogIn } from "lucide-react";
 
-// Define the form schema with validation
-const formSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "يجب أن يكون اسم المستخدم على الأقل 3 أحرف" }),
-  password: z
-    .string()
-    .min(3, { message: "يجب أن تكون كلمة المرور على الأقل 3 أحرف" }),
+const loginSchema = z.object({
+  email: z.string().email("البريد الإلكتروني غير صالح"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+const signupSchema = z.object({
+  email: z.string().email("البريد الإلكتروني غير صالح"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+  confirmPassword: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "كلمات المرور غير متطابقة",
+  path: ["confirmPassword"],
+});
 
 const Login = () => {
-  const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoggedIn, login, signup } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    setIsLoading(true);
-    // Simulate API request
-    setTimeout(() => {
-      login(data.username, data.password);
-      setIsLoading(false);
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: `مرحباً، ${data.username}`,
-      });
+  const signupForm = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  useEffect(() => {
+    if (isLoggedIn) {
       navigate("/");
-    }, 1000);
+    }
+  }, [isLoggedIn, navigate]);
+
+  const handleLogin = async (data: z.infer<typeof loginSchema>) => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await login(data.email, data.password);
+      
+      if (error) {
+        throw error;
+      } else {
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+        });
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast({
+        title: "خطأ في تسجيل الدخول",
+        description: error.message || "حدث خطأ أثناء تسجيل الدخول",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSignup = async (data: z.infer<typeof signupSchema>) => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await signup(data.email, data.password);
+      
+      if (error) {
+        throw error;
+      } else {
+        toast({
+          title: "تم إنشاء الحساب بنجاح",
+          description: "يمكنك الآن تسجيل الدخول باستخدام بريدك الإلكتروني وكلمة المرور",
+        });
+        loginForm.setValue("email", data.email);
+        loginForm.setValue("password", data.password);
+      }
+    } catch (error: any) {
+      toast({
+        title: "خطأ في إنشاء الحساب",
+        description: error.message || "حدث خطأ أثناء إنشاء الحساب",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Layout>
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">تسجيل الدخول</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              قم بتسجيل الدخول للوصول إلى جميع خدمات المنصة وتتبع تقدمك
-            </p>
-          </div>
-
-          <div className="flex justify-center">
-            <Card className="w-full max-w-md border-2 border-border bg-secondary">
-              <CardContent className="p-6">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>اسم المستخدم</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="ادخل اسم المستخدم"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>كلمة المرور</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="ادخل كلمة المرور"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button
-                      type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-                      ) : (
-                        <LogIn className="ml-2" size={18} />
-                      )}
-                      تسجيل الدخول
-                    </Button>
-                  </form>
-                </Form>
-                
-                <div className="mt-4 text-center text-sm text-muted-foreground">
-                  <p>هذا تسجيل دخول تجريبي. يمكنك إدخال أي اسم مستخدم وكلمة مرور.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="container mx-auto py-16 px-4">
+        <div className="max-w-md mx-auto">
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">تسجيل الدخول</TabsTrigger>
+              <TabsTrigger value="signup">إنشاء حساب</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <Card>
+                <CardHeader>
+                  <CardTitle>تسجيل الدخول</CardTitle>
+                  <CardDescription>أدخل بياناتك لتسجيل الدخول إلى حسابك</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...loginForm}>
+                    <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                      <FormField
+                        control={loginForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem className="text-right">
+                            <FormLabel>البريد الإلكتروني</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="name@example.com" 
+                                {...field} 
+                                type="email"
+                                dir="ltr"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem className="text-right">
+                            <FormLabel>كلمة المرور</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="••••••••" 
+                                {...field} 
+                                type="password"
+                                dir="ltr"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full" 
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <Card>
+                <CardHeader>
+                  <CardTitle>إنشاء حساب</CardTitle>
+                  <CardDescription>أدخل بياناتك لإنشاء حساب جديد</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...signupForm}>
+                    <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                      <FormField
+                        control={signupForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem className="text-right">
+                            <FormLabel>البريد الإلكتروني</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="name@example.com" 
+                                {...field} 
+                                type="email"
+                                dir="ltr"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={signupForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem className="text-right">
+                            <FormLabel>كلمة المرور</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="••••••••" 
+                                {...field} 
+                                type="password"
+                                dir="ltr"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={signupForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem className="text-right">
+                            <FormLabel>تأكيد كلمة المرور</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="••••••••" 
+                                {...field} 
+                                type="password"
+                                dir="ltr"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full" 
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
-      </section>
+      </div>
     </Layout>
   );
 };

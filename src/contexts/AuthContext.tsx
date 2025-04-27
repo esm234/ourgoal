@@ -1,11 +1,17 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
   isLoggedIn: boolean;
   username: string | null;
-  login: (username: string, password: string) => void;
-  logout: () => void;
+  user: User | null;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<{ error: any | null }>;
+  signup: (email: string, password: string) => Promise<{ error: any | null }>;
+  logout: () => Promise<void>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -13,34 +19,64 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load user data from localStorage on component mount
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    
-    if (storedUsername) {
-      setIsLoggedIn(true);
-      setUsername(storedUsername);
-    }
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoggedIn(!!session);
+        setUsername(session?.user?.email ?? null);
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoggedIn(!!session);
+      setUsername(session?.user?.email ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (username: string, password: string) => {
-    // Simple mock login - in a real app, this would validate against a backend
-    if (username && password) {
-      localStorage.setItem("username", username);
-      setIsLoggedIn(true);
-      setUsername(username);
-    }
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
   };
 
-  const logout = () => {
-    localStorage.removeItem("username");
-    setIsLoggedIn(false);
-    setUsername(null);
+  const signup = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    return { error };
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, login, logout }}>
+    <AuthContext.Provider value={{ 
+      isLoggedIn, 
+      username, 
+      user, 
+      session, 
+      login, 
+      signup, 
+      logout,
+      loading
+    }}>
       {children}
     </AuthContext.Provider>
   );

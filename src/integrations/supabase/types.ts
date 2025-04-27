@@ -47,6 +47,38 @@ export type Database = {
           },
         ]
       }
+      options: {
+        Row: {
+          id: string
+          is_correct: boolean
+          option_order: number
+          question_id: string
+          text: string
+        }
+        Insert: {
+          id?: string
+          is_correct?: boolean
+          option_order: number
+          question_id: string
+          text: string
+        }
+        Update: {
+          id?: string
+          is_correct?: boolean
+          option_order?: number
+          question_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -65,6 +97,74 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          created_at: string
+          explanation: string | null
+          id: string
+          question_order: number
+          test_id: string
+          text: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          question_order: number
+          test_id: string
+          text: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          question_order?: number
+          test_id?: string
+          text?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tests: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration: number
+          id: string
+          published: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration: number
+          id?: string
+          published?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration?: number
+          id?: string
+          published?: boolean
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
