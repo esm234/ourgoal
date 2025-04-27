@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -67,7 +66,7 @@ const mockTests: TestType[] = [
 const QiyasTests = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, role } = useAuth();
   const [userTests, setUserTests] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("sample-tests");
@@ -128,7 +127,7 @@ const QiyasTests = () => {
             </p>
           </div>
 
-          {isLoggedIn && (
+          {isLoggedIn && role === "admin" && (
             <div className="mb-8 text-center">
               <Link to="/test-management">
                 <Button className="bg-primary hover:bg-primary/90">
@@ -270,17 +269,19 @@ const QiyasTests = () => {
               ) : (
                 <div className="text-center py-10">
                   <p className="text-muted-foreground mb-4">لا توجد اختبارات منشورة من المستخدمين حتى الآن</p>
-                  {isLoggedIn ? (
+                  {isLoggedIn && role === "admin" ? (
                     <Link to="/test-management">
                       <Button className="bg-primary hover:bg-primary/90">
                         <Plus className="mr-2" size={16} />
                         كن أول من ينشئ اختباراً
                       </Button>
                     </Link>
+                  ) : isLoggedIn ? (
+                    <p>يمكن للمشرفين فقط إنشاء اختبارات جديدة</p>
                   ) : (
                     <Link to="/login">
                       <Button className="bg-primary hover:bg-primary/90">
-                        تسجيل الدخول لإنشاء اختبار
+                        تسجيل الدخول
                       </Button>
                     </Link>
                   )}
