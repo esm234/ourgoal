@@ -31,7 +31,7 @@ const Home = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      handleSlide('next');
+      setCurrentSlide((prev) => (prev === 2 ? 0 : prev + 1));
     }, 5000);
 
     return () => clearInterval(interval);
@@ -276,8 +276,8 @@ const Home = () => {
             <div className="overflow-hidden">
               <div 
                 ref={sliderRef}
-                className="flex transition-transform duration-500 ease-in-out" 
-                style={{ width: '300%' }}
+                className="flex transition-transform duration-500 ease-in-out justify-center" 
+                style={{ width: '100%' }}
               >
                 {/* First Group */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
@@ -304,92 +304,8 @@ const Home = () => {
                     </div>
                   </Card>
                 </div>
-
-                {/* Second Group */}
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">عمر علام</h3>
-                      <p className="text-gray-300 text-center">خبير الفيزياء</p>
-                    </div>
-                  </Card>
-                </div>
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">احمد طلبه</h3>
-                      <p className="text-gray-300 text-center">خبير الكيمياء</p>
-                    </div>
-                  </Card>
-                </div>
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">ماهيتاب ايهاب</h3>
-                      <p className="text-gray-300 text-center">خبيرة الرياضيات</p>
-                    </div>
-                  </Card>
-                </div>
-
-                {/* Third Group */}
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">احمد المعني</h3>
-                      <p className="text-gray-300 text-center">خبير اللغة العربية</p>
-                    </div>
-                  </Card>
-                </div>
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">بسنت</h3>
-                      <p className="text-gray-300 text-center">خبيرة اللغة العربية</p>
-                    </div>
-                  </Card>
-                </div>
               </div>
             </div>
-
-            {/* Navigation Arrows */}
-            <button
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#03DAC6] text-white p-2 rounded-full shadow-lg hover:bg-[#03DAC6]/90 transition-colors"
-              onClick={() => handleSlide('prev')}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#03DAC6] text-white p-2 rounded-full shadow-lg hover:bg-[#03DAC6]/90 transition-colors"
-              onClick={() => handleSlide('next')}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
 
             {/* Indicators */}
             <div className="flex justify-center mt-8 space-x-2">
@@ -399,7 +315,7 @@ const Home = () => {
                   className={`w-3 h-3 rounded-full transition-colors ${
                     currentSlide === index ? 'bg-[#03DAC6]' : 'bg-gray-400'
                   }`}
-                  onClick={() => goToSlide(index)}
+                  onClick={() => setCurrentSlide(index)}
                 />
               ))}
             </div>
