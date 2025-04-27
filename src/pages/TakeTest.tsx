@@ -11,6 +11,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { TestResult } from "@/types/testResults";
 import type { Question, Option } from "@/types/testManagement";
 
+interface ExtendedQuestion extends Question {
+  correctAnswer?: number;
+  options: (Option | string)[];
+}
+
 const TakeTest = () => {
   const { testId } = useParams();
   const navigate = useNavigate();
@@ -20,7 +25,7 @@ const TakeTest = () => {
   const [answers, setAnswers] = useState<number[]>([]);
   
   const [test, setTest] = useState<any | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,7 +53,7 @@ const TakeTest = () => {
             id: staticTest.testId,
             title: `اختبار تجريبي ${staticTest.testId}`
           });
-          setQuestions(staticTest.questions);
+          setQuestions(staticTest.questions as unknown as ExtendedQuestion[]);
           setLoading(false);
           return;
         } else {
@@ -84,8 +89,9 @@ const TakeTest = () => {
           return {
             ...question,
             options: optionsData.map(opt => opt.text),
-            correctAnswer: correctIndex
-          };
+            correctAnswer: correctIndex,
+            type: question.type as "verbal" | "quantitative" | "mixed"
+          } as ExtendedQuestion;
         })
       );
 
@@ -163,7 +169,11 @@ const TakeTest = () => {
     } else {
       // Calculate score
       const correctAnswers = newAnswers.reduce((acc, answer, index) => {
-        return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+        const question = questions[index];
+        if (typeof question.correctAnswer === 'number') {
+          return acc + (answer === question.correctAnswer ? 1 : 0);
+        }
+        return acc;
       }, 0);
       const score = Math.round((correctAnswers / questions.length) * 100);
 
@@ -180,6 +190,27 @@ const TakeTest = () => {
   };
 
   const question = questions[currentQuestion];
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">جاري تحميل الاختبار...</h1>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!test || questions.length === 0) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">الاختبار غير موجود</h1>
+          <Button onClick={() => navigate("/qiyas-tests")}>العودة للاختبارات</Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -204,7 +235,7 @@ const TakeTest = () => {
                     className="w-full justify-start text-right h-auto py-4 px-6"
                     onClick={() => handleAnswer(index)}
                   >
-                    {option}
+                    {typeof option === 'string' ? option : option.text}
                   </Button>
                 ))}
               </div>

@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft } from "lucide-react";
 import QuestionList from "@/components/test-management/QuestionList";
 import QuestionForm from "@/components/test-management/QuestionForm";
-import { Test, Question } from "@/types/testManagement";
+import { Test, Question, CreateQuestionForm } from "@/types/testManagement";
 
 const TestQuestions = () => {
   const { testId } = useParams();
@@ -81,12 +81,13 @@ const TestQuestions = () => {
 
             return {
               ...question,
+              type: question.type as "verbal" | "quantitative" | "mixed",
               options: optionsData || [],
-            };
+            } as Question;
           })
         );
 
-        setQuestions(questionsWithOptions);
+        setQuestions(questionsWithOptions as Question[]);
       }
     } catch (error: any) {
       toast({
@@ -99,7 +100,7 @@ const TestQuestions = () => {
     }
   };
 
-  const handleCreateQuestion = async (data: any) => {
+  const handleCreateQuestion = async (data: CreateQuestionForm) => {
     try {
       // Get the next order number
       const nextOrder = questions.length > 0 
@@ -127,7 +128,7 @@ const TestQuestions = () => {
       const questionId = questionData[0].id;
 
       // Then insert all options for this question
-      const optionsToInsert = data.options.map((option: any, index: number) => ({
+      const optionsToInsert = data.options.map((option, index) => ({
         question_id: questionId,
         text: option.text,
         is_correct: option.is_correct,
