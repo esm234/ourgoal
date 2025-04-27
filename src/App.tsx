@@ -1,46 +1,52 @@
-
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import Home from "@/pages/Home";
-import QiyasTests from "@/pages/QiyasTests";
-import TakeTest from "@/pages/TakeTest";
-import Performance from "@/pages/Performance";
-import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
-import NotFound from "@/pages/NotFound";
-import TestManagement from "@/pages/TestManagement";
-import TestQuestions from "@/pages/TestQuestions";
-import EditTest from "@/pages/EditTest";
+import ProfileSetup from "@/pages/ProfileSetup";
+// ... other imports ...
 
-const queryClient = new QueryClient();
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn, loading, needsProfileSetup } = useAuth();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
+  }
+
+  if (needsProfileSetup) {
+    return <Navigate to="/profile-setup" />;
+  }
+
+  return <>{children}</>;
+};
+
+const App = () => {
+  return (
+    <Router>
       <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  {/* Your protected routes here */}
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          {/* Add other routes here */}
+        </Routes>
         <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/qiyas-tests" element={<QiyasTests />} />
-            <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
-            <Route path="/performance" element={<Performance />} />
-            <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/test-management" element={<TestManagement />} />
-            <Route path="/test-management/:testId/questions" element={<TestQuestions />} />
-            <Route path="/test-management/:testId/edit" element={<EditTest />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
       </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </Router>
+  );
+};
 
 export default App;
