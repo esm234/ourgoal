@@ -29,7 +29,7 @@ const optionSchema = z.object({
 });
 
 const formSchema = z.object({
-  text: z.string().min(1, "نص السؤال مطلوب"),
+  text: z.string().optional(),
   type: z.enum(["verbal", "quantitative", "mixed"]),
   explanation: z.string().optional(),
   image_url: z.string().url("رابط الصورة غير صالح").optional().or(z.literal("").optional()),
@@ -40,6 +40,9 @@ const formSchema = z.object({
     .refine((options) => options.some((option) => option.is_correct), {
       message: "يجب تحديد إجابة صحيحة واحدة على الأقل",
     }),
+}).refine((data) => (data.text && data.text.trim()) || (data.image_url && data.image_url.trim()), {
+  message: "يجب إدخال نص السؤال أو رفع صورة السؤال على الأقل",
+  path: ["text"],
 });
 
 type FormData = z.infer<typeof formSchema>;
