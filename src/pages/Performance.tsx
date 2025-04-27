@@ -131,6 +131,7 @@ const Performance = () => {
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
+                        <TableHead className="text-right">التفاصيل</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -145,6 +146,17 @@ const Performance = () => {
                           <TableCell>{result.score}%</TableCell>
                           <TableCell>
                             {result.correctAnswers} من {result.totalQuestions}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                            >
+                              <Link to={`/test-results/${result.testId}/${result.date}`}>
+                                عرض التفاصيل
+                              </Link>
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
