@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,36 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const Home = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const handleSlide = (direction: 'prev' | 'next') => {
+    if (direction === 'next') {
+      setCurrentSlide((prev) => (prev === 3 ? 0 : prev + 1));
+    } else {
+      setCurrentSlide((prev) => (prev === 0 ? 3 : prev - 1));
+    }
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (slider) {
+      slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+  }, [currentSlide]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleSlide('next');
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -230,36 +260,142 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="py-20 px-4 bg-card">
+      {/* Team Section */}
+      <section className="py-20 px-4 bg-[#1A2237]">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">إحصائيات المنصة</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              تعرف على أرقامنا وإنجازاتنا في مساعدة طلاب المعادلة المصرية
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">خبراؤنا</h2>
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+              فريق من الخبراء المتخصصين في مجال التعليم والتدريب
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="p-6 bg-background border-b-4 border-primary rounded-xl text-center">
-              <h3 className="text-4xl font-bold mb-2 text-primary">10,000+</h3>
-              <p className="text-muted-foreground">طالب مسجل</p>
-            </Card>
+          <div className="relative max-w-6xl mx-auto">
+            {/* Slider Container */}
+            <div className="overflow-hidden">
+              <div className="flex transition-transform duration-500 ease-in-out" id="teamSlider">
+                {/* Team Member 1 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="أحمد محمد"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">أحمد محمد</h3>
+                      <p className="text-gray-300 text-center">خبير الرياضيات</p>
+                    </div>
+                  </Card>
+                </div>
 
-            <Card className="p-6 bg-background border-b-4 border-primary rounded-xl text-center">
-              <h3 className="text-4xl font-bold mb-2 text-primary">50+</h3>
-              <p className="text-muted-foreground">اختبار تجريبي</p>
-            </Card>
+                {/* Team Member 2 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="سارة أحمد"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">سارة أحمد</h3>
+                      <p className="text-gray-300 text-center">خبيرة اللغة العربية</p>
+                    </div>
+                  </Card>
+                </div>
 
-            <Card className="p-6 bg-background border-b-4 border-primary rounded-xl text-center">
-              <h3 className="text-4xl font-bold mb-2 text-primary">95%</h3>
-              <p className="text-muted-foreground">معدل تحسن الأداء</p>
-            </Card>
+                {/* Team Member 3 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="محمد علي"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">محمد علي</h3>
+                      <p className="text-gray-300 text-center">خبير الفيزياء</p>
+                    </div>
+                  </Card>
+                </div>
 
-            <Card className="p-6 bg-background border-b-4 border-primary rounded-xl text-center">
-              <h3 className="text-4xl font-bold mb-2 text-primary">4.8</h3>
-              <p className="text-muted-foreground">تقييم المستخدمين</p>
-            </Card>
+                {/* Team Member 4 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="نورا محمود"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">نورا محمود</h3>
+                      <p className="text-gray-300 text-center">خبيرة الكيمياء</p>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Arrows */}
+            <button
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#03DAC6] text-white p-2 rounded-full shadow-lg hover:bg-[#03DAC6]/90 transition-colors"
+              onClick={() => handleSlide('prev')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#03DAC6] text-white p-2 rounded-full shadow-lg hover:bg-[#03DAC6]/90 transition-colors"
+              onClick={() => handleSlide('next')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+
+            {/* Indicators */}
+            <div className="flex justify-center mt-8 space-x-2">
+              {[0, 1, 2, 3].map((index) => (
+                <button
+                  key={index}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    currentSlide === index ? 'bg-[#03DAC6]' : 'bg-gray-400'
+                  }`}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
