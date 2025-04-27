@@ -194,7 +194,8 @@ const TakeTest = () => {
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: test.duration // Using test duration as time taken
+          time_taken: test.duration, // Using test duration as time taken
+          answers: answers // <-- Save the user's answers array
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
