@@ -236,7 +236,15 @@ const TakeTest = () => {
                           <span className="text-red-600">إجابة خاطئة</span>
                         )}
                       </div>
-                      <p className="mb-2 text-black">{q.text}</p>
+                      {q.image_url ? (
+                        <img
+                          src={q.image_url}
+                          alt="صورة السؤال"
+                          className="mb-2 max-h-40 rounded border"
+                        />
+                      ) : (
+                        <p className="mb-2 text-black">{q.text}</p>
+                      )}
                       <div className="space-y-2">
                         <p className="font-semibold text-black">إجابتك:</p>
                         <p className="text-black">{getOptionText(q.options[userAnswer])}</p>
@@ -283,7 +291,16 @@ const TakeTest = () => {
                   {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
                 </span>
               </div>
-              <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
+              {/* Question prompt: show image if available, otherwise text */}
+              {question.image_url ? (
+                <img
+                  src={question.image_url}
+                  alt="صورة السؤال"
+                  className="mb-6 max-h-64 mx-auto rounded border"
+                />
+              ) : (
+                <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
+              )}
               <div className="space-y-4">
                 {Array.isArray(question.options) && question.options.map((option, index) => (
                   <Button
