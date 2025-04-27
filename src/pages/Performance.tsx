@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,72 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
 const Performance = () => {
-  const { isLoggedIn, user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [testResults, setTestResults] = useState<TestResult[]>([]);
-
-  useEffect(() => {
-    fetchResults();
-  }, [isLoggedIn, user]);
-
-  const fetchResults = async () => {
-    setLoading(true);
-    try {
-      // Get results from localStorage
-      const localResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
-
-      // If user is logged in, also get results from database
-      if (isLoggedIn && user) {
-        const { data: dbResults, error } = await supabase
-          .from("exam_results")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        // Convert database results to TestResult format
-        const formattedDbResults: TestResult[] = dbResults.map(result => ({
-          testId: result.test_id,
-          score: result.score,
-          correctAnswers: result.correct_answers,
-          totalQuestions: result.total_questions,
-          date: result.created_at,
-          type: result.test_type,
-          questions: result.questions_data
-        }));
-
-        // Merge results, removing duplicates based on date
-        const allResults = [...localResults, ...formattedDbResults];
-        const uniqueResults = allResults.filter((result, index, self) =>
-          index === self.findIndex((r) => r.date === result.date)
-        );
-
-        // Sort by date, most recent first
-        uniqueResults.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
-        setTestResults(uniqueResults);
-      } else {
-        setTestResults(localResults);
-      }
-    } catch (error: any) {
-      console.error("Error fetching results:", error);
-      toast({
-        title: "خطأ في جلب النتائج",
-        description: error.message,
-        variant: "destructive",
-      });
-      setTestResults([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
+  const [expandedResult, setExpandedResult] = useState<number | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -86,18 +24,6 @@ const Performance = () => {
       minute: 'numeric',
     }).format(date);
   };
-
-  if (loading) {
-    return (
-      <Layout>
-        <section className="py-16 px-4">
-          <div className="container mx-auto text-center">
-            <h1 className="text-2xl font-bold mb-4">جاري تحميل النتائج...</h1>
-          </div>
-        </section>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
