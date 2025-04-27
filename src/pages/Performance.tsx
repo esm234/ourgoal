@@ -1,47 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, ArrowRight } from "lucide-react";
+import { BarChart, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { TestResult } from "@/types/test";
+import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
-import { getExamResults } from "@/integrations/supabase/examResults";
 
 const Performance = () => {
-  const { isLoggedIn, user } = useAuth();
-  const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [loading, setLoading] = useState(true);
+  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
+  const [expandedResult, setExpandedResult] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (isLoggedIn && user) {
-      fetchTestResults();
-    } else {
-      // Fallback to localStorage for backward compatibility
-      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-      setTestResults(localResults);
-      setLoading(false);
-    }
-  }, [isLoggedIn, user]);
-
-  const fetchTestResults = async () => {
-    try {
-      const results = await getExamResults();
-      setTestResults(results);
-    } catch (error) {
-      console.error("Error fetching test results:", error);
-      // Fallback to localStorage if database fetch fails
-      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-      setTestResults(localResults);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string | number) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('ar-SA', {
       weekday: 'long',
@@ -52,20 +24,6 @@ const Performance = () => {
       minute: 'numeric',
     }).format(date);
   };
-
-  if (loading) {
-    return (
-      <Layout>
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="text-center">
-              <p className="text-lg">جاري تحميل النتائج...</p>
-            </div>
-          </div>
-        </section>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
@@ -111,20 +69,17 @@ const Performance = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {testResults.map((result, index) => {
-                        const correctAnswers = result.questions.filter(q => q.isCorrect).length;
-                        return (
-                          <TableRow key={index}>
-                            <TableCell className="text-right">
-                              {formatDate(result.timestamp || new Date())}
-                            </TableCell>
+                      {testResults.map((result, index) => (
+                        <React.Fragment key={index}>
+                          <TableRow>
+                            <TableCell className="text-right">{formatDate(result.date)}</TableCell>
                             <TableCell>
                               {result.type === 'verbal' ? 'لفظي' : 
                                result.type === 'quantitative' ? 'كمي' : 'مختلط'}
                             </TableCell>
                             <TableCell>{result.score}%</TableCell>
                             <TableCell>
-                              {correctAnswers} من {result.totalQuestions}
+                              {result.correctAnswers} من {result.totalQuestions}
                             </TableCell>
                             <TableCell>
                               <Dialog>
@@ -141,7 +96,7 @@ const Performance = () => {
                                     <div className="grid grid-cols-2 gap-4 mb-4">
                                       <div>
                                         <p className="font-semibold">التاريخ:</p>
-                                        <p>{formatDate(result.timestamp || new Date())}</p>
+                                        <p>{formatDate(result.date)}</p>
                                       </div>
                                       <div>
                                         <p className="font-semibold">نوع الاختبار:</p>
@@ -155,31 +110,45 @@ const Performance = () => {
                                     </div>
                                     <div className="border-t pt-4">
                                       <p className="font-semibold mb-2">ملخص الإجابات:</p>
-                                      <p>عدد الإجابات الصحيحة: {correctAnswers} من {result.totalQuestions}</p>
+                                      <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
                                       <p>نسبة النجاح: {result.score}%</p>
                                     </div>
                                     <div className="border-t pt-4 mt-4">
                                       <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
                                       <div className="space-y-6">
-                                        {result.questions.map((question, qIndex) => (
-                                          <div 
-                                            key={question.questionId} 
-                                            className={`p-4 rounded-lg ${question.isCorrect ? 'bg-green-50' : 'bg-red-50'}`}
-                                          >
-                                            <div className="flex items-center justify-between mb-2">
-                                              <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
-                                              <Badge variant={question.isCorrect ? "success" : "destructive"}>
-                                                {question.isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
-                                              </Badge>
+                                        {result.questions?.map((question, qIndex) => {
+                                          const isCorrect = question.userAnswer === question.correctAnswer;
+                                          return (
+                                            <div 
+                                              key={question.id} 
+                                              className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}
+                                            >
+                                              <div className="flex items-center justify-between mb-2">
+                                                <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
+                                                <Badge variant={isCorrect ? "success" : "destructive"}>
+                                                  {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
+                                                </Badge>
+                                              </div>
+                                              <p className="mb-2 text-black">{question.text}</p>
+                                              <div className="space-y-2">
+                                                <p className="font-semibold text-black">إجابتك:</p>
+                                                <p className="text-black">{question.options[question.userAnswer]}</p>
+                                                {!isCorrect && (
+                                                  <>
+                                                    <p className="font-semibold text-black">الإجابة الصحيحة:</p>
+                                                    <p className="text-black">{question.options[question.correctAnswer]}</p>
+                                                    {question.explanation && (
+                                                      <>
+                                                        <p className="font-semibold text-black">الشرح:</p>
+                                                        <p className="text-black">{question.explanation}</p>
+                                                      </>
+                                                    )}
+                                                  </>
+                                                )}
+                                              </div>
                                             </div>
-                                            <div className="space-y-2">
-                                              <p className="font-semibold text-black">إجابتك:</p>
-                                              <p className="text-black">{question.userAnswer}</p>
-                                              <p className="font-semibold text-black mt-2">الوقت المستغرق:</p>
-                                              <p className="text-black">{Math.round(question.timeTaken)} ثانية</p>
-                                            </div>
-                                          </div>
-                                        ))}
+                                          );
+                                        })}
                                       </div>
                                     </div>
                                   </div>
@@ -187,8 +156,8 @@ const Performance = () => {
                               </Dialog>
                             </TableCell>
                           </TableRow>
-                        );
-                      })}
+                        </React.Fragment>
+                      ))}
                     </TableBody>
                   </Table>
                 </CardContent>
