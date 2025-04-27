@@ -58,7 +58,7 @@ const QuestionList = ({ questions, loading, onDelete, onEdit }: QuestionListProp
                     {getQuestionTypeText(question.type)}
                   </Badge>
                   <CardTitle className="text-lg">
-                    السؤال {question.question_order}
+                    السؤال {question.question_order} من {questions.length}
                   </CardTitle>
                 </div>
                 <CardDescription className="line-clamp-2 text-right">
