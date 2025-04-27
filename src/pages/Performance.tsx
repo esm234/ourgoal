@@ -9,6 +9,8 @@ import type { TestResult } from "@/types/testResults";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { testQuestions } from "@/data/testQuestions";
+import mockTests from "@/pages/QiyasTests";
 
 const Performance = () => {
   const { isLoggedIn, user } = useAuth();
@@ -135,35 +137,48 @@ const Performance = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {testResults.map((result, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="text-right">{formatDate(result.date)}</TableCell>
-                          <TableCell className="text-right">
-                            {result.title && result.title !== 'اختبار' ? result.title :
-                              result.testId && result.testId.startsWith('test-') ? `اختبار تجريبي ${result.testId.replace('test-', '')}` :
-                              `اختبار ${result.testId}`}
-                          </TableCell>
-                          <TableCell>
-                            {result.type === 'verbal' ? 'لفظي' : 
-                             result.type === 'quantitative' ? 'كمي' : 'مختلط'}
-                          </TableCell>
-                          <TableCell>{result.score}%</TableCell>
-                          <TableCell>
-                            {result.correctAnswers} من {result.totalQuestions}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              asChild
-                            >
-                              <Link to={`/test-results/${result.testId}/${result.date}`}>
-                                عرض التفاصيل
-                              </Link>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {testResults.map((result, index) => {
+                        // Try to get the test name from multiple sources
+                        let testName = result.title && result.title !== 'اختبار' ? result.title : '';
+                        if (!testName && result.testId) {
+                          // Try mockTests
+                          const mock = (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) ? mockTests.find(t => t.id === result.testId) : null;
+                          if (mock) testName = mock.title;
+                        }
+                        if (!testName && result.testId) {
+                          // Try testQuestions
+                          const mockQ = testQuestions.find(t => t.testId === result.testId);
+                          if (mockQ) testName = `اختبار تجريبي ${result.testId.replace('test-', '')}`;
+                        }
+                        if (!testName && result.testId) {
+                          testName = `اختبار ${result.testId}`;
+                        }
+                        return (
+                          <TableRow key={index}>
+                            <TableCell className="text-right">{formatDate(result.date)}</TableCell>
+                            <TableCell className="text-right">{testName}</TableCell>
+                            <TableCell>
+                              {result.type === 'verbal' ? 'لفظي' : 
+                               result.type === 'quantitative' ? 'كمي' : 'مختلط'}
+                            </TableCell>
+                            <TableCell>{result.score}%</TableCell>
+                            <TableCell>
+                              {result.correctAnswers} من {result.totalQuestions}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                              >
+                                <Link to={`/test-results/${result.testId}/${result.date}`}>
+                                  عرض التفاصيل
+                                </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </CardContent>
