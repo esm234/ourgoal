@@ -1,4 +1,3 @@
-
 import React from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,7 @@ const Home = () => {
             </div>
             <div className="lg:w-1/2">
               <img
-                src="https://lh7-us.googleusercontent.com/pbYvrUffQasCqI5i42vKBc3U55GKAFa-N5ay84n7xjEiGM7a6x4drbhVuZRM6KwBCPtzls-Yb7u-QNDrUPksvxC7J14YXurFNIibdg_Hjrm2tWSP3pNW4Pt5Wf1x3o5i19QiPihN-xBTyqI7UuvvMO1b0KWQ7nB2XHGm9kr7N1vhVg4mpqJrkhreRlH9MpBTeFnqtKph?key=hEv8vchztg3tFh4Mt59OTQ"
+                src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
                 alt="طلاب يدرسون"
                 className="rounded-lg shadow-xl w-full h-auto object-cover"
               />
@@ -129,250 +128,104 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 px-4">
+      {/* Learning Path Section */}
+      <section className="py-20 px-4 bg-card">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">آراء الطلاب</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">مسار التعلم لاختبار القدرات</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              تعرف على تجارب الطلاب الذين استفادوا من منصتنا وحققوا درجات عالية في المعادلة
+              خطة منهجية للتحضير لاختبار القدرات العامة
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="p-6 bg-secondary rounded-xl">
-              <div className="flex items-center mb-4">
-                <div className="bg-primary/20 w-12 h-12 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-xl font-bold text-primary">أ</span>
-                </div>
-                <div>
-                  <h4 className="font-bold">أحمد محمد</h4>
-                  <p className="text-sm text-muted-foreground">طالب معادلة - الرياض</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground">
-                "ساعدتني المنصة كثيراً في التدرب على اختبارات قياس. الاختبارات التجريبية كانت قريبة
-                جداً من الاختبار الحقيقي وحصلت على درجة 90 في قياس."
-              </p>
-              <div className="mt-4 flex">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </Card>
+          <div className="max-w-4xl mx-auto">
+            <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
+              {/* Background */}
+              <rect width="800" height="600" fill="#0f172a" rx="10" ry="10"/>
+              
+              {/* Title */}
+              <text x="400" y="50" font-family="Arial, sans-serif" font-size="28" fill="#06b6d4" text-anchor="middle" font-weight="bold">مسار التعلم لاختبار القدرات</text>
+              
+              {/* Main Flow Path */}
+              <path d="M150,110 C150,110 650,110 650,110 C700,110 700,500 650,500 C650,500 150,500 150,500 C100,500 100,110 150,110 Z" fill="none" stroke="#0284c7" stroke-width="4" stroke-dasharray="8,4"/>
 
-            <Card className="p-6 bg-secondary rounded-xl">
-              <div className="flex items-center mb-4">
-                <div className="bg-primary/20 w-12 h-12 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-xl font-bold text-primary">س</span>
-                </div>
-                <div>
-                  <h4 className="font-bold">سارة أحمد</h4>
-                  <p className="text-sm text-muted-foreground">طالبة معادلة - جدة</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground">
-                "المنصة رائعة جداً! ساعدتني حاسبة المعادلة على معرفة معدلي التقديري وما أحتاجه للقبول
-                في كلية الطب. الاختبارات التجريبية مفيدة جداً."
-              </p>
-              <div className="mt-4 flex">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </Card>
+              {/* Stages Boxes */}
+              {/* Stage 1 */}
+              <rect x="250" y="130" width="300" height="60" rx="10" ry="10" fill="#164e63" stroke="#0ea5e9" stroke-width="2"/>
+              <text x="400" y="167" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">المرحلة الأولى: التأسيس</text>
 
-            <Card className="p-6 bg-secondary rounded-xl">
-              <div className="flex items-center mb-4">
-                <div className="bg-primary/20 w-12 h-12 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-xl font-bold text-primary">م</span>
-                </div>
-                <div>
-                  <h4 className="font-bold">محمد علي</h4>
-                  <p className="text-sm text-muted-foreground">طالب معادلة - الدمام</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground">
-                "تميزت المنصة بالاختبارات المتنوعة والمشابهة للواقع. استفدت كثيراً من تحليل نتائجي
-                ومعرفة نقاط ضعفي. أنصح بها لكل طالب معادلة."
-              </p>
-              <div className="mt-4 flex">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5 text-amber-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </Card>
+              {/* Stage 2 */}
+              <rect x="250" y="220" width="300" height="60" rx="10" ry="10" fill="#164e63" stroke="#0ea5e9" stroke-width="2"/>
+              <text x="400" y="257" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">المرحلة الثانية: المحوسب</text>
+
+              {/* Stage 3 */}
+              <rect x="250" y="310" width="300" height="60" rx="10" ry="10" fill="#164e63" stroke="#0ea5e9" stroke-width="2"/>
+              <text x="400" y="347" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">المرحلة الثالثة: مراجعة على البنوك</text>
+
+              {/* Stage 4 */}
+              <rect x="250" y="400" width="300" height="60" rx="10" ry="10" fill="#164e63" stroke="#0ea5e9" stroke-width="2"/>
+              <text x="400" y="437" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">المرحلة الرابعة: المراجعة النهائية</text>
+
+              {/* Final Stage */}
+              <rect x="200" y="500" width="400" height="60" rx="10" ry="10" fill="#0c4a6e" stroke="#22d3ee" stroke-width="3"/>
+              <text x="400" y="537" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="middle" font-weight="bold">جاهزيتك لدخول الاختبار بالتوفيق</text>
+
+              {/* Connecting Arrows */}
+              <polyline points="400,190 400,220" fill="none" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" marker-end="url(#arrowhead)"/>
+              <polyline points="400,280 400,310" fill="none" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" marker-end="url(#arrowhead)"/>
+              <polyline points="400,370 400,400" fill="none" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" marker-end="url(#arrowhead)"/>
+              <polyline points="400,460 400,500" fill="none" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" marker-end="url(#arrowhead)"/>
+
+              {/* Arrow Definition */}
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#06b6d4"/>
+                </marker>
+              </defs>
+
+              {/* Side Notes */}
+              {/* Stage 1 Notes */}
+              <rect x="100" y="130" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="165" y="150" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">تأسيس الكمي</text>
+              <text x="165" y="170" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">٤-٦ أسابيع</text>
+              <text x="165" y="190" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">ساعتين يومياً أقل شي</text>
+
+              {/* Stage 2 Notes */}
+              <rect x="100" y="220" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="165" y="245" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">كمي</text>
+              <text x="165" y="265" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">٣ اختبارات أقل شي في البداية</text>
+
+              {/* Stage 3 Notes */}
+              <rect x="100" y="310" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="165" y="335" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">كمي</text>
+              <text x="165" y="355" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">ساعتين أقل شي</text>
+
+              {/* Stage 4 Notes */}
+              <rect x="100" y="400" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="165" y="425" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">الكمي</text>
+              <text x="165" y="445" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">مجلدات أخطائك</text>
+
+              {/* Right Side Notes */}
+              {/* Stage 1 Right */}
+              <rect x="570" y="130" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="635" y="155" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">تأسيس لفظي</text>
+              <text x="635" y="175" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">٢-٤ أسابيع</text>
+
+              {/* Stage 2 Right */}
+              <rect x="570" y="220" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="635" y="245" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">لفظي</text>
+              <text x="635" y="265" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">فيديوهين في اليوم أقل شي</text>
+
+              {/* Stage 3 Right */}
+              <rect x="570" y="310" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="635" y="335" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">لفظي</text>
+              <text x="635" y="355" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">ساعتين مذاكرة أقل شي</text>
+
+              {/* Stage 4 Right */}
+              <rect x="570" y="400" width="130" height="60" rx="8" ry="8" fill="#075985" stroke="#0ea5e9" stroke-width="1"/>
+              <text x="635" y="425" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">لفظي</text>
+              <text x="635" y="445" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">مراجعة جميع أخطائك</text>
+            </svg>
           </div>
         </div>
       </section>
