@@ -20,9 +20,7 @@ const Performance = () => {
     if (isLoggedIn && user) {
       fetchTestResults();
     } else {
-      // If not logged in, only show localStorage results
-      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-      setTestResults(localResults);
+      setTestResults([]);
       setLoading(false);
     }
   }, [isLoggedIn, user]);
@@ -44,22 +42,16 @@ const Performance = () => {
 
       if (error) throw error;
 
-      // Get results from localStorage
-      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-
-      // Combine and format results
-      const formattedResults = [
-        ...dbResults.map(result => ({
-          testId: result.test_id,
-          score: result.score,
-          correctAnswers: result.correct_answers || 0,
-          totalQuestions: result.total_questions,
-          date: result.created_at,
-          type: result.tests?.type || 'mixed',
-          title: result.tests?.title || 'اختبار'
-        })),
-        ...localResults
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Format results
+      const formattedResults = dbResults.map(result => ({
+        testId: result.test_id,
+        score: result.score,
+        correctAnswers: result.correct_answers || 0,
+        totalQuestions: result.total_questions,
+        date: result.created_at,
+        type: result.tests?.type || 'mixed',
+        title: result.tests?.title || 'اختبار'
+      }));
 
       setTestResults(formattedResults);
     } catch (error: any) {
@@ -108,7 +100,19 @@ const Performance = () => {
           </div>
 
           <div className="flex justify-center">
-            {testResults.length === 0 ? (
+            {!isLoggedIn ? (
+              <Card className="w-full max-w-4xl">
+                <CardContent className="p-6 text-center">
+                  <p className="text-xl mb-4">يجب تسجيل الدخول لعرض نتائج الاختبارات</p>
+                  <Button asChild>
+                    <Link to="/login" className="flex items-center">
+                      تسجيل الدخول
+                      <ArrowRight className="mr-2" size={16} />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : testResults.length === 0 ? (
               <Card className="w-full max-w-4xl">
                 <CardContent className="p-6 text-center">
                   <p className="text-xl mb-4">لا توجد نتائج اختبارات سابقة</p>
