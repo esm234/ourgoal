@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -10,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { TestResult } from "@/types/testResults";
 import type { Question, Option, ExtendedQuestion } from "@/types/testManagement";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -18,7 +18,7 @@ const TakeTest = () => {
   const { isLoggedIn, user } = useAuth();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
-  
+  const [showResults, setShowResults] = useState(false);
   const [test, setTest] = useState<any | null>(null);
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,33 +137,45 @@ const TakeTest = () => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerIndex;
     setAnswers(newAnswers);
+  };
 
+  const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
-    } else {
-      // Calculate score
-      const correctAnswers = newAnswers.reduce((acc, answer, index) => {
-        const question = questions[index];
-        if (typeof question.correctAnswer === 'number') {
-          return acc + (answer === question.correctAnswer ? 1 : 0);
-        }
-        return acc;
-      }, 0);
-      const score = Math.round((correctAnswers / questions.length) * 100);
-
-      // Save test result
-      saveTestResult(score, correctAnswers);
-
-      toast({
-        title: "تم إنهاء الاختبار",
-        description: `حصلت على ${score}% (${correctAnswers} من ${questions.length})`,
-      });
-      
-      navigate("/performance");
     }
   };
 
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    // Calculate score
+    const correctAnswers = answers.reduce((acc, answer, index) => {
+      const question = questions[index];
+      if (typeof question.correctAnswer === 'number') {
+        return acc + (answer === question.correctAnswer ? 1 : 0);
+      }
+      return acc;
+    }, 0);
+    const score = Math.round((correctAnswers / questions.length) * 100);
+
+    // Save test result
+    saveTestResult(score, correctAnswers);
+
+    // Show results
+    setShowResults(true);
+  };
+
   const question = questions[currentQuestion];
+
+  const getOptionText = (option: string | Option | { text: string }) => {
+    if (typeof option === 'string') return option;
+    if ('text' in option) return option.text;
+    return '';
+  };
 
   if (loading) {
     return (
@@ -181,6 +193,60 @@ const TakeTest = () => {
         <div className="container mx-auto py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">الاختبار غير موجود</h1>
           <Button onClick={() => navigate("/qiyas-tests")}>العودة للاختبارات</Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (showResults) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16">
+          <Card className="max-w-3xl mx-auto">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold mb-6 text-center">نتائج الاختبار</h2>
+              <div className="space-y-6">
+                {questions.map((q, index) => {
+                  const userAnswer = answers[index];
+                  const isCorrect = userAnswer === q.correctAnswer;
+                  return (
+                    <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-black">السؤال {index + 1}</span>
+                        {isCorrect ? (
+                          <span className="text-green-600">إجابة صحيحة</span>
+                        ) : (
+                          <span className="text-red-600">إجابة خاطئة</span>
+                        )}
+                      </div>
+                      <p className="mb-2 text-black">{q.text}</p>
+                      <div className="space-y-2">
+                        <p className="font-semibold text-black">إجابتك:</p>
+                        <p className="text-black">{getOptionText(q.options[userAnswer])}</p>
+                        {!isCorrect && (
+                          <>
+                            <p className="font-semibold text-black">الإجابة الصحيحة:</p>
+                            <p className="text-black">{getOptionText(q.options[q.correctAnswer!])}</p>
+                            {q.explanation && (
+                              <>
+                                <p className="font-semibold text-black">الشرح:</p>
+                                <p className="text-black">{q.explanation}</p>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-8 text-center">
+                <Button onClick={() => navigate("/qiyas-tests")}>
+                  العودة للاختبارات
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </Layout>
     );
@@ -205,7 +271,7 @@ const TakeTest = () => {
                 {Array.isArray(question.options) && question.options.map((option, index) => (
                   <Button
                     key={index}
-                    variant="outline"
+                    variant={answers[currentQuestion] === index ? "default" : "outline"}
                     className="w-full justify-start text-right h-auto py-4 px-6"
                     onClick={() => handleAnswer(index)}
                   >
@@ -217,6 +283,30 @@ const TakeTest = () => {
                   </Button>
                 ))}
               </div>
+            </div>
+            <div className="flex justify-between mt-8">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+              >
+                <ArrowLeft className="mr-2" size={16} />
+                السابق
+              </Button>
+              {currentQuestion === questions.length - 1 ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={answers.length !== questions.length}
+                >
+                  <Check className="mr-2" size={16} />
+                  إنهاء الاختبار
+                </Button>
+              ) : (
+                <Button onClick={handleNext}>
+                  التالي
+                  <ArrowRight className="mr-2" size={16} />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
