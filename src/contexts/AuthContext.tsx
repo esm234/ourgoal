@@ -13,6 +13,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: any | null }>;
   logout: () => Promise<void>;
   loading: boolean;
+  needsProfileSetup: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,19 +25,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
 
-  // Helper to fetch role from profiles
-  const fetchUserRole = async (userId: string | undefined | null) => {
+  // Helper to fetch user profile
+  const fetchUserProfile = async (userId: string | undefined | null) => {
     if (!userId) {
+      setUsername(null);
       setRole(null);
+      setNeedsProfileSetup(false);
       return;
     }
     const { data, error } = await supabase
       .from("profiles")
-      .select("role")
+      .select("username, role")
       .eq("id", userId)
       .single();
+    
+    if (error) {
+      console.error("Error fetching user profile:", error);
+      return;
+    }
+
+    setUsername(data?.username ?? null);
     setRole(data?.role ?? null);
+    setNeedsProfileSetup(!data?.username);
   };
 
   useEffect(() => {
@@ -46,8 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoggedIn(!!session);
-        setUsername(session?.user?.email ?? null);
-        fetchUserRole(session?.user?.id);
+        fetchUserProfile(session?.user?.id);
       }
     );
 
@@ -56,8 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoggedIn(!!session);
-      setUsername(session?.user?.email ?? null);
-      fetchUserRole(session?.user?.id);
+      fetchUserProfile(session?.user?.id);
       setLoading(false);
     });
 
@@ -105,7 +115,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signup,
       signInWithGoogle,
       logout,
-      loading
+      loading,
+      needsProfileSetup
     }}>
       {children}
     </AuthContext.Provider>
