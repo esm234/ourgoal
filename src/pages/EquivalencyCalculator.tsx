@@ -630,13 +630,15 @@ const EquivalencyCalculator = () => {
                     </div>
                     <h3 className="text-lg font-bold mb-4">الكليات المتاحة</h3>
                     {availableColleges.length > 0 ? (
-                      <ul className="text-right">
-                        {availableColleges.map(college => (
-                          <li key={college.name} className="mb-2 font-semibold text-primary/90 bg-primary/10 rounded px-3 py-2">
-                            {college.name} — {college.minScore}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="max-h-[500px] overflow-y-auto">
+                        <ul className="text-right">
+                          {availableColleges.map(college => (
+                            <li key={college.name} className="mb-2 font-semibold text-primary/90 bg-primary/10 rounded px-3 py-2">
+                              {college.name} — {college.minScore}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ) : (
                       <p>لا توجد كليات متاحة لهذا المجموع</p>
                     )}
