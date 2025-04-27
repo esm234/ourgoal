@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { TestResult } from '@/types/test';
+import { TestResult, Question } from '@/types/test';
 
 export type ExamResultDB = {
   id: string;
@@ -8,7 +8,7 @@ export type ExamResultDB = {
   score: number;
   total_questions: number;
   type: 'verbal' | 'quantitative' | 'mixed';
-  questions_data: any;
+  questions_data: Question[];
   created_at: string;
 };
 
@@ -21,7 +21,7 @@ export const saveExamResult = async (result: TestResult): Promise<ExamResultDB |
         score: result.score,
         total_questions: result.totalQuestions,
         type: result.type,
-        questions_data: result.questionsData
+        questions_data: result.questions
       })
       .select()
       .single();
@@ -55,7 +55,7 @@ export const getExamResults = async (): Promise<TestResult[]> => {
       score: result.score,
       totalQuestions: result.total_questions,
       type: result.type,
-      questionsData: result.questions_data,
+      questions: result.questions_data,
       timestamp: new Date(result.created_at).getTime()
     }));
   } catch (error) {
