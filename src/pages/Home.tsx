@@ -9,32 +9,8 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const handleSlide = (direction: 'prev' | 'next') => {
-    if (direction === 'next') {
-      setCurrentSlide((prev) => (prev === 2 ? 0 : prev + 1));
-    } else {
-      setCurrentSlide((prev) => (prev === 0 ? 2 : prev - 1));
-    }
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
-
   useEffect(() => {
-    const slider = sliderRef.current;
-    if (slider) {
-      const slideWidth = slider.offsetWidth / 3; // Divide by number of slides
-      slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
-    }
-  }, [currentSlide]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev === 2 ? 0 : prev + 1));
-    }, 5000);
-
-    return () => clearInterval(interval);
+    // Remove auto-sliding
   }, []);
 
   return (
@@ -271,53 +247,36 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="relative max-w-6xl mx-auto">
-            {/* Slider Container */}
-            <div className="overflow-hidden">
-              <div 
-                ref={sliderRef}
-                className="flex transition-transform duration-500 ease-in-out justify-center" 
-                style={{ width: '100%' }}
-              >
-                {/* First Group */}
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">محمد منصور</h3>
-                      <p className="text-gray-300 text-center">مدير المنصة</p>
-                    </div>
-                  </Card>
+          {/* Team Members Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Team Member 1 */}
+            <div className="p-4">
+              <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white text-center mb-2">محمد منصور</h3>
+                  <p className="text-gray-300 text-center">مدير المنصة</p>
                 </div>
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">اسلام احمد</h3>
-                      <p className="text-gray-300 text-center">مطور المنصة</p>
-                    </div>
-                  </Card>
-                </div>
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">محمد اسامه</h3>
-                      <p className="text-gray-300 text-center">خبير الرياضيات</p>
-                    </div>
-                  </Card>
-                </div>
-              </div>
+              </Card>
             </div>
 
-            {/* Indicators */}
-            <div className="flex justify-center mt-8 space-x-2">
-              {[0, 1, 2].map((index) => (
-                <button
-                  key={index}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    currentSlide === index ? 'bg-[#03DAC6]' : 'bg-gray-400'
-                  }`}
-                  onClick={() => setCurrentSlide(index)}
-                />
-              ))}
+            {/* Team Member 2 */}
+            <div className="p-4">
+              <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white text-center mb-2">اسلام احمد</h3>
+                  <p className="text-gray-300 text-center">مطور المنصة</p>
+                </div>
+              </Card>
+            </div>
+
+            {/* Team Member 3 */}
+            <div className="p-4">
+              <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white text-center mb-2">محمد اسامه</h3>
+                  <p className="text-gray-300 text-center">خبير الرياضيات</p>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
