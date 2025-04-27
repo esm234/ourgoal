@@ -20,7 +20,7 @@ const Navbar = () => {
             <img 
               src="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ"
               alt="اسرار للتفوق"
-              className="w-8 h-8 object-contain"
+              className="w-12 h-12 object-contain"
             />
             منصة اسرار للتفوق
           </Link>
