@@ -274,7 +274,7 @@ const Home = () => {
               <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-white text-center mb-2">محمد اسامه</h3>
-                  <p className="text-gray-300 text-center">خبير الرياضيات</p>
+                  <p className="text-gray-300 text-center">مدير المنصة</p>
                 </div>
               </Card>
             </div>
