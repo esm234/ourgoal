@@ -11,9 +11,9 @@ const Home = () => {
 
   const handleSlide = (direction: 'prev' | 'next') => {
     if (direction === 'next') {
-      setCurrentSlide((prev) => (prev === 3 ? 0 : prev + 1));
+      setCurrentSlide((prev) => (prev === 7 ? 0 : prev + 1));
     } else {
-      setCurrentSlide((prev) => (prev === 0 ? 3 : prev - 1));
+      setCurrentSlide((prev) => (prev === 0 ? 7 : prev - 1));
     }
   };
 
@@ -24,7 +24,7 @@ const Home = () => {
   useEffect(() => {
     const slider = sliderRef.current;
     if (slider) {
-      const slideWidth = slider.offsetWidth / 4; // Divide by number of visible slides
+      const slideWidth = slider.offsetWidth / 8; // Divide by number of slides
       slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
     }
   }, [currentSlide]);
@@ -277,7 +277,7 @@ const Home = () => {
               <div 
                 ref={sliderRef}
                 className="flex transition-transform duration-500 ease-in-out" 
-                style={{ width: '400%' }}
+                style={{ width: '800%' }}
               >
                 {/* Team Member 1 */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
@@ -403,7 +403,7 @@ const Home = () => {
 
             {/* Indicators */}
             <div className="flex justify-center mt-8 space-x-2">
-              {[0, 1, 2, 3].map((index) => (
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => (
                 <button
                   key={index}
                   className={`w-3 h-3 rounded-full transition-colors ${
