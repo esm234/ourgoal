@@ -179,7 +179,7 @@ const TakeTest = () => {
       correctAnswers,
       totalQuestions: questions.length,
       date: new Date().toISOString(),
-      type: 'mixed',
+      type: test?.type || 'mixed',
       questions: questions.map((q, index) => ({
         id: q.id,
         text: q.text,
@@ -193,24 +193,41 @@ const TakeTest = () => {
       }))
     };
 
-    // Save to localStorage for backward compatibility
-    const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-    localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
+    try {
+      // Save to localStorage
+      const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+      localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
 
-    // If user is logged in, also save to database
-    if (isLoggedIn && user) {
-      try {
-        await supabase.from("exam_results").insert({
+      // If user is logged in, save to database
+      if (isLoggedIn && user) {
+        const { error } = await supabase.from("exam_results").insert({
           test_id: testId,
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: test.duration, // Using test duration as time taken
-          questions_data: result.questions // Store questions data in the database
+          correct_answers: correctAnswers,
+          time_taken: test.duration * 60 - timeLeft, // Convert to actual time taken in seconds
+          questions_data: result.questions,
+          test_type: test?.type || 'mixed',
+          created_at: new Date().toISOString()
         });
-      } catch (error) {
-        console.error("Error saving result to database:", error);
+
+        if (error) {
+          throw error;
+        }
+
+        toast({
+          title: "تم حفظ النتيجة",
+          description: "تم حفظ نتيجة الاختبار بنجاح",
+        });
       }
+    } catch (error: any) {
+      console.error("Error saving test result:", error);
+      toast({
+        title: "خطأ في حفظ النتيجة",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
