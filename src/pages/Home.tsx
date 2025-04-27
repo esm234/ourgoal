@@ -281,12 +281,12 @@ const Home = () => {
                       <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
                         <img
                           src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="أحمد محمد"
+                          alt="محمد منصور"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="text-xl font-bold text-white text-center mb-2">أحمد محمد</h3>
-                      <p className="text-gray-300 text-center">خبير الرياضيات</p>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">محمد منصور</h3>
+                      <p className="text-gray-300 text-center">مدير المنصة</p>
                     </div>
                   </Card>
                 </div>
@@ -298,12 +298,12 @@ const Home = () => {
                       <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
                         <img
                           src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="سارة أحمد"
+                          alt="اسلام احمد"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="text-xl font-bold text-white text-center mb-2">سارة أحمد</h3>
-                      <p className="text-gray-300 text-center">خبيرة اللغة العربية</p>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">اسلام احمد</h3>
+                      <p className="text-gray-300 text-center">مطور المنصة</p>
                     </div>
                   </Card>
                 </div>
@@ -315,12 +315,12 @@ const Home = () => {
                       <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
                         <img
                           src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="محمد علي"
+                          alt="محمد اسامه"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="text-xl font-bold text-white text-center mb-2">محمد علي</h3>
-                      <p className="text-gray-300 text-center">خبير الفيزياء</p>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">محمد اسامه</h3>
+                      <p className="text-gray-300 text-center">خبير الرياضيات</p>
                     </div>
                   </Card>
                 </div>
@@ -332,12 +332,80 @@ const Home = () => {
                       <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
                         <img
                           src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="نورا محمود"
+                          alt="عمر علام"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="text-xl font-bold text-white text-center mb-2">نورا محمود</h3>
-                      <p className="text-gray-300 text-center">خبيرة الكيمياء</p>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">عمر علام</h3>
+                      <p className="text-gray-300 text-center">خبير الفيزياء</p>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Team Member 5 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="احمد طلبه"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">احمد طلبه</h3>
+                      <p className="text-gray-300 text-center">خبير الكيمياء</p>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Team Member 6 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="احمد المعني"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">احمد المعني</h3>
+                      <p className="text-gray-300 text-center">خبير اللغة العربية</p>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Team Member 7 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="ماهيتاب ايهاب"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">ماهيتاب ايهاب</h3>
+                      <p className="text-gray-300 text-center">خبيرة الرياضيات</p>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Team Member 8 */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
+                        <img
+                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+                          alt="بسنت"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="text-xl font-bold text-white text-center mb-2">بسنت</h3>
+                      <p className="text-gray-300 text-center">خبيرة اللغة العربية</p>
                     </div>
                   </Card>
                 </div>
