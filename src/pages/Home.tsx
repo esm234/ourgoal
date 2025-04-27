@@ -278,13 +278,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="محمد منصور"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">محمد منصور</h3>
                       <p className="text-gray-300 text-center">مدير المنصة</p>
                     </div>
@@ -295,13 +288,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="اسلام احمد"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">اسلام احمد</h3>
                       <p className="text-gray-300 text-center">مطور المنصة</p>
                     </div>
@@ -312,13 +298,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="محمد اسامه"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">محمد اسامه</h3>
                       <p className="text-gray-300 text-center">خبير الرياضيات</p>
                     </div>
@@ -329,13 +308,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="عمر علام"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">عمر علام</h3>
                       <p className="text-gray-300 text-center">خبير الفيزياء</p>
                     </div>
@@ -346,13 +318,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="احمد طلبه"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">احمد طلبه</h3>
                       <p className="text-gray-300 text-center">خبير الكيمياء</p>
                     </div>
@@ -363,13 +328,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="احمد المعني"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">احمد المعني</h3>
                       <p className="text-gray-300 text-center">خبير اللغة العربية</p>
                     </div>
@@ -380,13 +338,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="ماهيتاب ايهاب"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">ماهيتاب ايهاب</h3>
                       <p className="text-gray-300 text-center">خبيرة الرياضيات</p>
                     </div>
@@ -397,13 +348,6 @@ const Home = () => {
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#03DAC6]">
-                        <img
-                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                          alt="بسنت"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
                       <h3 className="text-xl font-bold text-white text-center mb-2">بسنت</h3>
                       <p className="text-gray-300 text-center">خبيرة اللغة العربية</p>
                     </div>
