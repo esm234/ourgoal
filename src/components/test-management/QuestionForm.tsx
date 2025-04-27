@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +32,7 @@ const formSchema = z.object({
   text: z.string().min(1, "نص السؤال مطلوب"),
   type: z.enum(["verbal", "quantitative", "mixed"]),
   explanation: z.string().optional(),
+  image_url: z.string().url("رابط الصورة غير صالح").optional().or(z.literal("").optional()),
   options: z
     .array(optionSchema)
     .min(2, "يجب إضافة خيارين على الأقل")
@@ -55,12 +55,14 @@ const QuestionForm = ({
   defaultValues,
   isEdit = false,
 }: QuestionFormProps) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(defaultValues?.image_url || null);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
       text: "",
       type: "mixed",
       explanation: "",
+      image_url: "",
       options: [
         { text: "", is_correct: false },
         { text: "", is_correct: false },
@@ -214,6 +216,47 @@ const QuestionForm = ({
                   placeholder="أدخل شرحاً للإجابة الصحيحة (اختياري)"
                   {...field}
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem className="text-right">
+              <FormLabel>صورة السؤال (اختياري)</FormLabel>
+              <FormControl>
+                <div>
+                  <Input
+                    type="url"
+                    placeholder="أدخل رابط الصورة أو قم برفع صورة"
+                    value={field.value || ""}
+                    onChange={e => {
+                      field.onChange(e.target.value);
+                      setImagePreview(e.target.value);
+                    }}
+                  />
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="mt-2"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = URL.createObjectURL(file);
+                        setImagePreview(url);
+                        // For now, just preview. For real upload, integrate with Supabase Storage or similar.
+                        // You may want to upload the file and set the resulting URL in field.onChange
+                      }
+                    }}
+                  />
+                  {imagePreview && (
+                    <img src={imagePreview} alt="معاينة الصورة" className="mt-2 max-h-40 rounded border" />
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
