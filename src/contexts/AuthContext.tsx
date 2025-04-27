@@ -10,10 +10,8 @@ interface AuthContextType {
   role: string | null;
   login: (email: string, password: string) => Promise<{ error: any | null }>;
   signup: (email: string, password: string) => Promise<{ error: any | null }>;
-  signInWithGoogle: () => Promise<{ error: any | null }>;
   logout: () => Promise<void>;
   loading: boolean;
-  needsProfileSetup: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,30 +23,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
 
-  // Helper to fetch user profile
-  const fetchUserProfile = async (userId: string | undefined | null) => {
+  // Helper to fetch role from profiles
+  const fetchUserRole = async (userId: string | undefined | null) => {
     if (!userId) {
-      setUsername(null);
       setRole(null);
-      setNeedsProfileSetup(false);
       return;
     }
     const { data, error } = await supabase
       .from("profiles")
-      .select("username, role")
+      .select("role")
       .eq("id", userId)
       .single();
-    
-    if (error) {
-      console.error("Error fetching user profile:", error);
-      return;
-    }
-
-    setUsername(data?.username ?? null);
     setRole(data?.role ?? null);
-    setNeedsProfileSetup(!data?.username);
   };
 
   useEffect(() => {
@@ -58,7 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoggedIn(!!session);
-        fetchUserProfile(session?.user?.id);
+        setUsername(session?.user?.email ?? null);
+        fetchUserRole(session?.user?.id);
       }
     );
 
@@ -67,7 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoggedIn(!!session);
-      fetchUserProfile(session?.user?.id);
+      setUsername(session?.user?.email ?? null);
+      fetchUserRole(session?.user?.id);
       setLoading(false);
     });
 
@@ -90,16 +79,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
-    return { error };
-  };
-
   const logout = async () => {
     await supabase.auth.signOut();
   };
@@ -112,11 +91,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       session, 
       role,
       login, 
-      signup,
-      signInWithGoogle,
+      signup, 
       logout,
-      loading,
-      needsProfileSetup
+      loading
     }}>
       {children}
     </AuthContext.Provider>
