@@ -232,7 +232,27 @@ const TakeTest = () => {
     }
   };
 
+  const getUnansweredQuestions = () => {
+    return questions.reduce((acc: number[], _, index) => {
+      if (answers[index] === undefined) {
+        acc.push(index + 1);
+      }
+      return acc;
+    }, []);
+  };
+
   const handleSubmit = () => {
+    const unansweredQuestions = getUnansweredQuestions();
+    
+    if (unansweredQuestions.length > 0) {
+      toast({
+        title: "لم يتم الإجابة على جميع الأسئلة",
+        description: `الرجاء الإجابة على الأسئلة التالية: ${unansweredQuestions.join(', ')}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Calculate score
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
