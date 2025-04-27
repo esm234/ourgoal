@@ -504,7 +504,9 @@ const EquivalencyCalculator = () => {
     }
   };
 
-  const availableColleges = (gender === 'male' ? collegesMale : collegesFemale).filter(college => result !== null && result >= college.minScore);
+  const availableColleges = (gender === 'male' ? collegesMale : collegesFemale)
+    .filter(college => result !== null && result >= college.minScore)
+    .sort((a, b) => b.minScore - a.minScore); // Sort by score in descending order
 
   return (
     <Layout>
