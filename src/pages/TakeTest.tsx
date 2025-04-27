@@ -179,7 +179,18 @@ const TakeTest = () => {
       correctAnswers,
       totalQuestions: questions.length,
       date: new Date().toISOString(),
-      type: 'mixed'
+      type: 'mixed',
+      questions: questions.map((q, index) => ({
+        id: q.id,
+        text: q.text,
+        type: q.type,
+        options: Array.isArray(q.options) ? q.options.map(opt => 
+          typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
+        ) : [],
+        correctAnswer: q.correctAnswer || 0,
+        userAnswer: answers[index],
+        explanation: q.explanation || undefined
+      }))
     };
 
     // Save to localStorage for backward compatibility
@@ -194,7 +205,8 @@ const TakeTest = () => {
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: test.duration // Using test duration as time taken
+          time_taken: test.duration, // Using test duration as time taken
+          questions_data: result.questions // Store questions data in the database
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
