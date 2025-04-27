@@ -12,12 +12,19 @@ function calculateFinalEquivalencyScore(highSchoolPercentage: number, qiyasScore
 }
 
 // Placeholder colleges data (replace with real data later)
-const colleges = [
+const collegesMale = [
   { name: "طب القاهرة", minScore: 400 },
   { name: "طب أسنان القاهرة", minScore: 395 },
   { name: "صيدلة الإسكندرية", minScore: 390 },
   { name: "هندسة القاهرة", minScore: 380 },
   { name: "حاسبات ومعلومات عين شمس", minScore: 370 },
+];
+const collegesFemale = [
+  { name: "طب بنات القاهرة", minScore: 398 },
+  { name: "طب أسنان بنات القاهرة", minScore: 393 },
+  { name: "صيدلة بنات الإسكندرية", minScore: 388 },
+  { name: "هندسة بنات القاهرة", minScore: 378 },
+  { name: "حاسبات ومعلومات بنات عين شمس", minScore: 368 },
 ];
 
 const EquivalencyCalculator = () => {
@@ -25,6 +32,7 @@ const EquivalencyCalculator = () => {
   const [qiyas, setQiyas] = useState<number | ''>('');
   const [result, setResult] = useState<number | null>(null);
   const [showColleges, setShowColleges] = useState(false);
+  const [gender, setGender] = useState<'male' | 'female'>('male');
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +43,7 @@ const EquivalencyCalculator = () => {
     }
   };
 
-  const availableColleges = colleges.filter(college => result !== null && result >= college.minScore);
+  const availableColleges = (gender === 'male' ? collegesMale : collegesFemale).filter(college => result !== null && result >= college.minScore);
 
   return (
     <Layout>
@@ -56,6 +64,24 @@ const EquivalencyCalculator = () => {
               <CardContent className="p-6">
                 {result === null && (
                   <form onSubmit={handleCalculate} className="space-y-6">
+                    <div className="flex justify-center mb-4 gap-2">
+                      <Button
+                        type="button"
+                        variant={gender === 'male' ? 'default' : 'outline'}
+                        className={gender === 'male' ? 'bg-primary text-white' : ''}
+                        onClick={() => setGender('male')}
+                      >
+                        البنين
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={gender === 'female' ? 'default' : 'outline'}
+                        className={gender === 'female' ? 'bg-primary text-white' : ''}
+                        onClick={() => setGender('female')}
+                      >
+                        البنات
+                      </Button>
+                    </div>
                     <div>
                       <label className="block mb-1 text-right">النسبة المئوية للثانوية العامة (من 100)</label>
                       <Input
@@ -90,6 +116,24 @@ const EquivalencyCalculator = () => {
 
                 {result !== null && !showColleges && (
                   <div className="mt-8 p-4 bg-background rounded-lg border-2 border-primary text-center">
+                    <div className="flex justify-center mb-4 gap-2">
+                      <Button
+                        type="button"
+                        variant={gender === 'male' ? 'default' : 'outline'}
+                        className={gender === 'male' ? 'bg-primary text-white' : ''}
+                        onClick={() => setGender('male')}
+                      >
+                        البنين
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={gender === 'female' ? 'default' : 'outline'}
+                        className={gender === 'female' ? 'bg-primary text-white' : ''}
+                        onClick={() => setGender('female')}
+                      >
+                        البنات
+                      </Button>
+                    </div>
                     <h3 className="text-lg font-bold mb-2">المجموع الاعتباري</h3>
                     <p className="text-4xl font-bold text-primary mb-1">{result} <span className="text-lg text-muted-foreground">/ 410</span></p>
                     <Button
@@ -103,6 +147,24 @@ const EquivalencyCalculator = () => {
 
                 {result !== null && showColleges && (
                   <div className="mt-8 p-4 bg-background rounded-lg border-2 border-primary text-center">
+                    <div className="flex justify-center mb-4 gap-2">
+                      <Button
+                        type="button"
+                        variant={gender === 'male' ? 'default' : 'outline'}
+                        className={gender === 'male' ? 'bg-primary text-white' : ''}
+                        onClick={() => setGender('male')}
+                      >
+                        البنين
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={gender === 'female' ? 'default' : 'outline'}
+                        className={gender === 'female' ? 'bg-primary text-white' : ''}
+                        onClick={() => setGender('female')}
+                      >
+                        البنات
+                      </Button>
+                    </div>
                     <h3 className="text-lg font-bold mb-4">الكليات المتاحة</h3>
                     {availableColleges.length > 0 ? (
                       <ul className="text-right">
