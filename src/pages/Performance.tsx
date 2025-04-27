@@ -138,7 +138,11 @@ const Performance = () => {
                       {testResults.map((result, index) => (
                         <TableRow key={index}>
                           <TableCell className="text-right">{formatDate(result.date)}</TableCell>
-                          <TableCell className="text-right">{result.title || `اختبار ${result.testId}`}</TableCell>
+                          <TableCell className="text-right">
+                            {result.title && result.title !== 'اختبار' ? result.title :
+                              result.testId && result.testId.startsWith('test-') ? `اختبار تجريبي ${result.testId.replace('test-', '')}` :
+                              `اختبار ${result.testId}`}
+                          </TableCell>
                           <TableCell>
                             {result.type === 'verbal' ? 'لفظي' : 
                              result.type === 'quantitative' ? 'كمي' : 'مختلط'}
