@@ -22,6 +22,7 @@ const TakeTest = () => {
   const [test, setTest] = useState<any | null>(null);
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -49,15 +50,30 @@ const TakeTest = () => {
   }, [testId]);
 
   useEffect(() => {
-    if (!showResults && !loading && questions.length > 0) {
+    if (test && test.duration && timeLeft === null) {
+      setTimeLeft(test.duration * 60); // duration is in minutes
+    }
+  }, [test, timeLeft]);
+
+  useEffect(() => {
+    if (!showResults && !loading && questions.length > 0 && timeLeft !== null) {
       timerRef.current = setInterval(() => {
-        setElapsedSeconds((prev) => prev + 1);
+        setTimeLeft((prev) => {
+          if (prev === null) return null;
+          if (prev <= 1) {
+            clearInterval(timerRef.current!);
+            handleSubmit();
+            return 0;
+          }
+          setElapsedSeconds((e) => e + 1);
+          return prev - 1;
+        });
       }, 1000);
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [showResults, loading, questions.length]);
+  }, [showResults, loading, questions.length, timeLeft]);
 
   const fetchTestWithQuestions = async () => {
     setLoading(true);
@@ -134,6 +150,8 @@ const TakeTest = () => {
   };
 
   const saveTestResult = async (score: number, correctAnswers: number) => {
+    const durationSeconds = test && test.duration ? test.duration * 60 : 0;
+    const timeTaken = durationSeconds - (timeLeft ?? 0);
     const result: TestResult = {
       testId: testId!,
       score,
@@ -141,7 +159,7 @@ const TakeTest = () => {
       totalQuestions: questions.length,
       date: new Date().toISOString(),
       type: 'mixed',
-      timeTaken: elapsedSeconds
+      timeTaken: timeTaken
     };
 
     // Save to localStorage for backward compatibility
@@ -156,7 +174,7 @@ const TakeTest = () => {
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: elapsedSeconds
+          time_taken: timeTaken
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
@@ -237,6 +255,8 @@ const TakeTest = () => {
   }
 
   if (showResults) {
+    const durationSeconds = test && test.duration ? test.duration * 60 : 0;
+    const timeTaken = durationSeconds - (timeLeft ?? 0);
     return (
       <Layout>
         <div className="container mx-auto py-16">
@@ -244,7 +264,7 @@ const TakeTest = () => {
             <CardContent className="p-6">
               <h2 className="text-2xl font-bold mb-6 text-center">نتائج الاختبار</h2>
               <div className="mb-4 text-center font-semibold text-lg">
-                الوقت المستغرق: {formatTime(elapsedSeconds)}
+                الوقت المستغرق: {formatTime(timeTaken)}
               </div>
               <div className="space-y-6">
                 {questions.map((q, index) => {
@@ -308,7 +328,7 @@ const TakeTest = () => {
                 </span>
               </div>
               <div className="mb-4 text-center font-semibold text-lg">
-                الوقت: {formatTime(elapsedSeconds)}
+                الوقت المتبقي: {formatTime(timeLeft ?? 0)}
               </div>
               <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
               <div className="space-y-4">
