@@ -1,15 +1,16 @@
-
-import React from "react";
+import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, ArrowRight } from "lucide-react";
+import { BarChart, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { TestResult } from "@/types/testResults";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const Performance = () => {
   const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
+  const [expandedResult, setExpandedResult] = useState<number | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -21,6 +22,19 @@ const Performance = () => {
       hour: 'numeric',
       minute: 'numeric',
     }).format(date);
+  };
+
+  const getTestName = (testId: string) => {
+    // Map test IDs to their names
+    const testNames: { [key: string]: string } = {
+      'test-1': 'اختبار قياس تجريبي #1',
+      'test-2': 'اختبار قياس تجريبي #2',
+      'test-3': 'اختبار قياس تجريبي #3',
+      'test-4': 'اختبار قياس قصير #1',
+      'test-5': 'اختبار قياس قصير #2',
+      'test-6': 'اختبار قياس كامل',
+    };
+    return testNames[testId] || `اختبار ${testId}`;
   };
 
   return (
@@ -60,24 +74,69 @@ const Performance = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">التاريخ والوقت</TableHead>
+                        <TableHead className="text-right">اسم الاختبار</TableHead>
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
+                        <TableHead className="text-right">التفاصيل</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {testResults.map((result, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="text-right">{formatDate(result.date)}</TableCell>
-                          <TableCell>
-                            {result.type === 'verbal' ? 'لفظي' : 
-                             result.type === 'quantitative' ? 'كمي' : 'مختلط'}
-                          </TableCell>
-                          <TableCell>{result.score}%</TableCell>
-                          <TableCell>
-                            {result.correctAnswers} من {result.totalQuestions}
-                          </TableCell>
-                        </TableRow>
+                        <React.Fragment key={index}>
+                          <TableRow>
+                            <TableCell className="text-right">{formatDate(result.date)}</TableCell>
+                            <TableCell className="text-right">{getTestName(result.testId)}</TableCell>
+                            <TableCell>
+                              {result.type === 'verbal' ? 'لفظي' : 
+                               result.type === 'quantitative' ? 'كمي' : 'مختلط'}
+                            </TableCell>
+                            <TableCell>{result.score}%</TableCell>
+                            <TableCell>
+                              {result.correctAnswers} من {result.totalQuestions}
+                            </TableCell>
+                            <TableCell>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    عرض التفاصيل
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-3xl">
+                                  <DialogHeader>
+                                    <DialogTitle>تفاصيل الاختبار</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="mt-4">
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                      <div>
+                                        <p className="font-semibold">اسم الاختبار:</p>
+                                        <p>{getTestName(result.testId)}</p>
+                                      </div>
+                                      <div>
+                                        <p className="font-semibold">التاريخ:</p>
+                                        <p>{formatDate(result.date)}</p>
+                                      </div>
+                                      <div>
+                                        <p className="font-semibold">نوع الاختبار:</p>
+                                        <p>{result.type === 'verbal' ? 'لفظي' : 
+                                            result.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
+                                      </div>
+                                      <div>
+                                        <p className="font-semibold">النتيجة:</p>
+                                        <p>{result.score}%</p>
+                                      </div>
+                                    </div>
+                                    <div className="border-t pt-4">
+                                      <p className="font-semibold mb-2">ملخص الإجابات:</p>
+                                      <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
+                                      <p>نسبة النجاح: {result.score}%</p>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </TableCell>
+                          </TableRow>
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>
