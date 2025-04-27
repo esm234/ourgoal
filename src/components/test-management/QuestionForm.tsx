@@ -112,37 +112,6 @@ const QuestionForm = ({
   // Toggle between text and image mode
   const mode = form.watch("mode");
 
-  const handleFileUpload = async (file: File) => {
-    setIsUploading(true);
-    try {
-      // Create a unique file name
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `question-images/${fileName}`;
-
-      // Upload file to Supabase storage
-      const { error: uploadError, data } = await supabase.storage
-        .from('questions')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('questions')
-        .getPublicUrl(filePath);
-
-      // Update form and preview
-      form.setValue('image_url', publicUrl);
-      setImagePreview(publicUrl);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      // You might want to show an error toast here
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -195,26 +164,40 @@ const QuestionForm = ({
                 <FormControl>
                   <div>
                     <Input
-                      type="url"
-                      placeholder="أدخل رابط الصورة أو قم برفع صورة"
-                      value={field.value || ""}
-                      onChange={e => {
-                        field.onChange(e.target.value);
-                        setImagePreview(e.target.value);
-                      }}
-                    />
-                    <Input
                       type="file"
                       accept="image/*"
                       className="mt-2"
-                      onChange={e => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          // Show local preview immediately
-                          const localUrl = URL.createObjectURL(file);
-                          setImagePreview(localUrl);
-                          // Upload to Supabase
-                          handleFileUpload(file);
+                          try {
+                            setIsUploading(true);
+                            // Create a unique file name
+                            const fileExt = file.name.split('.').pop();
+                            const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+                            const filePath = `question-images/${fileName}`;
+
+                            // Upload file to Supabase storage
+                            const { error: uploadError } = await supabase.storage
+                              .from('questions')
+                              .upload(filePath, file);
+
+                            if (uploadError) throw uploadError;
+
+                            // Get the public URL
+                            const { data: { publicUrl } } = supabase.storage
+                              .from('questions')
+                              .getPublicUrl(filePath);
+
+                            // Update form and preview
+                            field.onChange(publicUrl);
+                            setImagePreview(publicUrl);
+                          } catch (error) {
+                            console.error('Error uploading file:', error);
+                            // You might want to show an error toast here
+                          } finally {
+                            setIsUploading(false);
+                          }
                         }
                       }}
                       disabled={isUploading}
@@ -223,7 +206,16 @@ const QuestionForm = ({
                       <p className="text-sm text-muted-foreground mt-2">جاري رفع الصورة...</p>
                     )}
                     {imagePreview && (
-                      <img src={imagePreview} alt="معاينة الصورة" className="mt-2 max-h-40 rounded border" />
+                      <div className="mt-4">
+                        <img 
+                          src={imagePreview} 
+                          alt="معاينة الصورة" 
+                          className="max-h-40 rounded border" 
+                        />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          تم رفع الصورة بنجاح
+                        </p>
+                      </div>
                     )}
                   </div>
                 </FormControl>
