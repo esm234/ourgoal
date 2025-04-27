@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,9 +15,6 @@ import NotFound from "@/pages/NotFound";
 import TestManagement from "@/pages/TestManagement";
 import TestQuestions from "@/pages/TestQuestions";
 import EditTest from "@/pages/EditTest";
-import TestResults from "@/pages/TestResults";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +35,6 @@ const App = () => (
             <Route path="/test-management" element={<TestManagement />} />
             <Route path="/test-management/:testId/questions" element={<TestQuestions />} />
             <Route path="/test-management/:testId/edit" element={<EditTest />} />
-            <Route path="/test-results/:testId/:date" element={<TestResults />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
