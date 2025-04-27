@@ -138,8 +138,11 @@ const Performance = () => {
                     </TableHeader>
                     <TableBody>
                       {testResults.map((result, index) => {
-                        // Try to get the test name from multiple sources
-                        let testName = result.title && result.title !== 'اختبار' ? result.title : '';
+                        // Prefer Supabase joined title if available
+                        let testName = result.tests?.title && result.tests?.title !== 'اختبار' ? result.tests.title : '';
+                        if (!testName && result.title && result.title !== 'اختبار') {
+                          testName = result.title;
+                        }
                         if (!testName && result.testId) {
                           // Try mockTests
                           const mock = (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) ? mockTests.find(t => t.id === result.testId) : null;
