@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Plus, PenLine } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { testQuestions } from "@/data/testQuestions";
@@ -116,6 +116,10 @@ const QiyasTests = () => {
     }
   };
 
+  const handleEditTest = (testId: string) => {
+    navigate(`/test-management/${testId}/edit`);
+  };
+
   return (
     <Layout>
       <section className="py-16 px-4">
@@ -155,7 +159,19 @@ const QiyasTests = () => {
               {mockTests.map((test) => (
                 <Card key={test.id} className="overflow-hidden border-2 border-border bg-secondary hover:border-primary transition-colors">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{test.title}</h3>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-bold">{test.title}</h3>
+                      {isLoggedIn && role === "admin" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditTest(test.id)}
+                        >
+                          <PenLine className="h-4 w-4 mr-1" />
+                          تعديل
+                        </Button>
+                      )}
+                    </div>
                     <p className="text-muted-foreground mb-4">{test.description}</p>
                     <div className="flex justify-between text-sm text-muted-foreground mb-6">
                       <span className="flex items-center">
