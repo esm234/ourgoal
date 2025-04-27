@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Trophy, Medal } from "lucide-react";
+import { Trophy, Medal, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface LeaderboardEntry {
   id: string;
+  user_id: string;
   user_name: string;
   score: number;
   total_questions: number;
@@ -17,6 +19,7 @@ interface LeaderboardEntry {
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -25,6 +28,9 @@ const Leaderboard = () => {
 
   const fetchLeaderboard = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from("leaderboard")
         .select("*")
@@ -32,9 +38,15 @@ const Leaderboard = () => {
         .limit(10);
 
       if (error) throw error;
-      setLeaderboardData(data || []);
-    } catch (error) {
+      
+      if (!data || data.length === 0) {
+        setError("لا توجد بيانات في المتصدرين بعد");
+      } else {
+        setLeaderboardData(data);
+      }
+    } catch (error: any) {
       console.error("Error fetching leaderboard:", error);
+      setError("حدث خطأ أثناء تحميل المتصدرين");
     } finally {
       setLoading(false);
     }
@@ -66,8 +78,33 @@ const Leaderboard = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>جاري تحميل المتصدرين...</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-6 w-6 text-yellow-500" />
+            المتصدرون
+          </CardTitle>
         </CardHeader>
+        <CardContent>
+          <div className="text-center py-4">جاري تحميل المتصدرين...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-6 w-6 text-yellow-500" />
+            المتصدرون
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </CardContent>
       </Card>
     );
   }
