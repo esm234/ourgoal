@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,6 @@ const TakeTest = () => {
   const [test, setTest] = useState<any | null>(null);
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Restrict access to signed-in users only
   if (!isLoggedIn) {
@@ -48,32 +45,6 @@ const TakeTest = () => {
       fetchTestWithQuestions();
     }
   }, [testId]);
-
-  useEffect(() => {
-    if (test && test.duration && timeLeft === null) {
-      setTimeLeft(test.duration * 60); // duration is in minutes
-    }
-  }, [test, timeLeft]);
-
-  useEffect(() => {
-    if (!showResults && !loading && questions.length > 0 && timeLeft !== null) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev === null) return null;
-          if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            handleSubmit();
-            return 0;
-          }
-          setElapsedSeconds((e) => e + 1);
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [showResults, loading, questions.length, timeLeft]);
 
   const fetchTestWithQuestions = async () => {
     setLoading(true);
@@ -150,16 +121,13 @@ const TakeTest = () => {
   };
 
   const saveTestResult = async (score: number, correctAnswers: number) => {
-    const durationSeconds = test && test.duration ? test.duration * 60 : 0;
-    const timeTaken = durationSeconds - (timeLeft ?? 0);
     const result: TestResult = {
       testId: testId!,
       score,
       correctAnswers,
       totalQuestions: questions.length,
       date: new Date().toISOString(),
-      type: 'mixed',
-      timeTaken: timeTaken
+      type: 'mixed'
     };
 
     // Save to localStorage for backward compatibility
@@ -174,7 +142,7 @@ const TakeTest = () => {
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: timeTaken
+          time_taken: test.duration // Using test duration as time taken
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
@@ -226,13 +194,6 @@ const TakeTest = () => {
     return '';
   };
 
-  // Format time as mm:ss
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60).toString().padStart(2, '0');
-    const s = (secs % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
   if (loading) {
     return (
       <Layout>
@@ -255,17 +216,12 @@ const TakeTest = () => {
   }
 
   if (showResults) {
-    const durationSeconds = test && test.duration ? test.duration * 60 : 0;
-    const timeTaken = durationSeconds - (timeLeft ?? 0);
     return (
       <Layout>
         <div className="container mx-auto py-16">
           <Card className="max-w-3xl mx-auto">
             <CardContent className="p-6">
               <h2 className="text-2xl font-bold mb-6 text-center">نتائج الاختبار</h2>
-              <div className="mb-4 text-center font-semibold text-lg">
-                الوقت المستغرق: {formatTime(timeTaken)}
-              </div>
               <div className="space-y-6">
                 {questions.map((q, index) => {
                   const userAnswer = answers[index];
@@ -280,16 +236,7 @@ const TakeTest = () => {
                           <span className="text-red-600">إجابة خاطئة</span>
                         )}
                       </div>
-                      {q.image_url && (
-                        <img
-                          src={q.image_url}
-                          alt={q.text || 'سؤال بالصورة'}
-                          className="mx-auto mb-4 max-h-64 rounded border"
-                        />
-                      )}
-                      {q.text && (
-                        <p className="mb-2 text-black">{q.text}</p>
-                      )}
+                      <p className="mb-2 text-black">{q.text}</p>
                       <div className="space-y-2">
                         <p className="font-semibold text-black">إجابتك:</p>
                         <p className="text-black">{getOptionText(q.options[userAnswer])}</p>
@@ -336,19 +283,7 @@ const TakeTest = () => {
                   {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
                 </span>
               </div>
-              <div className="mb-4 text-center font-semibold text-lg">
-                الوقت المتبقي: {formatTime(timeLeft ?? 0)}
-              </div>
-              {question.image_url && (
-                <img
-                  src={question.image_url}
-                  alt={question.text || 'سؤال بالصورة'}
-                  className="mx-auto mb-4 max-h-64 rounded border"
-                />
-              )}
-              {question.text && (
-                <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
-              )}
+              <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
               <div className="space-y-4">
                 {Array.isArray(question.options) && question.options.map((option, index) => (
                   <Button
