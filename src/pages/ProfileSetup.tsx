@@ -32,7 +32,7 @@ const profileSetupSchema = z.object({
 const ProfileSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof profileSetupSchema>>({
@@ -56,6 +56,8 @@ const ProfileSetup = () => {
         });
 
       if (error) throw error;
+
+      await refreshProfile();
 
       toast({
         title: "تم تحديث الملف الشخصي بنجاح",
