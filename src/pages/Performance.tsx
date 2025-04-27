@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,10 +8,56 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Performance = () => {
-  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
-  const [expandedResult, setExpandedResult] = useState<number | null>(null);
+  const { isLoggedIn, user } = useAuth();
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      fetchTestResults();
+    } else {
+      // Fallback to localStorage for backward compatibility
+      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+      setTestResults(localResults);
+      setLoading(false);
+    }
+  }, [isLoggedIn, user]);
+
+  const fetchTestResults = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("exam_results")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Transform the data to match TestResult type
+      const formattedResults: TestResult[] = data.map(result => ({
+        testId: result.test_id,
+        score: result.score,
+        correctAnswers: result.questions_data?.filter(q => q.userAnswer === q.correctAnswer).length || 0,
+        totalQuestions: result.total_questions,
+        date: result.created_at,
+        type: result.type || 'mixed',
+        questions: result.questions_data || []
+      }));
+
+      setTestResults(formattedResults);
+    } catch (error) {
+      console.error("Error fetching test results:", error);
+      // Fallback to localStorage if database fetch fails
+      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+      setTestResults(localResults);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -24,6 +70,20 @@ const Performance = () => {
       minute: 'numeric',
     }).format(date);
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <section className="py-16 px-4">
+          <div className="container mx-auto">
+            <div className="text-center">
+              <p className="text-lg">جاري تحميل النتائج...</p>
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
