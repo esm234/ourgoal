@@ -9,8 +9,6 @@ import type { TestResult } from "@/types/testResults";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { testQuestions } from "@/data/testQuestions";
-import mockTests from "@/pages/QiyasTests";
 
 const Performance = () => {
   const { isLoggedIn, user } = useAuth();
@@ -133,55 +131,23 @@ const Performance = () => {
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
-                        <TableHead className="text-right">التفاصيل</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {testResults.map((result, index) => {
-                        // Prefer Supabase joined title if available
-                        let testName = result.tests?.title && result.tests?.title !== 'اختبار' ? result.tests.title : '';
-                        if (!testName && result.title && result.title !== 'اختبار') {
-                          testName = result.title;
-                        }
-                        if (!testName && result.testId) {
-                          // Try mockTests
-                          const mock = (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) ? mockTests.find(t => t.id === result.testId) : null;
-                          if (mock) testName = mock.title;
-                        }
-                        if (!testName && result.testId) {
-                          // Try testQuestions
-                          const mockQ = testQuestions.find(t => t.testId === result.testId);
-                          if (mockQ) testName = `اختبار تجريبي ${result.testId.replace('test-', '')}`;
-                        }
-                        if (!testName && result.testId) {
-                          testName = `اختبار ${result.testId}`;
-                        }
-                        return (
-                          <TableRow key={index}>
-                            <TableCell className="text-right">{formatDate(result.date)}</TableCell>
-                            <TableCell className="text-right">{testName}</TableCell>
-                            <TableCell>
-                              {result.type === 'verbal' ? 'لفظي' : 
-                               result.type === 'quantitative' ? 'كمي' : 'مختلط'}
-                            </TableCell>
-                            <TableCell>{result.score}%</TableCell>
-                            <TableCell>
-                              {result.correctAnswers} من {result.totalQuestions}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                              >
-                                <Link to={`/test-results/${result.testId}/${result.date}`}>
-                                  عرض التفاصيل
-                                </Link>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                      {testResults.map((result, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="text-right">{formatDate(result.date)}</TableCell>
+                          <TableCell className="text-right">{result.title || `اختبار ${result.testId}`}</TableCell>
+                          <TableCell>
+                            {result.type === 'verbal' ? 'لفظي' : 
+                             result.type === 'quantitative' ? 'كمي' : 'مختلط'}
+                          </TableCell>
+                          <TableCell>{result.score}%</TableCell>
+                          <TableCell>
+                            {result.correctAnswers} من {result.totalQuestions}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </CardContent>
