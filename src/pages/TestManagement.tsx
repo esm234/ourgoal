@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,7 @@ import TestList from "@/components/test-management/TestList";
 import { Test } from "@/types/testManagement";
 
 const TestManagement = () => {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, role } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("my-tests");
@@ -26,9 +25,12 @@ const TestManagement = () => {
       navigate("/login");
       return;
     }
-    
+    if (role !== "admin") {
+      navigate("/");
+      return;
+    }
     fetchTests();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, role]);
 
   const fetchTests = async () => {
     setLoading(true);
