@@ -43,3 +43,16 @@ export interface CreateQuestionForm {
     is_correct: boolean;
   }[];
 }
+
+// For the TakeTest component, which handles both database questions and static questions
+export interface ExtendedQuestion {
+  id: string;
+  test_id: string;
+  text: string;
+  type: 'verbal' | 'quantitative' | 'mixed';
+  explanation: string | null;
+  question_order: number;
+  created_at: string;
+  options: (Option | { text: string })[] | string[]; // Can be Option[], simple objects, or string[]
+  correctAnswer?: number; // Index of the correct answer
+}

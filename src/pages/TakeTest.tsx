@@ -9,12 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { TestResult } from "@/types/testResults";
-import type { Question, Option } from "@/types/testManagement";
-
-interface ExtendedQuestion extends Question {
-  correctAnswer?: number;
-  options: (Option | string)[];
-}
+import type { Question, Option, ExtendedQuestion } from "@/types/testManagement";
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -107,27 +102,6 @@ const TakeTest = () => {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">جاري تحميل الاختبار...</h1>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!test || questions.length === 0) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">الاختبار غير موجود</h1>
-          <Button onClick={() => navigate("/qiyas-tests")}>العودة للاختبارات</Button>
-        </div>
-      </Layout>
-    );
-  }
 
   const saveTestResult = async (score: number, correctAnswers: number) => {
     const result: TestResult = {
@@ -228,14 +202,18 @@ const TakeTest = () => {
               </div>
               <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
               <div className="space-y-4">
-                {question.options.map((option, index) => (
+                {Array.isArray(question.options) && question.options.map((option, index) => (
                   <Button
                     key={index}
                     variant="outline"
                     className="w-full justify-start text-right h-auto py-4 px-6"
                     onClick={() => handleAnswer(index)}
                   >
-                    {typeof option === 'string' ? option : option.text}
+                    {typeof option === 'string' 
+                      ? option 
+                      : 'text' in option 
+                        ? option.text 
+                        : ''}
                   </Button>
                 ))}
               </div>
