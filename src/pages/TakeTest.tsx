@@ -112,10 +112,10 @@ const TakeTest = () => {
         // If not found in database, try the local static data
         const staticTest = testQuestions.find(t => t.testId === testId);
         if (staticTest) {
-          setTest({
+           setTest({
             ...staticTest,
             id: staticTest.testId,
-            title: `اختبار تجريبي ${staticTest.testId}`
+            title: `اختبار تجريبي ${staticTest.testId.split('-')[0]}`
           });
           setQuestions(staticTest.questions as unknown as ExtendedQuestion[]);
           setLoading(false);
@@ -125,7 +125,11 @@ const TakeTest = () => {
         }
       }
 
-      setTest(testData);
+      // Format the test data with a proper title
+      setTest({
+        ...testData,
+        title: testData.title || `اختبار تجريبي ${testData.id.split('-')[0]}`
+      });
       
       // Then, get the questions for this test
       const { data: questionsData, error: questionsError } = await supabase
