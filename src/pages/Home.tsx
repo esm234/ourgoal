@@ -11,9 +11,9 @@ const Home = () => {
 
   const handleSlide = (direction: 'prev' | 'next') => {
     if (direction === 'next') {
-      setCurrentSlide((prev) => (prev === 7 ? 0 : prev + 1));
+      setCurrentSlide((prev) => (prev === 2 ? 0 : prev + 1));
     } else {
-      setCurrentSlide((prev) => (prev === 0 ? 7 : prev - 1));
+      setCurrentSlide((prev) => (prev === 0 ? 2 : prev - 1));
     }
   };
 
@@ -24,7 +24,7 @@ const Home = () => {
   useEffect(() => {
     const slider = sliderRef.current;
     if (slider) {
-      const slideWidth = slider.offsetWidth / 8; // Divide by number of slides
+      const slideWidth = slider.offsetWidth / 3; // Divide by number of slides
       slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
     }
   }, [currentSlide]);
@@ -277,9 +277,9 @@ const Home = () => {
               <div 
                 ref={sliderRef}
                 className="flex transition-transform duration-500 ease-in-out" 
-                style={{ width: '800%' }}
+                style={{ width: '300%' }}
               >
-                {/* Team Member 1 */}
+                {/* First Group */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -288,8 +288,6 @@ const Home = () => {
                     </div>
                   </Card>
                 </div>
-
-                {/* Team Member 2 */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -298,8 +296,6 @@ const Home = () => {
                     </div>
                   </Card>
                 </div>
-
-                {/* Team Member 3 */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -309,7 +305,7 @@ const Home = () => {
                   </Card>
                 </div>
 
-                {/* Team Member 4 */}
+                {/* Second Group */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -318,8 +314,6 @@ const Home = () => {
                     </div>
                   </Card>
                 </div>
-
-                {/* Team Member 5 */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -328,18 +322,6 @@ const Home = () => {
                     </div>
                   </Card>
                 </div>
-
-                {/* Team Member 6 */}
-                <div className="min-w-[300px] md:min-w-[400px] p-4">
-                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white text-center mb-2">احمد المعني</h3>
-                      <p className="text-gray-300 text-center">خبير اللغة العربية</p>
-                    </div>
-                  </Card>
-                </div>
-
-                {/* Team Member 7 */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -349,7 +331,15 @@ const Home = () => {
                   </Card>
                 </div>
 
-                {/* Team Member 8 */}
+                {/* Third Group */}
+                <div className="min-w-[300px] md:min-w-[400px] p-4">
+                  <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-white text-center mb-2">احمد المعني</h3>
+                      <p className="text-gray-300 text-center">خبير اللغة العربية</p>
+                    </div>
+                  </Card>
+                </div>
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
                     <div className="p-6">
@@ -403,7 +393,7 @@ const Home = () => {
 
             {/* Indicators */}
             <div className="flex justify-center mt-8 space-x-2">
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((index) => (
+              {[0, 1, 2].map((index) => (
                 <button
                   key={index}
                   className={`w-3 h-3 rounded-full transition-colors ${
