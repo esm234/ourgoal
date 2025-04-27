@@ -356,7 +356,7 @@ const TakeTest = () => {
                     {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
                   </span>
                   <span className={`font-semibold ${timeLeft < 300 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                    الوقت المتبقي: {formatTime(timeLeft)}
+                   {test?.title || 'اختبار'} - {formatTime(timeLeft)}
                   </span>
                 </div>
               </div>
