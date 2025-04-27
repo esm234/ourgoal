@@ -173,46 +173,32 @@ const TakeTest = () => {
   };
 
   const saveTestResult = async (score: number, correctAnswers: number) => {
-    if (!isLoggedIn || !user) {
-      toast({
-        title: "تنبيه",
-        description: "يجب تسجيل الدخول لحفظ نتائج الاختبار",
-        variant: "destructive",
-      });
-      return;
-    }
+    const result: TestResult = {
+      testId: testId!,
+      score,
+      correctAnswers,
+      totalQuestions: questions.length,
+      date: new Date().toISOString(),
+      type: 'mixed'
+    };
 
-    // Check if this is a mock test
-    if (testId?.startsWith('test-')) {
-      toast({
-        title: "تنبيه",
-        description: "لا يمكن حفظ نتائج الاختبارات النموذجية",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Save to localStorage for backward compatibility
+    const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+    localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
 
-    try {
-      await supabase.from("exam_results").insert({
-        test_id: testId,
-        user_id: user.id,
-        score: score,
-        correct_answers: correctAnswers,
-        total_questions: questions.length,
-        time_taken: test.duration
-      });
-
-      toast({
-        title: "تم حفظ النتيجة",
-        description: "تم حفظ نتيجة الاختبار بنجاح",
-      });
-    } catch (error: any) {
-      console.error("Error saving result to database:", error);
-      toast({
-        title: "خطأ في حفظ النتيجة",
-        description: error.message,
-        variant: "destructive",
-      });
+    // If user is logged in, also save to database
+    if (isLoggedIn && user) {
+      try {
+        await supabase.from("exam_results").insert({
+          test_id: testId,
+          user_id: user.id,
+          score: score,
+          total_questions: questions.length,
+          time_taken: test.duration // Using test duration as time taken
+        });
+      } catch (error) {
+        console.error("Error saving result to database:", error);
+      }
     }
   };
 
