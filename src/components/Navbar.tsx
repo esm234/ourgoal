@@ -18,7 +18,7 @@ const Navbar = () => {
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary">
-            منصة المعادلة المصرية
+            منصة اسرار للتفوق
           </Link>
 
           {/* Mobile Menu Button */}
@@ -54,7 +54,7 @@ const Navbar = () => {
               className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
             >
               <Calculator size={20} className="ml-2" />
-              <span>جلسة المعادلة</span>
+              <span>حاسبة المعادلة</span>
             </Link>
             <Link
               to="/performance"
