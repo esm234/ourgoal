@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,17 +8,44 @@ const Navbar = () => {
   const { isLoggedIn, username, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Theme state and effect
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') || 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   const handleToggleMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
-    <nav className="bg-secondary py-4 px-6 shadow-md">
+    <nav className="bg-secondary py-4 px-6 shadow-md transition-colors duration-500">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary">
             منصة اسرار للتفوق
           </Link>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="ml-2 p-2 rounded-full shadow-md bg-secondary border border-border text-2xl transition-colors duration-300 hover:bg-primary/10"
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? '🌞' : '🌙'}
+          </button>
 
           {/* Mobile Menu Button */}
           <div className="block lg:hidden">
@@ -162,6 +188,15 @@ const Navbar = () => {
                 </Button>
               </Link>
             )}
+
+            {/* Theme Toggle Button for mobile */}
+            <button
+              onClick={toggleTheme}
+              className="mt-2 p-2 rounded-full shadow-md bg-secondary border border-border text-2xl transition-colors duration-300 hover:bg-primary/10 self-end"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? '🌞' : '🌙'}
+            </button>
           </div>
         )}
       </div>
