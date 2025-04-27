@@ -200,14 +200,40 @@ const TakeTest = () => {
     // If user is logged in, also save to database
     if (isLoggedIn && user) {
       try {
-        await supabase.from("exam_results").insert({
+        // First, get the user's profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        // Save to exam_results
+        const { error: examError } = await supabase.from("exam_results").insert({
           test_id: testId,
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: test.duration, // Using test duration as time taken
-          questions_data: result.questions // Store questions data in the database
+          time_taken: test.duration,
+          questions_data: result.questions
         });
+
+        if (examError) throw examError;
+
+        // Save to leaderboard
+        const { error: leaderboardError } = await supabase.from("leaderboard").insert({
+          user_id: user.id,
+          test_id: testId,
+          score: score,
+          total_questions: questions.length,
+          time_taken: test.duration,
+          user_name: profileData?.full_name || user.email?.split('@')[0] || 'مستخدم',
+          user_email: user.email
+        });
+
+        if (leaderboardError) throw leaderboardError;
+
       } catch (error) {
         console.error("Error saving result to database:", error);
       }
