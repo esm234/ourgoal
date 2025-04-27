@@ -24,7 +24,8 @@ const Home = () => {
   useEffect(() => {
     const slider = sliderRef.current;
     if (slider) {
-      slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+      const slideWidth = slider.offsetWidth / 4; // Divide by number of visible slides
+      slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
     }
   }, [currentSlide]);
 
@@ -273,7 +274,11 @@ const Home = () => {
           <div className="relative max-w-6xl mx-auto">
             {/* Slider Container */}
             <div className="overflow-hidden">
-              <div className="flex transition-transform duration-500 ease-in-out" id="teamSlider">
+              <div 
+                ref={sliderRef}
+                className="flex transition-transform duration-500 ease-in-out" 
+                style={{ width: '400%' }}
+              >
                 {/* Team Member 1 */}
                 <div className="min-w-[300px] md:min-w-[400px] p-4">
                   <Card className="bg-[#1A2237] border-2 border-[#03DAC6] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
