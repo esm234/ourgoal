@@ -291,7 +291,7 @@ const EquivalencyCalculator = () => {
                       <ul className="text-right">
                         {availableColleges.map(college => (
                           <li key={college.name} className="mb-2 font-semibold text-primary/90 bg-primary/10 rounded px-3 py-2">
-                            {college.name}
+                            {college.name} — {college.minScore}
                           </li>
                         ))}
                       </ul>
