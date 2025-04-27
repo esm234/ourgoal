@@ -22,6 +22,36 @@ const TakeTest = () => {
   const [test, setTest] = useState<any | null>(null);
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+
+  useEffect(() => {
+    if (test?.duration) {
+      setTimeLeft(test.duration * 60); // Convert minutes to seconds
+    }
+  }, [test]);
+
+  useEffect(() => {
+    if (timeLeft > 0 && !showResults) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            handleSubmit(); // Auto-submit when time runs out
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [timeLeft, showResults]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   // Restrict access to signed-in users only
   if (!isLoggedIn) {
@@ -287,9 +317,14 @@ const TakeTest = () => {
                 <span className="text-muted-foreground">
                   السؤال {currentQuestion + 1} من {questions.length}
                 </span>
-                <span className="text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-                  {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
-                </span>
+                <div className="flex items-center gap-4">
+                  <span className="text-muted-foreground bg-secondary px-3 py-1 rounded-full">
+                    {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
+                  </span>
+                  <span className={`font-semibold ${timeLeft < 300 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    الوقت المتبقي: {formatTime(timeLeft)}
+                  </span>
+                </div>
               </div>
               {/* Question prompt: show image if available, otherwise text */}
               {question.image_url ? (
