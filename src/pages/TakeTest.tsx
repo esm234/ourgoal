@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ const TakeTest = () => {
   const [test, setTest] = useState<any | null>(null);
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Restrict access to signed-in users only
   if (!isLoggedIn) {
@@ -45,6 +47,17 @@ const TakeTest = () => {
       fetchTestWithQuestions();
     }
   }, [testId]);
+
+  useEffect(() => {
+    if (!showResults && !loading && questions.length > 0) {
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [showResults, loading, questions.length]);
 
   const fetchTestWithQuestions = async () => {
     setLoading(true);
@@ -127,7 +140,8 @@ const TakeTest = () => {
       correctAnswers,
       totalQuestions: questions.length,
       date: new Date().toISOString(),
-      type: 'mixed'
+      type: 'mixed',
+      timeTaken: elapsedSeconds
     };
 
     // Save to localStorage for backward compatibility
@@ -142,7 +156,7 @@ const TakeTest = () => {
           user_id: user.id,
           score: score,
           total_questions: questions.length,
-          time_taken: test.duration // Using test duration as time taken
+          time_taken: elapsedSeconds
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
@@ -194,6 +208,13 @@ const TakeTest = () => {
     return '';
   };
 
+  // Format time as mm:ss
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -222,6 +243,9 @@ const TakeTest = () => {
           <Card className="max-w-3xl mx-auto">
             <CardContent className="p-6">
               <h2 className="text-2xl font-bold mb-6 text-center">نتائج الاختبار</h2>
+              <div className="mb-4 text-center font-semibold text-lg">
+                الوقت المستغرق: {formatTime(elapsedSeconds)}
+              </div>
               <div className="space-y-6">
                 {questions.map((q, index) => {
                   const userAnswer = answers[index];
@@ -282,6 +306,9 @@ const TakeTest = () => {
                 <span className="text-muted-foreground bg-secondary px-3 py-1 rounded-full">
                   {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
                 </span>
+              </div>
+              <div className="mb-4 text-center font-semibold text-lg">
+                الوقت: {formatTime(elapsedSeconds)}
               </div>
               <h2 className="text-xl font-semibold mb-6">{question.text}</h2>
               <div className="space-y-4">
