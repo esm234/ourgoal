@@ -23,6 +23,23 @@ const TakeTest = () => {
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Restrict access to signed-in users only
+  if (!isLoggedIn) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <p className="text-xl mb-4">يجب تسجيل الدخول لبدء الاختبار</p>
+          <Button
+            className="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90"
+            onClick={() => navigate('/login')}
+          >
+            الذهاب لتسجيل الدخول
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
   useEffect(() => {
     if (testId) {
       fetchTestWithQuestions();
