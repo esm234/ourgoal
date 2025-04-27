@@ -37,7 +37,7 @@ const Home = () => {
             </div>
             <div className="lg:w-1/2">
               <img
-                src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                src="https://lh7-us.googleusercontent.com/pbYvrUffQasCqI5i42vKBc3U55GKAFa-N5ay84n7xjEiGM7a6x4drbhVuZRM6KwBCPtzls-Yb7u-QNDrUPksvxC7J14YXurFNIibdg_Hjrm2tWSP3pNW4Pt5Wf1x3o5i19QiPihN-xBTyqI7UuvvMO1b0KWQ7nB2XHGm9kr7N1vhVg4mpqJrkhreRlH9MpBTeFnqtKph?key=hEv8vchztg3tFh4Mt59OTQ"
                 alt="طلاب يدرسون"
                 className="rounded-lg shadow-xl w-full h-auto object-cover"
               />
