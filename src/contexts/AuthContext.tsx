@@ -14,6 +14,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   loading: boolean;
   needsProfileSetup: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,6 +50,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsername(data?.username ?? null);
     setRole(data?.role ?? null);
     setNeedsProfileSetup(!data?.username);
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchUserProfile(user.id);
+    }
   };
 
   useEffect(() => {
@@ -116,7 +123,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signInWithGoogle,
       logout,
       loading,
-      needsProfileSetup
+      needsProfileSetup,
+      refreshProfile
     }}>
       {children}
     </AuthContext.Provider>
