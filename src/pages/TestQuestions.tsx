@@ -21,6 +21,7 @@ const TestQuestions = () => {
   const [test, setTest] = useState<Test | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -179,6 +180,66 @@ const TestQuestions = () => {
     }
   };
 
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setActiveTab("add-question");
+  };
+
+  const handleUpdateQuestion = async (data: CreateQuestionForm) => {
+    if (!editingQuestion) return;
+
+    try {
+      // Update the question
+      const { error: questionError } = await supabase
+        .from("questions")
+        .update({
+          text: data.text,
+          type: data.type,
+          explanation: data.explanation || null,
+          image_url: data.image_url || null,
+        })
+        .eq("id", editingQuestion.id);
+
+      if (questionError) throw questionError;
+
+      // Delete existing options
+      const { error: deleteOptionsError } = await supabase
+        .from("options")
+        .delete()
+        .eq("question_id", editingQuestion.id);
+
+      if (deleteOptionsError) throw deleteOptionsError;
+
+      // Insert new options
+      const optionsToInsert = data.options.map((option, index) => ({
+        question_id: editingQuestion.id,
+        text: option.text,
+        is_correct: option.is_correct,
+        option_order: index + 1,
+      }));
+
+      const { error: optionsError } = await supabase
+        .from("options")
+        .insert(optionsToInsert);
+
+      if (optionsError) throw optionsError;
+
+      toast({
+        title: "تم تحديث السؤال بنجاح",
+      });
+
+      setEditingQuestion(null);
+      fetchQuestions();
+      setActiveTab("questions-list");
+    } catch (error: any) {
+      toast({
+        title: "خطأ في تحديث السؤال",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Layout>
       <section className="container mx-auto py-16 px-4">
@@ -193,10 +254,12 @@ const TestQuestions = () => {
           <p className="text-muted-foreground">{test?.description}</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-4xl mx-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="questions-list">قائمة الأسئلة</TabsTrigger>
-            <TabsTrigger value="add-question">إضافة سؤال جديد</TabsTrigger>
+            <TabsTrigger value="add-question">
+              {editingQuestion ? "تعديل السؤال" : "إضافة سؤال جديد"}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="questions-list">
@@ -214,6 +277,7 @@ const TestQuestions = () => {
                   questions={questions}
                   loading={loading}
                   onDelete={handleDeleteQuestion}
+                  onEdit={handleEditQuestion}
                 />
               </CardContent>
             </Card>
@@ -222,11 +286,31 @@ const TestQuestions = () => {
           <TabsContent value="add-question">
             <Card>
               <CardHeader>
-                <CardTitle>إضافة سؤال جديد</CardTitle>
-                <CardDescription>أدخل تفاصيل السؤال والإجابات المحتملة</CardDescription>
+                <CardTitle>
+                  {editingQuestion ? "تعديل السؤال" : "إضافة سؤال جديد"}
+                </CardTitle>
+                <CardDescription>
+                  {editingQuestion 
+                    ? "تعديل تفاصيل السؤال والإجابات المحتملة"
+                    : "أدخل تفاصيل السؤال والإجابات المحتملة"}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <QuestionForm onSubmit={handleCreateQuestion} />
+                <QuestionForm 
+                  onSubmit={editingQuestion ? handleUpdateQuestion : handleCreateQuestion}
+                  defaultValues={editingQuestion ? {
+                    mode: editingQuestion.image_url ? "image" : "text",
+                    text: editingQuestion.text,
+                    type: editingQuestion.type,
+                    explanation: editingQuestion.explanation || "",
+                    image_url: editingQuestion.image_url || "",
+                    options: editingQuestion.options.map(opt => ({
+                      text: typeof opt === 'string' ? opt : opt.text,
+                      is_correct: typeof opt === 'string' ? false : opt.is_correct,
+                    })),
+                  } : undefined}
+                  isEdit={!!editingQuestion}
+                />
               </CardContent>
             </Card>
           </TabsContent>
