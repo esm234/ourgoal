@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,9 +29,11 @@ const optionSchema = z.object({
 });
 
 const formSchema = z.object({
-  text: z.string().min(1, "نص السؤال مطلوب"),
+  mode: z.enum(["text", "image"]),
+  text: z.string().optional(),
   type: z.enum(["verbal", "quantitative", "mixed"]),
   explanation: z.string().optional(),
+  image_url: z.string().url("رابط الصورة غير صالح").optional().or(z.literal("").optional()),
   options: z
     .array(optionSchema)
     .min(2, "يجب إضافة خيارين على الأقل")
@@ -40,6 +41,21 @@ const formSchema = z.object({
     .refine((options) => options.some((option) => option.is_correct), {
       message: "يجب تحديد إجابة صحيحة واحدة على الأقل",
     }),
+}).superRefine((data, ctx) => {
+  if (data.mode === "text" && (!data.text || !data.text.trim())) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "نص السؤال مطلوب",
+      path: ["text"],
+    });
+  }
+  if (data.mode === "image" && (!data.image_url || !data.image_url.trim())) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "رابط الصورة مطلوب",
+      path: ["image_url"],
+    });
+  }
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,12 +71,15 @@ const QuestionForm = ({
   defaultValues,
   isEdit = false,
 }: QuestionFormProps) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(defaultValues?.image_url || null);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
+      mode: "text",
       text: "",
       type: "mixed",
       explanation: "",
+      image_url: "",
       options: [
         { text: "", is_correct: false },
         { text: "", is_correct: false },
@@ -88,26 +107,93 @@ const QuestionForm = ({
     }
   };
 
+  // Toggle between text and image mode
+  const mode = form.watch("mode");
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="text"
-          render={({ field }) => (
-            <FormItem className="text-right">
-              <FormLabel>نص السؤال</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="أدخل نص السؤال هنا"
-                  className="min-h-[100px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex gap-4 mb-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              value="text"
+              checked={mode === "text"}
+              onChange={() => form.setValue("mode", "text")}
+            />
+            سؤال نصي
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              value="image"
+              checked={mode === "image"}
+              onChange={() => form.setValue("mode", "image")}
+            />
+            سؤال صورة
+          </label>
+        </div>
+        {mode === "text" && (
+          <FormField
+            control={form.control}
+            name="text"
+            render={({ field }) => (
+              <FormItem className="text-right">
+                <FormLabel>نص السؤال</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="أدخل نص السؤال هنا"
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {mode === "image" && (
+          <FormField
+            control={form.control}
+            name="image_url"
+            render={({ field }) => (
+              <FormItem className="text-right">
+                <FormLabel>صورة السؤال</FormLabel>
+                <FormControl>
+                  <div>
+                    <Input
+                      type="url"
+                      placeholder="أدخل رابط الصورة أو قم برفع صورة"
+                      value={field.value || ""}
+                      onChange={e => {
+                        field.onChange(e.target.value);
+                        setImagePreview(e.target.value);
+                      }}
+                    />
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="mt-2"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = URL.createObjectURL(file);
+                          setImagePreview(url);
+                          // For now, just preview. For real upload, integrate with Supabase Storage or similar.
+                          // You may want to upload the file and set the resulting URL in field.onChange
+                        }
+                      }}
+                    />
+                    {imagePreview && (
+                      <img src={imagePreview} alt="معاينة الصورة" className="mt-2 max-h-40 rounded border" />
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
