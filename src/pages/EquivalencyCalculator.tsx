@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -43,26 +42,20 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+function calculateFinalEquivalencyScore(highSchoolPercentage: number, qiyasScore: number): number {
+  const weightedAverage = (highSchoolPercentage * 0.5) + (qiyasScore * 0.5);
+  const finalScore = weightedAverage * 4.1;
+  return Math.round(finalScore * 100) / 100; // rounded to 2 decimal places
+}
+
 const EquivalencyCalculator = () => {
+  const [highSchool, setHighSchool] = useState(0);
+  const [qiyas, setQiyas] = useState(0);
   const [result, setResult] = useState<number | null>(null);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      highSchoolPercentage: undefined,
-      qiyasScore: undefined,
-    },
-  });
-
-  const calculateEquivalencyScore = (data: FormValues) => {
-    // Based on Saudi-Egyptian equivalency system
-    // 40% from high school + 60% from Qiyas, then scaled to 410
-    const totalScore = (data.highSchoolPercentage! * 0.4 + data.qiyasScore! * 0.6) * 4.1;
-    return Math.round(totalScore * 100) / 100; // Round to 2 decimal places
-  };
-
-  const onSubmit = (data: FormValues) => {
-    const score = calculateEquivalencyScore(data);
+  const handleCalculate = (e: React.FormEvent) => {
+    e.preventDefault();
+    const score = calculateFinalEquivalencyScore(highSchool, qiyas);
     setResult(score);
   };
 
@@ -79,64 +72,41 @@ const EquivalencyCalculator = () => {
 
           <div className="flex justify-center">
             <Card className="w-full max-w-md border-2 border-border bg-secondary">
+              <CardHeader>
+                <CardTitle>حساب النسبة المكافئة النهائية</CardTitle>
+              </CardHeader>
               <CardContent className="p-6">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="highSchoolPercentage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>نسبة الثانوية العامة (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="ادخل نسبة الثانوية العامة"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e.target.value);
-                                setResult(null); // Reset result when input changes
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                <form onSubmit={handleCalculate} className="space-y-6">
+                  <div>
+                    <label className="block mb-1 text-right">النسبة المئوية للثانوية العامة (من 100)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={highSchool}
+                      onChange={e => setHighSchool(Number(e.target.value))}
+                      required
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="qiyasScore"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>درجة اختبار القدرات (قياس)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="ادخل درجة اختبار القدرات"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e.target.value);
-                                setResult(null); // Reset result when input changes
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  </div>
+                  <div>
+                    <label className="block mb-1 text-right">درجة قياس (من 100)</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={qiyas}
+                      onChange={e => setQiyas(Number(e.target.value))}
+                      required
                     />
-
-                    <Button
-                      type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
-                    >
-                      <Calculator className="ml-2" size={18} />
-                      احسب المعدل التقديري
-                    </Button>
-                  </form>
-                </Form>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
+                  >
+                    <Calculator className="ml-2" size={18} />
+                    احسب النتيجة النهائية
+                  </Button>
+                </form>
 
                 {result !== null && (
                   <div className="mt-8 p-4 bg-background rounded-lg border-2 border-primary text-center">
