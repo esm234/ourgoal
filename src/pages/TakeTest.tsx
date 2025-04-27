@@ -182,6 +182,16 @@ const TakeTest = () => {
       return;
     }
 
+    // Check if this is a mock test
+    if (testId?.startsWith('test-')) {
+      toast({
+        title: "تنبيه",
+        description: "لا يمكن حفظ نتائج الاختبارات النموذجية",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await supabase.from("exam_results").insert({
         test_id: testId,
