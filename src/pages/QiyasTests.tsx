@@ -117,6 +117,15 @@ const QiyasTests = () => {
   };
 
   const handleEditTest = (testId: string) => {
+    // Check if it's a mock test
+    if (testId.startsWith('test-')) {
+      toast({
+        title: "لا يمكن تعديل الاختبارات النموذجية",
+        description: "هذه الاختبارات النموذجية ولا يمكن تعديلها",
+        variant: "destructive",
+      });
+      return;
+    }
     navigate(`/test-management/${testId}/edit`);
   };
 
