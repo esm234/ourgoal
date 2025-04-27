@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { TestResult } from "@/types/testResults";
 import type { Question, Option, ExtendedQuestion } from "@/types/testManagement";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Timer } from "lucide-react";
 
 const TakeTest = () => {
   const { testId } = useParams();
