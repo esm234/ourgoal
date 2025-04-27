@@ -13,7 +13,7 @@ function calculateFinalEquivalencyScore(highSchoolPercentage: number, qiyasScore
 
 // Placeholder colleges data (replace with real data later)
 const collegesMale = [
-  { name: "طب القاهرة", minScore: 410.00 },
+  { name: "طب القاهرة", minScore: 399.75 },
   { name: "طب أسنان القاهرة", minScore: 410.000 },
   { name: "طب الإسكندرية", minScore: 410.000 },
   { name: "طب أسنان الإسكندرية", minScore: 410.000 },
