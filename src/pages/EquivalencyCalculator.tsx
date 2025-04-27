@@ -2,61 +2,26 @@ import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Calculator } from "lucide-react";
 
-// Define the form schema with validation
-const formSchema = z.object({
-  highSchoolPercentage: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z
-      .number({
-        required_error: "هذا الحقل مطلوب",
-        invalid_type_error: "يجب إدخال رقم",
-      })
-      .min(0, { message: "يجب أن تكون النسبة أكبر من أو تساوي 0" })
-      .max(100, { message: "يجب أن تكون النسبة أقل من أو تساوي 100" })
-  ),
-  qiyasScore: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z
-      .number({
-        required_error: "هذا الحقل مطلوب",
-        invalid_type_error: "يجب إدخال رقم",
-      })
-      .min(0, { message: "يجب أن تكون الدرجة أكبر من أو تساوي 0" })
-      .max(100, { message: "يجب أن تكون الدرجة أقل من أو تساوي 100" })
-  ),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 function calculateFinalEquivalencyScore(highSchoolPercentage: number, qiyasScore: number): number {
-  const weightedAverage = (highSchoolPercentage * 0.5) + (qiyasScore * 0.5);
-  const finalScore = weightedAverage * 4.1;
+  const average = (highSchoolPercentage + qiyasScore) / 2;
+  const finalScore = average * 4.1;
   return Math.round(finalScore * 100) / 100; // rounded to 2 decimal places
 }
 
 const EquivalencyCalculator = () => {
-  const [highSchool, setHighSchool] = useState(0);
-  const [qiyas, setQiyas] = useState(0);
+  const [highSchool, setHighSchool] = useState<number | ''>('');
+  const [qiyas, setQiyas] = useState<number | ''>('');
   const [result, setResult] = useState<number | null>(null);
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    const score = calculateFinalEquivalencyScore(highSchool, qiyas);
-    setResult(score);
+    if (highSchool !== '' && qiyas !== '') {
+      const score = calculateFinalEquivalencyScore(Number(highSchool), Number(qiyas));
+      setResult(score);
+    }
   };
 
   return (
@@ -64,16 +29,16 @@ const EquivalencyCalculator = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">حاسبة المعادلة المصرية</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-primary">حاسبة المعادلة المصرية</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              احسب معدلك التقديري للمعادلة المصرية بناء على نسبة الثانوية العامة ودرجة اختبار القدرات
+              احسب معدلك النهائي بناءً على نسبة الثانوية العامة ودرجة اختبار القدرات
             </p>
           </div>
 
           <div className="flex justify-center">
             <Card className="w-full max-w-md border-2 border-border bg-secondary">
               <CardHeader>
-                <CardTitle>حساب النسبة المكافئة النهائية</CardTitle>
+                <CardTitle className="text-center">حساب النسبة المكافئة النهائية</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <form onSubmit={handleCalculate} className="space-y-6">
@@ -84,7 +49,7 @@ const EquivalencyCalculator = () => {
                       min="0"
                       max="100"
                       value={highSchool}
-                      onChange={e => setHighSchool(Number(e.target.value))}
+                      onChange={e => setHighSchool(e.target.value === '' ? '' : Number(e.target.value))}
                       required
                     />
                   </div>
@@ -95,7 +60,7 @@ const EquivalencyCalculator = () => {
                       min="0"
                       max="100"
                       value={qiyas}
-                      onChange={e => setQiyas(Number(e.target.value))}
+                      onChange={e => setQiyas(e.target.value === '' ? '' : Number(e.target.value))}
                       required
                     />
                   </div>
