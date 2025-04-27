@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,9 +6,73 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BarChart, ArrowRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { TestResult } from "@/types/testResults";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 const Performance = () => {
-  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
+  const { isLoggedIn, user } = useAuth();
+  const { toast } = useToast();
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      fetchTestResults();
+    } else {
+      // If not logged in, only show localStorage results
+      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+      setTestResults(localResults);
+      setLoading(false);
+    }
+  }, [isLoggedIn, user]);
+
+  const fetchTestResults = async () => {
+    try {
+      // Get results from database
+      const { data: dbResults, error } = await supabase
+        .from("exam_results")
+        .select(`
+          *,
+          tests (
+            title,
+            type
+          )
+        `)
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Get results from localStorage
+      const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+
+      // Combine and format results
+      const formattedResults = [
+        ...dbResults.map(result => ({
+          testId: result.test_id,
+          score: result.score,
+          correctAnswers: result.correct_answers || 0,
+          totalQuestions: result.total_questions,
+          date: result.created_at,
+          type: result.tests?.type || 'mixed',
+          title: result.tests?.title || 'اختبار'
+        })),
+        ...localResults
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      setTestResults(formattedResults);
+    } catch (error: any) {
+      console.error("Error fetching test results:", error);
+      toast({
+        title: "خطأ في جلب النتائج",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -23,34 +86,38 @@ const Performance = () => {
     }).format(date);
   };
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4">جاري تحميل النتائج...</h1>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">لوحة الأداء</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-primary">سجل الأداء</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              تتبع تقدمك وأدائك في اختبارات قياس التجريبية
+              عرض جميع نتائج الاختبارات السابقة
             </p>
           </div>
 
           <div className="flex justify-center">
             {testResults.length === 0 ? (
-              <Card className="w-full max-w-2xl border-2 border-border bg-secondary">
-                <CardContent className="p-10 text-center">
-                  <div className="mb-6">
-                    <BarChart className="h-24 w-24 text-muted-foreground mx-auto" />
-                  </div>
-                  <h2 className="text-2xl font-bold mb-3">لا توجد بيانات بعد</h2>
-                  <p className="text-muted-foreground mb-8">
-                    لم تقم بإجراء أي اختبار تجريبي حتى الآن. ابدأ اختباراً الآن لتتبع أدائك وتحسين مستواك.
-                  </p>
-                  <Link to="/qiyas-tests">
-                    <Button className="bg-primary hover:bg-primary/90 text-white flex items-center mx-auto">
-                      ابدأ الاختبارات الآن
+              <Card className="w-full max-w-4xl">
+                <CardContent className="p-6 text-center">
+                  <p className="text-xl mb-4">لا توجد نتائج اختبارات سابقة</p>
+                  <Button asChild>
+                    <Link to="/qiyas-tests" className="flex items-center">
+                      ابدأ اختبار جديد
                       <ArrowRight className="mr-2" size={16} />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -60,6 +127,7 @@ const Performance = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">التاريخ والوقت</TableHead>
+                        <TableHead className="text-right">الاختبار</TableHead>
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
@@ -69,6 +137,7 @@ const Performance = () => {
                       {testResults.map((result, index) => (
                         <TableRow key={index}>
                           <TableCell className="text-right">{formatDate(result.date)}</TableCell>
+                          <TableCell className="text-right">{result.title || `اختبار ${result.testId}`}</TableCell>
                           <TableCell>
                             {result.type === 'verbal' ? 'لفظي' : 
                              result.type === 'quantitative' ? 'كمي' : 'مختلط'}
