@@ -50,7 +50,7 @@ const Footer = () => {
                 البريد الإلكتروني: info@asrar.com
               </li>
               <li className="text-muted-foreground">
-                الهاتف: +966 50 000 0000
+                الهاتف: +966 54 3310024
               </li>
               <li className="text-muted-foreground">
                 العنوان: الرياض، المملكة العربية السعودية
