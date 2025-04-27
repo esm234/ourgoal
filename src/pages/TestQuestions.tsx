@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -116,6 +115,7 @@ const TestQuestions = () => {
           type: data.type,
           explanation: data.explanation || null,
           question_order: nextOrder,
+          image_url: data.image_url || null,
         })
         .select();
 
