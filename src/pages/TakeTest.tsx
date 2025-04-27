@@ -47,6 +47,28 @@ const TakeTest = () => {
     }
   }, [timeLeft, showResults]);
 
+  // Add a warning when time is running low
+  useEffect(() => {
+    if (timeLeft === 300 && !showResults) { // 5 minutes warning
+      toast({
+        title: "تنبيه",
+        description: "متبقي 5 دقائق على انتهاء الاختبار",
+        variant: "destructive",
+      });
+    }
+  }, [timeLeft, showResults]);
+
+  // Add a final warning when time is very low
+  useEffect(() => {
+    if (timeLeft === 60 && !showResults) { // 1 minute warning
+      toast({
+        title: "تنبيه",
+        description: "متبقي دقيقة واحدة على انتهاء الاختبار",
+        variant: "destructive",
+      });
+    }
+  }, [timeLeft, showResults]);
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
