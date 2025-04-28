@@ -193,11 +193,7 @@ const TakeTest = () => {
       }))
     };
 
-    // Save to localStorage for backward compatibility
-    const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-    localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
-
-    // If user is logged in, also save to database
+    // Only save to database for signed-in users
     if (isLoggedIn && user) {
       try {
         await supabase.from("exam_results").insert({
@@ -206,11 +202,23 @@ const TakeTest = () => {
           score: score,
           total_questions: questions.length,
           time_taken: test.duration, // Using test duration as time taken
-          questions_data: result.questions // Store questions data in the database
+          questions_data: result.questions, // Store questions data in the database
+          date: new Date().toISOString() // Add date field to track when the test was taken
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
+        toast({
+          title: "خطأ في حفظ النتائج",
+          description: "حدث خطأ أثناء حفظ نتائج الاختبار. الرجاء المحاولة مرة أخرى.",
+          variant: "destructive",
+        });
       }
+    } else {
+      toast({
+        title: "تنبيه",
+        description: "يجب تسجيل الدخول لحفظ نتائج الاختبار.",
+        variant: "destructive",
+      });
     }
   };
 
