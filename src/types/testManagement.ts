@@ -1,3 +1,4 @@
+
 export interface Test {
   id: string;
   title: string;
@@ -54,5 +55,4 @@ export interface ExtendedQuestion {
   created_at: string;
   options: (Option | { text: string })[] | string[]; // Can be Option[], simple objects, or string[]
   correctAnswer?: number; // Index of the correct answer
-  image_url?: string; // URL for question image
 }

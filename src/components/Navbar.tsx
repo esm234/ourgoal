@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Book, Calculator, BarChart, LogIn, LogOut, Menu, X, User, UserCircle } from "lucide-react";
+import { Home, Book, Calculator, BarChart, LogIn, LogOut, Menu, X, User } from "lucide-react";
+
+// Logo URL constant
+const LOGO_URL = "https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ";
 
 const Navbar = () => {
   const { isLoggedIn, username, logout } = useAuth();
@@ -16,13 +19,13 @@ const Navbar = () => {
     <nav className="bg-secondary py-4 px-6 shadow-md">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
+          <Link to="/" className="flex items-center text-2xl font-bold text-primary">
             <img 
-              src="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ"
-              alt="اسرار للتفوق"
-              className="w-12 h-12 object-contain"
+              src={LOGO_URL} 
+              alt="Logo" 
+              className="h-10 w-auto ml-2" 
             />
-            منصة اسرار للتفوق
+            <span>منصة اسرار للتفوق</span>
           </Link>
 
           {/* Mobile Menu Button */}
@@ -70,13 +73,6 @@ const Navbar = () => {
 
             {isLoggedIn ? (
               <div className="flex items-center">
-                <Link
-                  to="/profile"
-                  className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
-                >
-                  <UserCircle size={20} className="ml-2" />
-                  <span>الملف الشخصي</span>
-                </Link>
                 <div className="flex items-center px-3 py-2 mx-2 text-foreground">
                   <User size={20} className="ml-2" />
                   <span>مرحباً، {username}</span>
@@ -142,14 +138,6 @@ const Navbar = () => {
 
             {isLoggedIn ? (
               <>
-                <Link
-                  to="/profile"
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-muted transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <UserCircle size={20} className="ml-2" />
-                  <span>الملف الشخصي</span>
-                </Link>
                 <div className="flex items-center px-3 py-2 text-foreground">
                   <User size={20} className="ml-2" />
                   <span>مرحباً، {username}</span>

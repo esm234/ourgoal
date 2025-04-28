@@ -36,37 +36,7 @@ const TakeTest = () => {
         setTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(timer);
-            // When time runs out, check for unanswered questions
-            const unansweredCount = questions.length - answers.filter(a => a !== undefined).length;
-            if (unansweredCount > 0) {
-              toast({
-                title: "انتهى الوقت",
-                description: `تم ترك ${unansweredCount} سؤال بدون إجابة. سيتم احتسابها كإجابات خاطئة.`,
-                variant: "destructive",
-              });
-            }
-            // Fill in remaining answers with -1 to indicate unanswered
-            const filledAnswers = [...answers];
-            for (let i = 0; i < questions.length; i++) {
-              if (filledAnswers[i] === undefined) {
-                filledAnswers[i] = -1;
-              }
-            }
-            setAnswers(filledAnswers);
-            
-            // Then submit the test
-            const correctAnswers = filledAnswers.reduce((acc, answer, index) => {
-              if (answer === -1) return acc; // Skip unanswered questions
-              const question = questions[index];
-              if (typeof question.correctAnswer === 'number') {
-                return acc + (answer === question.correctAnswer ? 1 : 0);
-              }
-              return acc;
-            }, 0);
-            
-            const score = Math.round((correctAnswers / questions.length) * 100);
-            saveTestResult(score, correctAnswers);
-            setShowResults(true);
+            handleSubmit(); // Auto-submit when time runs out
             return 0;
           }
           return prev - 1;
@@ -219,8 +189,7 @@ const TakeTest = () => {
         ) : [],
         correctAnswer: q.correctAnswer || 0,
         userAnswer: answers[index],
-        explanation: q.explanation || undefined,
-        image_url: q.image_url
+        explanation: q.explanation || undefined
       }))
     };
 
@@ -264,24 +233,6 @@ const TakeTest = () => {
   };
 
   const handleSubmit = () => {
-    // Check if all questions are answered
-    const unansweredQuestions = [];
-    
-    for (let i = 0; i < questions.length; i++) {
-      if (answers[i] === undefined) {
-        unansweredQuestions.push(i + 1);
-      }
-    }
-    
-    if (unansweredQuestions.length > 0) {
-      toast({
-        title: "تنبيه",
-        description: `يجب الإجابة على جميع الأسئلة قبل إنهاء الاختبار. الأسئلة غير المجابة: ${unansweredQuestions.join(', ')}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Calculate score
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
@@ -338,16 +289,12 @@ const TakeTest = () => {
               <div className="space-y-6">
                 {questions.map((q, index) => {
                   const userAnswer = answers[index];
-                  const isUnanswered = userAnswer === -1;
-                  const isCorrect = !isUnanswered && userAnswer === q.correctAnswer;
-                  
+                  const isCorrect = userAnswer === q.correctAnswer;
                   return (
-                    <div key={q.id} className={`p-4 rounded-lg ${isUnanswered ? 'bg-yellow-50' : isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-semibold text-black">السؤال {index + 1}</span>
-                        {isUnanswered ? (
-                          <span className="text-yellow-600">لم تتم الإجابة</span>
-                        ) : isCorrect ? (
+                        {isCorrect ? (
                           <span className="text-green-600">إجابة صحيحة</span>
                         ) : (
                           <span className="text-red-600">إجابة خاطئة</span>
@@ -363,16 +310,9 @@ const TakeTest = () => {
                         <p className="mb-2 text-black">{q.text}</p>
                       )}
                       <div className="space-y-2">
-                        {!isUnanswered ? (
-                          <>
-                            <p className="font-semibold text-black">إجابتك:</p>
-                            <p className="text-black">{getOptionText(q.options[userAnswer])}</p>
-                          </>
-                        ) : (
-                          <p className="font-semibold text-orange-600">لم تقم بالإجابة على هذا السؤال</p>
-                        )}
-                        
-                        {(!isCorrect || isUnanswered) && (
+                        <p className="font-semibold text-black">إجابتك:</p>
+                        <p className="text-black">{getOptionText(q.options[userAnswer])}</p>
+                        {!isCorrect && (
                           <>
                             <p className="font-semibold text-black">الإجابة الصحيحة:</p>
                             <p className="text-black">{getOptionText(q.options[q.correctAnswer!])}</p>
@@ -459,6 +399,7 @@ const TakeTest = () => {
               {currentQuestion === questions.length - 1 ? (
                 <Button
                   onClick={handleSubmit}
+                  disabled={answers.length !== questions.length}
                 >
                   <Check className="mr-2" size={16} />
                   إنهاء الاختبار
