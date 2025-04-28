@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { DatabaseExamResult } from "@/types/testResults";
 
 const Performance = () => {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ const Performance = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormatter('ar-SA', {
+    return new Intl.DateTimeFormat('ar-SA', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -95,13 +96,13 @@ const Performance = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {testResults.map((result, index) => (
+                      {testResults.map((result: DatabaseExamResult, index) => (
                         <React.Fragment key={index}>
                           <TableRow>
                             <TableCell className="text-right">{formatDate(result.created_at)}</TableCell>
                             <TableCell>
-                              {result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
-                               result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}
+                              {result.questions_data && result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
+                               result.questions_data && result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}
                             </TableCell>
                             <TableCell>{result.score}%</TableCell>
                             <TableCell>
@@ -126,8 +127,8 @@ const Performance = () => {
                                       </div>
                                       <div>
                                         <p className="font-semibold">نوع الاختبار:</p>
-                                        <p>{result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
-                                            result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
+                                        <p>{result.questions_data && result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
+                                            result.questions_data && result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
                                       </div>
                                       <div>
                                         <p className="font-semibold">النتيجة:</p>
@@ -142,7 +143,7 @@ const Performance = () => {
                                     <div className="border-t pt-4 mt-4">
                                       <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
                                       <div className="space-y-6">
-                                        {result.questions_data?.map((question: any, qIndex: number) => {
+                                        {result.questions_data?.map((question, qIndex) => {
                                           const isCorrect = question.userAnswer === question.correctAnswer;
                                           return (
                                             <div 
@@ -151,7 +152,7 @@ const Performance = () => {
                                             >
                                               <div className="flex items-center justify-between mb-2">
                                                 <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
-                                                <Badge variant={isCorrect ? "success" : "destructive"}>
+                                                <Badge variant={isCorrect ? "default" : "destructive"}>
                                                   {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
                                                 </Badge>
                                               </div>
