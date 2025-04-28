@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import NotFound from "@/pages/NotFound";
 import TestManagement from "@/pages/TestManagement";
 import TestQuestions from "@/pages/TestQuestions";
 import EditTest from "@/pages/EditTest";
+import Profile from "@/pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +32,7 @@ const App = () => (
             <Route path="/performance" element={<Performance />} />
             <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/test-management" element={<TestManagement />} />
             <Route path="/test-management/:testId/questions" element={<TestQuestions />} />
             <Route path="/test-management/:testId/edit" element={<EditTest />} />
