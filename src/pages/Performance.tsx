@@ -1,34 +1,17 @@
-
-import React from "react";
+import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, ArrowRight } from "lucide-react";
+import { BarChart, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { DatabaseExamResult } from "@/types/testResults";
 
 const Performance = () => {
-  const { user } = useAuth();
-
-  const { data: testResults = [], isLoading } = useQuery({
-    queryKey: ['examResults', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('exam_results')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-  });
+  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
+  const [expandedResult, setExpandedResult] = useState<number | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -42,15 +25,18 @@ const Performance = () => {
     }).format(date);
   };
 
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-16 text-center">
-          <p>جاري تحميل النتائج...</p>
-        </div>
-      </Layout>
-    );
-  }
+  const getTestName = (testId: string) => {
+    // Map test IDs to their names
+    const testNames: { [key: string]: string } = {
+      'test-1': 'اختبار قياس تجريبي #1',
+      'test-2': 'اختبار قياس تجريبي #2',
+      'test-3': 'اختبار قياس تجريبي #3',
+      'test-4': 'اختبار قياس قصير #1',
+      'test-5': 'اختبار قياس قصير #2',
+      'test-6': 'اختبار قياس كامل',
+    };
+    return testNames[testId] || `اختبار ${testId}`;
+  };
 
   return (
     <Layout>
@@ -89,6 +75,7 @@ const Performance = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">التاريخ والوقت</TableHead>
+                        <TableHead className="text-right">اسم الاختبار</TableHead>
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
@@ -96,17 +83,18 @@ const Performance = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {testResults.map((result: DatabaseExamResult, index) => (
+                      {testResults.map((result, index) => (
                         <React.Fragment key={index}>
                           <TableRow>
-                            <TableCell className="text-right">{formatDate(result.created_at)}</TableCell>
+                            <TableCell className="text-right">{formatDate(result.date)}</TableCell>
+                            <TableCell className="text-right">{getTestName(result.testId)}</TableCell>
                             <TableCell>
-                              {result.questions_data && result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
-                               result.questions_data && result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}
+                              {result.type === 'verbal' ? 'لفظي' : 
+                               result.type === 'quantitative' ? 'كمي' : 'مختلط'}
                             </TableCell>
                             <TableCell>{result.score}%</TableCell>
                             <TableCell>
-                              {result.correct_answers} من {result.total_questions}
+                              {result.correctAnswers} من {result.totalQuestions}
                             </TableCell>
                             <TableCell>
                               <Dialog>
@@ -122,13 +110,17 @@ const Performance = () => {
                                   <div className="mt-4">
                                     <div className="grid grid-cols-2 gap-4 mb-4">
                                       <div>
+                                        <p className="font-semibold">اسم الاختبار:</p>
+                                        <p>{getTestName(result.testId)}</p>
+                                      </div>
+                                      <div>
                                         <p className="font-semibold">التاريخ:</p>
-                                        <p>{formatDate(result.created_at)}</p>
+                                        <p>{formatDate(result.date)}</p>
                                       </div>
                                       <div>
                                         <p className="font-semibold">نوع الاختبار:</p>
-                                        <p>{result.questions_data && result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
-                                            result.questions_data && result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
+                                        <p>{result.type === 'verbal' ? 'لفظي' : 
+                                            result.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
                                       </div>
                                       <div>
                                         <p className="font-semibold">النتيجة:</p>
@@ -137,13 +129,13 @@ const Performance = () => {
                                     </div>
                                     <div className="border-t pt-4">
                                       <p className="font-semibold mb-2">ملخص الإجابات:</p>
-                                      <p>عدد الإجابات الصحيحة: {result.correct_answers} من {result.total_questions}</p>
+                                      <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
                                       <p>نسبة النجاح: {result.score}%</p>
                                     </div>
                                     <div className="border-t pt-4 mt-4">
                                       <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
                                       <div className="space-y-6">
-                                        {result.questions_data?.map((question, qIndex) => {
+                                        {result.questions?.map((question, qIndex) => {
                                           const isCorrect = question.userAnswer === question.correctAnswer;
                                           return (
                                             <div 
@@ -152,7 +144,7 @@ const Performance = () => {
                                             >
                                               <div className="flex items-center justify-between mb-2">
                                                 <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
-                                                <Badge variant={isCorrect ? "default" : "destructive"}>
+                                                <Badge variant={isCorrect ? "success" : "destructive"}>
                                                   {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
                                                 </Badge>
                                               </div>

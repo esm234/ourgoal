@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,12 +17,7 @@ const Navbar = () => {
     <nav className="bg-secondary py-4 px-6 shadow-md">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
-            <img 
-              src="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ"
-              alt="اسرار للتفوق"
-              className="w-12 h-12 object-contain"
-            />
+          <Link to="/" className="text-2xl font-bold text-primary">
             منصة اسرار للتفوق
           </Link>
 

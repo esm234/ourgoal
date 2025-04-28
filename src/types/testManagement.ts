@@ -18,7 +18,6 @@ export interface Question {
   question_order: number;
   created_at: string;
   options: Option[];
-  image_url?: string | null;
 }
 
 export interface Option {
@@ -43,8 +42,6 @@ export interface CreateQuestionForm {
     text: string;
     is_correct: boolean;
   }[];
-  image_url?: string;
-  mode?: 'text' | 'image';
 }
 
 // For the TakeTest component, which handles both database questions and static questions
@@ -58,5 +55,4 @@ export interface ExtendedQuestion {
   created_at: string;
   options: (Option | { text: string })[] | string[]; // Can be Option[], simple objects, or string[]
   correctAnswer?: number; // Index of the correct answer
-  image_url?: string | null;
 }

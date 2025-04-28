@@ -23,14 +23,10 @@ const TakeTest = () => {
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<number>(0);
-  const [timeTaken, setTimeTaken] = useState<number>(0);
-  const [startTime, setStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
     if (test?.duration) {
       setTimeLeft(test.duration * 60); // Convert minutes to seconds
-      setTimeTaken(0); // Initialize timeTaken
-      setStartTime(Date.now()); // Record the start time
     }
   }, [test]);
 
@@ -45,15 +41,13 @@ const TakeTest = () => {
           }
           return prev - 1;
         });
-        
-        // Update timeTaken (seconds elapsed since start)
-        setTimeTaken(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
 
       return () => clearInterval(timer);
     }
-  }, [timeLeft, showResults, startTime]);
+  }, [timeLeft, showResults]);
 
+  // Add a warning when time is running low
   useEffect(() => {
     if (timeLeft === 300 && !showResults) { // 5 minutes warning
       toast({
@@ -64,6 +58,7 @@ const TakeTest = () => {
     }
   }, [timeLeft, showResults]);
 
+  // Add a final warning when time is very low
   useEffect(() => {
     if (timeLeft === 60 && !showResults) { // 1 minute warning
       toast({
@@ -80,6 +75,7 @@ const TakeTest = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Restrict access to signed-in users only
   if (!isLoggedIn) {
     return (
       <Layout>
@@ -105,6 +101,7 @@ const TakeTest = () => {
   const fetchTestWithQuestions = async () => {
     setLoading(true);
     try {
+      // First, get the test details
       const { data: testData, error: testError } = await supabase
         .from("tests")
         .select("*")
@@ -112,6 +109,7 @@ const TakeTest = () => {
         .single();
 
       if (testError) {
+        // If not found in database, try the local static data
         const staticTest = testQuestions.find(t => t.testId === testId);
         if (staticTest) {
           setTest({
@@ -129,6 +127,7 @@ const TakeTest = () => {
 
       setTest(testData);
       
+      // Then, get the questions for this test
       const { data: questionsData, error: questionsError } = await supabase
         .from("questions")
         .select("*")
@@ -137,6 +136,7 @@ const TakeTest = () => {
 
       if (questionsError) throw questionsError;
 
+      // For each question, fetch its options
       const questionsWithOptions = await Promise.all(
         questionsData.map(async (question) => {
           const { data: optionsData, error: optionsError } = await supabase
@@ -147,6 +147,7 @@ const TakeTest = () => {
 
           if (optionsError) throw optionsError;
 
+          // Find the correct answer index
           const correctIndex = optionsData.findIndex(opt => opt.is_correct);
 
           return {
@@ -172,76 +173,44 @@ const TakeTest = () => {
   };
 
   const saveTestResult = async (score: number, correctAnswers: number) => {
-    if (!user) {
-      toast({
-        title: "خطأ",
-        description: "يجب تسجيل الدخول لحفظ نتائج الاختبار",
-        variant: "destructive",
-      });
-      return;
-    }
+    const result: TestResult = {
+      testId: testId!,
+      score,
+      correctAnswers,
+      totalQuestions: questions.length,
+      date: new Date().toISOString(),
+      type: 'mixed',
+      questions: questions.map((q, index) => ({
+        id: q.id,
+        text: q.text,
+        type: q.type,
+        options: Array.isArray(q.options) ? q.options.map(opt => 
+          typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
+        ) : [],
+        correctAnswer: q.correctAnswer || 0,
+        userAnswer: answers[index],
+        explanation: q.explanation || undefined
+      }))
+    };
 
-    const questionsData = questions.map((q, index) => ({
-      id: q.id,
-      text: q.text,
-      type: q.type,
-      options: Array.isArray(q.options) ? q.options.map(opt => 
-        typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
-      ) : [],
-      correctAnswer: q.correctAnswer || 0,
-      userAnswer: answers[index],
-      explanation: q.explanation || undefined,
-      image_url: q.image_url
-    }));
+    // Save to localStorage for backward compatibility
+    const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+    localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
 
-    try {
-      // Calculate the actual time taken in seconds
-      const actualTimeTaken = timeTaken || Math.floor((Date.now() - startTime) / 1000);
-
-      // Create the data object without the questions_data field first
-      const examResultData = {
-        test_id: testId!,
-        user_id: user.id,
-        score: score,
-        correct_answers: correctAnswers,
-        total_questions: questions.length,
-        time_taken: actualTimeTaken // Use the tracked time taken
-      };
-
-      // First insert the basic exam result data
-      const { data: examResult, error: insertError } = await supabase
-        .from('exam_results')
-        .insert(examResultData)
-        .select('id')
-        .single();
-
-      if (insertError) throw insertError;
-
-      // If we have the result ID, update with questions_data in a separate operation
-      if (examResult) {
-        // Cast the update operation to 'any' to bypass TypeScript checking
-        // since our Supabase types might not be fully up to date
-        const { error: updateError } = await supabase
-          .from('exam_results')
-          .update({ questions_data: questionsData } as any)
-          .eq('id', examResult.id);
-
-        if (updateError) {
-          console.error("Error updating questions data:", updateError);
-          toast({
-            title: "تم حفظ النتيجة",
-            description: "تم حفظ النتائج الأساسية ولكن حدث خطأ في حفظ تفاصيل الأسئلة",
-            variant: "default",
-          });
-        }
+    // If user is logged in, also save to database
+    if (isLoggedIn && user) {
+      try {
+        await supabase.from("exam_results").insert({
+          test_id: testId,
+          user_id: user.id,
+          score: score,
+          total_questions: questions.length,
+          time_taken: test.duration, // Using test duration as time taken
+          questions_data: result.questions // Store questions data in the database
+        });
+      } catch (error) {
+        console.error("Error saving result to database:", error);
       }
-    } catch (error: any) {
-      console.error("Error saving result to database:", error);
-      toast({
-        title: "خطأ في حفظ النتائج",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
@@ -264,10 +233,7 @@ const TakeTest = () => {
   };
 
   const handleSubmit = () => {
-    // Calculate final time taken
-    const finalTimeTaken = timeTaken || Math.floor((Date.now() - startTime) / 1000);
-    setTimeTaken(finalTimeTaken);
-    
+    // Calculate score
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
       if (typeof question.correctAnswer === 'number') {
@@ -277,8 +243,10 @@ const TakeTest = () => {
     }, 0);
     const score = Math.round((correctAnswers / questions.length) * 100);
 
+    // Save test result
     saveTestResult(score, correctAnswers);
 
+    // Show results
     setShowResults(true);
   };
 
@@ -388,10 +356,11 @@ const TakeTest = () => {
                     {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
                   </span>
                   <span className={`font-semibold ${timeLeft < 300 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                   {test?.title || 'اختبار'} - {formatTime(timeLeft)}
+                    الوقت المتبقي: {formatTime(timeLeft)}
                   </span>
                 </div>
               </div>
+              {/* Question prompt: show image if available, otherwise text */}
               {question.image_url ? (
                 <img
                   src={question.image_url}
