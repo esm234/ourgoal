@@ -13,5 +13,6 @@ export interface TestResult {
     correctAnswer: number;
     userAnswer: number;
     explanation?: string;
+    image_url?: string;
   }[];
 }
