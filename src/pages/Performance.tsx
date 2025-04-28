@@ -1,21 +1,37 @@
-import React, { useState } from "react";
+
+import React from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { BarChart, ArrowRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Performance = () => {
-  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
-  const [expandedResult, setExpandedResult] = useState<number | null>(null);
+  const { user } = useAuth();
+
+  const { data: testResults = [], isLoading } = useQuery({
+    queryKey: ['examResults', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('exam_results')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ar-SA', {
+    return new Intl.DateTimeFormatter('ar-SA', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -24,6 +40,16 @@ const Performance = () => {
       minute: 'numeric',
     }).format(date);
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 text-center">
+          <p>جاري تحميل النتائج...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -72,14 +98,14 @@ const Performance = () => {
                       {testResults.map((result, index) => (
                         <React.Fragment key={index}>
                           <TableRow>
-                            <TableCell className="text-right">{formatDate(result.date)}</TableCell>
+                            <TableCell className="text-right">{formatDate(result.created_at)}</TableCell>
                             <TableCell>
-                              {result.type === 'verbal' ? 'لفظي' : 
-                               result.type === 'quantitative' ? 'كمي' : 'مختلط'}
+                              {result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
+                               result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}
                             </TableCell>
                             <TableCell>{result.score}%</TableCell>
                             <TableCell>
-                              {result.correctAnswers} من {result.totalQuestions}
+                              {result.correct_answers} من {result.total_questions}
                             </TableCell>
                             <TableCell>
                               <Dialog>
@@ -96,12 +122,12 @@ const Performance = () => {
                                     <div className="grid grid-cols-2 gap-4 mb-4">
                                       <div>
                                         <p className="font-semibold">التاريخ:</p>
-                                        <p>{formatDate(result.date)}</p>
+                                        <p>{formatDate(result.created_at)}</p>
                                       </div>
                                       <div>
                                         <p className="font-semibold">نوع الاختبار:</p>
-                                        <p>{result.type === 'verbal' ? 'لفظي' : 
-                                            result.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
+                                        <p>{result.questions_data[0]?.type === 'verbal' ? 'لفظي' : 
+                                            result.questions_data[0]?.type === 'quantitative' ? 'كمي' : 'مختلط'}</p>
                                       </div>
                                       <div>
                                         <p className="font-semibold">النتيجة:</p>
@@ -110,13 +136,13 @@ const Performance = () => {
                                     </div>
                                     <div className="border-t pt-4">
                                       <p className="font-semibold mb-2">ملخص الإجابات:</p>
-                                      <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
+                                      <p>عدد الإجابات الصحيحة: {result.correct_answers} من {result.total_questions}</p>
                                       <p>نسبة النجاح: {result.score}%</p>
                                     </div>
                                     <div className="border-t pt-4 mt-4">
                                       <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
                                       <div className="space-y-6">
-                                        {result.questions?.map((question, qIndex) => {
+                                        {result.questions_data?.map((question: any, qIndex: number) => {
                                           const isCorrect = question.userAnswer === question.correctAnswer;
                                           return (
                                             <div 

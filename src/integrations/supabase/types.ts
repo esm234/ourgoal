@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       exam_results: {
         Row: {
+          correct_answers: number | null
           created_at: string
           id: string
           score: number
@@ -20,6 +21,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          correct_answers?: number | null
           created_at?: string
           id?: string
           score: number
@@ -29,6 +31,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          correct_answers?: number | null
           created_at?: string
           id?: string
           score?: number
@@ -83,23 +86,23 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          role: string | null
           updated_at: string
           username: string | null
-          role: string | null
         }
         Insert: {
           created_at?: string
           id: string
+          role?: string | null
           updated_at?: string
           username?: string | null
-          role?: string | null
         }
         Update: {
           created_at?: string
           id?: string
+          role?: string | null
           updated_at?: string
           username?: string | null
-          role?: string | null
         }
         Relationships: []
       }
@@ -108,6 +111,7 @@ export type Database = {
           created_at: string
           explanation: string | null
           id: string
+          image_url: string | null
           question_order: number
           test_id: string
           text: string
@@ -117,6 +121,7 @@ export type Database = {
           created_at?: string
           explanation?: string | null
           id?: string
+          image_url?: string | null
           question_order: number
           test_id: string
           text: string
@@ -126,6 +131,7 @@ export type Database = {
           created_at?: string
           explanation?: string | null
           id?: string
+          image_url?: string | null
           question_order?: number
           test_id?: string
           text?: string

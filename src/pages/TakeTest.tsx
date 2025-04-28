@@ -47,7 +47,6 @@ const TakeTest = () => {
     }
   }, [timeLeft, showResults]);
 
-  // Add a warning when time is running low
   useEffect(() => {
     if (timeLeft === 300 && !showResults) { // 5 minutes warning
       toast({
@@ -58,7 +57,6 @@ const TakeTest = () => {
     }
   }, [timeLeft, showResults]);
 
-  // Add a final warning when time is very low
   useEffect(() => {
     if (timeLeft === 60 && !showResults) { // 1 minute warning
       toast({
@@ -75,7 +73,6 @@ const TakeTest = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Restrict access to signed-in users only
   if (!isLoggedIn) {
     return (
       <Layout>
@@ -101,7 +98,6 @@ const TakeTest = () => {
   const fetchTestWithQuestions = async () => {
     setLoading(true);
     try {
-      // First, get the test details
       const { data: testData, error: testError } = await supabase
         .from("tests")
         .select("*")
@@ -109,7 +105,6 @@ const TakeTest = () => {
         .single();
 
       if (testError) {
-        // If not found in database, try the local static data
         const staticTest = testQuestions.find(t => t.testId === testId);
         if (staticTest) {
           setTest({
@@ -127,7 +122,6 @@ const TakeTest = () => {
 
       setTest(testData);
       
-      // Then, get the questions for this test
       const { data: questionsData, error: questionsError } = await supabase
         .from("questions")
         .select("*")
@@ -136,7 +130,6 @@ const TakeTest = () => {
 
       if (questionsError) throw questionsError;
 
-      // For each question, fetch its options
       const questionsWithOptions = await Promise.all(
         questionsData.map(async (question) => {
           const { data: optionsData, error: optionsError } = await supabase
@@ -147,7 +140,6 @@ const TakeTest = () => {
 
           if (optionsError) throw optionsError;
 
-          // Find the correct answer index
           const correctIndex = optionsData.findIndex(opt => opt.is_correct);
 
           return {
@@ -173,44 +165,48 @@ const TakeTest = () => {
   };
 
   const saveTestResult = async (score: number, correctAnswers: number) => {
-    const result: TestResult = {
-      testId: testId!,
-      score,
-      correctAnswers,
-      totalQuestions: questions.length,
-      date: new Date().toISOString(),
-      type: 'mixed',
-      questions: questions.map((q, index) => ({
-        id: q.id,
-        text: q.text,
-        type: q.type,
-        options: Array.isArray(q.options) ? q.options.map(opt => 
-          typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
-        ) : [],
-        correctAnswer: q.correctAnswer || 0,
-        userAnswer: answers[index],
-        explanation: q.explanation || undefined
-      }))
-    };
+    if (!user) {
+      toast({
+        title: "خطأ",
+        description: "يجب تسجيل الدخول لحفظ نتائج الاختبار",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Save to localStorage for backward compatibility
-    const existingResults = JSON.parse(localStorage.getItem('testResults') || '[]');
-    localStorage.setItem('testResults', JSON.stringify([...existingResults, result]));
+    const questionsData = questions.map((q, index) => ({
+      id: q.id,
+      text: q.text,
+      type: q.type,
+      options: Array.isArray(q.options) ? q.options.map(opt => 
+        typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
+      ) : [],
+      correctAnswer: q.correctAnswer || 0,
+      userAnswer: answers[index],
+      explanation: q.explanation || undefined
+    }));
 
-    // If user is logged in, also save to database
-    if (isLoggedIn && user) {
-      try {
-        await supabase.from("exam_results").insert({
-          test_id: testId,
+    try {
+      const { error } = await supabase
+        .from('exam_results')
+        .insert({
+          test_id: testId!,
           user_id: user.id,
           score: score,
+          correct_answers: correctAnswers,
           total_questions: questions.length,
           time_taken: test.duration, // Using test duration as time taken
-          questions_data: result.questions // Store questions data in the database
+          questions_data: questionsData
         });
-      } catch (error) {
-        console.error("Error saving result to database:", error);
-      }
+
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Error saving result to database:", error);
+      toast({
+        title: "خطأ في حفظ النتائج",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -233,7 +229,6 @@ const TakeTest = () => {
   };
 
   const handleSubmit = () => {
-    // Calculate score
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
       if (typeof question.correctAnswer === 'number') {
@@ -243,10 +238,8 @@ const TakeTest = () => {
     }, 0);
     const score = Math.round((correctAnswers / questions.length) * 100);
 
-    // Save test result
     saveTestResult(score, correctAnswers);
 
-    // Show results
     setShowResults(true);
   };
 
@@ -360,7 +353,6 @@ const TakeTest = () => {
                   </span>
                 </div>
               </div>
-              {/* Question prompt: show image if available, otherwise text */}
               {question.image_url ? (
                 <img
                   src={question.image_url}
