@@ -1,9 +1,11 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Home, Book, Calculator, BarChart, LogIn, LogOut, Menu, X, User } from "lucide-react";
+
+// Logo URL constant
+const LOGO_URL = "https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ";
 
 const Navbar = () => {
   const { isLoggedIn, username, logout } = useAuth();
@@ -17,8 +19,13 @@ const Navbar = () => {
     <nav className="bg-secondary py-4 px-6 shadow-md">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            منصة اسرار للتفوق
+          <Link to="/" className="flex items-center text-2xl font-bold text-primary">
+            <img 
+              src={LOGO_URL} 
+              alt="Logo" 
+              className="h-10 w-auto ml-2" 
+            />
+            <span>منصة اسرار للتفوق</span>
           </Link>
 
           {/* Mobile Menu Button */}
