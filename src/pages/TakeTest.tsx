@@ -219,7 +219,8 @@ const TakeTest = () => {
         ) : [],
         correctAnswer: q.correctAnswer || 0,
         userAnswer: answers[index],
-        explanation: q.explanation || undefined
+        explanation: q.explanation || undefined,
+        image_url: q.image_url
       }))
     };
 
