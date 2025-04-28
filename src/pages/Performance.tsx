@@ -128,7 +128,15 @@ const Performance = () => {
                                                   {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
                                                 </Badge>
                                               </div>
-                                              <p className="mb-2 text-black">{question.text}</p>
+                                              {question.image_url ? (
+                                                <img
+                                                  src={question.image_url}
+                                                  alt="صورة السؤال"
+                                                  className="mb-2 max-h-40 rounded border"
+                                                />
+                                              ) : (
+                                                <p className="mb-2 text-black">{question.text}</p>
+                                              )}
                                               <div className="space-y-2">
                                                 <p className="font-semibold text-black">إجابتك:</p>
                                                 <p className="text-black">{question.options[question.userAnswer]}</p>
