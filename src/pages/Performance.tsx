@@ -30,6 +30,8 @@ const Performance = () => {
   const fetchUserResults = async () => {
     try {
       setLoading(true);
+      console.log("Fetching results for user:", user?.id);
+      
       // Use type assertion to handle additional fields
       type ExamResultWithData = {
         id: string;
@@ -43,13 +45,45 @@ const Performance = () => {
         test_type?: string;
       };
 
-      const { data, error } = await supabase
+      // First try with exam_results table
+      let { data, error } = await supabase
         .from("exam_results")
         .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
 
+      console.log("Query response from exam_results:", { data, error });
+
+      // If there's an error, try with test_results table instead
+      if (error) {
+        console.log("Error with exam_results, trying test_results instead");
+        
+        const testResultsResponse = await supabase
+          .from("test_results")
+          .select("*")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
+          
+        console.log("Query response from test_results:", testResultsResponse);
+        
+        if (!testResultsResponse.error) {
+          data = testResultsResponse.data;
+          error = null;
+        } else {
+          console.error("Both tables failed:", { 
+            examResultsError: error, 
+            testResultsError: testResultsResponse.error 
+          });
+        }
+      }
+
       if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        console.log("No results found in either table");
+        setTestResults([]);
+        return;
+      }
 
       // Transform database results to match TestResult type
       const formattedResults: TestResult[] = (data as ExamResultWithData[]).map(result => ({
@@ -64,6 +98,7 @@ const Performance = () => {
         questions: result.questions_data || []
       }));
 
+      console.log("Formatted results:", formattedResults);
       setTestResults(formattedResults);
     } catch (error: any) {
       console.error("Error fetching results:", error);
@@ -126,6 +161,33 @@ const Performance = () => {
               تتبع تقدمك وأدائك في اختبارات قياس التجريبية
             </p>
           </div>
+
+          {/* Debug Panel - Only visible in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <Card className="w-full max-w-4xl mx-auto mb-8 bg-yellow-50">
+              <CardContent className="p-4">
+                <h3 className="font-bold mb-2">Debug Info:</h3>
+                <p>User ID: {user?.id || 'Not logged in'}</p>
+                <p>Loading: {loading ? 'Yes' : 'No'}</p>
+                <p>Results Count: {testResults.length}</p>
+                <details>
+                  <summary className="cursor-pointer">Raw Results</summary>
+                  <pre className="text-xs mt-2 bg-black text-white p-2 rounded overflow-auto max-h-60">
+                    {JSON.stringify(testResults, null, 2)}
+                  </pre>
+                </details>
+                <div className="mt-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fetchUserResults()}
+                  >
+                    Refresh Data
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex justify-center">
             {testResults.length === 0 ? (
