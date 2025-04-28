@@ -25,19 +25,6 @@ const Performance = () => {
     }).format(date);
   };
 
-  const getTestName = (testId: string) => {
-    // Map test IDs to their names
-    const testNames: { [key: string]: string } = {
-      'test-1': 'اختبار قياس تجريبي #1',
-      'test-2': 'اختبار قياس تجريبي #2',
-      'test-3': 'اختبار قياس تجريبي #3',
-      'test-4': 'اختبار قياس قصير #1',
-      'test-5': 'اختبار قياس قصير #2',
-      'test-6': 'اختبار قياس كامل',
-    };
-    return testNames[testId] || `اختبار ${testId}`;
-  };
-
   return (
     <Layout>
       <section className="py-16 px-4">
@@ -75,7 +62,6 @@ const Performance = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">التاريخ والوقت</TableHead>
-                        <TableHead className="text-right">اسم الاختبار</TableHead>
                         <TableHead className="text-right">نوع الاختبار</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الإجابات الصحيحة</TableHead>
@@ -87,7 +73,6 @@ const Performance = () => {
                         <React.Fragment key={index}>
                           <TableRow>
                             <TableCell className="text-right">{formatDate(result.date)}</TableCell>
-                            <TableCell className="text-right">{getTestName(result.testId)}</TableCell>
                             <TableCell>
                               {result.type === 'verbal' ? 'لفظي' : 
                                result.type === 'quantitative' ? 'كمي' : 'مختلط'}
@@ -110,10 +95,6 @@ const Performance = () => {
                                   <div className="mt-4">
                                     <div className="grid grid-cols-2 gap-4 mb-4">
                                       <div>
-                                        <p className="font-semibold">اسم الاختبار:</p>
-                                        <p>{getTestName(result.testId)}</p>
-                                      </div>
-                                      <div>
                                         <p className="font-semibold">التاريخ:</p>
                                         <p>{formatDate(result.date)}</p>
                                       </div>
@@ -126,11 +107,10 @@ const Performance = () => {
                                         <p className="font-semibold">النتيجة:</p>
                                         <p>{result.score}%</p>
                                       </div>
-                                    </div>
-                                    <div className="border-t pt-4">
-                                      <p className="font-semibold mb-2">ملخص الإجابات:</p>
-                                      <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
-                                      <p>نسبة النجاح: {result.score}%</p>
+                                      <div>
+                                        <p className="font-semibold">الإجابات الصحيحة:</p>
+                                        <p>{result.correctAnswers} من {result.totalQuestions}</p>
+                                      </div>
                                     </div>
                                     <div className="border-t pt-4 mt-4">
                                       <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
