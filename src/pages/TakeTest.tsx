@@ -210,9 +210,11 @@ const TakeTest = () => {
 
       // If we have the result ID, update with questions_data in a separate operation
       if (examResult) {
+        // Cast the update operation to 'any' to bypass TypeScript checking
+        // since our Supabase types might not be fully up to date
         const { error: updateError } = await supabase
           .from('exam_results')
-          .update({ questions_data: questionsData })
+          .update({ questions_data: questionsData } as any)
           .eq('id', examResult.id);
 
         if (updateError) {
