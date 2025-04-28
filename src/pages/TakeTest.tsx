@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -24,10 +23,14 @@ const TakeTest = () => {
   const [questions, setQuestions] = useState<ExtendedQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timeTaken, setTimeTaken] = useState<number>(0);
+  const [startTime, setStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
     if (test?.duration) {
       setTimeLeft(test.duration * 60); // Convert minutes to seconds
+      setTimeTaken(0); // Initialize timeTaken
+      setStartTime(Date.now()); // Record the start time
     }
   }, [test]);
 
@@ -42,11 +45,14 @@ const TakeTest = () => {
           }
           return prev - 1;
         });
+        
+        // Update timeTaken (seconds elapsed since start)
+        setTimeTaken(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
 
       return () => clearInterval(timer);
     }
-  }, [timeLeft, showResults]);
+  }, [timeLeft, showResults, startTime]);
 
   useEffect(() => {
     if (timeLeft === 300 && !showResults) { // 5 minutes warning
@@ -189,6 +195,9 @@ const TakeTest = () => {
     }));
 
     try {
+      // Calculate the actual time taken in seconds
+      const actualTimeTaken = timeTaken || Math.floor((Date.now() - startTime) / 1000);
+
       // Create the data object without the questions_data field first
       const examResultData = {
         test_id: testId!,
@@ -196,7 +205,7 @@ const TakeTest = () => {
         score: score,
         correct_answers: correctAnswers,
         total_questions: questions.length,
-        time_taken: test.duration // Using test duration as time taken
+        time_taken: actualTimeTaken // Use the tracked time taken
       };
 
       // First insert the basic exam result data
@@ -255,6 +264,10 @@ const TakeTest = () => {
   };
 
   const handleSubmit = () => {
+    // Calculate final time taken
+    const finalTimeTaken = timeTaken || Math.floor((Date.now() - startTime) / 1000);
+    setTimeTaken(finalTimeTaken);
+    
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
       if (typeof question.correctAnswer === 'number') {
