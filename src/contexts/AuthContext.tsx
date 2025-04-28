@@ -80,7 +80,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    setLoading(true);
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "تم تسجيل الخروج بنجاح",
+        description: "سيتم تحويلك إلى الصفحة الرئيسية",
+      });
+    } catch (error: any) {
+      toast({
+        title: "خطأ في تسجيل الخروج",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
