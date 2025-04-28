@@ -203,7 +203,7 @@ const TakeTest = () => {
           total_questions: questions.length,
           time_taken: test.duration, // Using test duration as time taken
           questions_data: result.questions, // Store questions data in the database
-          date: new Date().toISOString() // Add date field to track when the test was taken
+          created_at: new Date().toISOString() // Use created_at instead of date field
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
