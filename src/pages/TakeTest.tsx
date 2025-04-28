@@ -233,6 +233,19 @@ const TakeTest = () => {
   };
 
   const handleSubmit = () => {
+    // Check if all questions are answered
+    const allQuestionsAnswered = answers.length === questions.length && 
+      answers.every(answer => answer !== undefined);
+    
+    if (!allQuestionsAnswered) {
+      toast({
+        title: "تنبيه",
+        description: "يجب الإجابة على جميع الأسئلة قبل إنهاء الاختبار",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Calculate score
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
@@ -399,7 +412,6 @@ const TakeTest = () => {
               {currentQuestion === questions.length - 1 ? (
                 <Button
                   onClick={handleSubmit}
-                  disabled={answers.length !== questions.length}
                 >
                   <Check className="mr-2" size={16} />
                   إنهاء الاختبار
