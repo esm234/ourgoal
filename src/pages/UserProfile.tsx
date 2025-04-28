@@ -129,10 +129,10 @@ const UserProfile = () => {
             {/* معلومات المستخدم */}
             <Card className="flex-1 shadow-lg min-w-[260px]">
               <CardHeader>
-                <CardTitle className="text-right">معلومات المستخدم</CardTitle>
-                <CardDescription className="text-right">بيانات الحساب</CardDescription>
+                <CardTitle className="text-right min-w-[500px] md:min-w-full">معلومات المستخدم</CardTitle>
+                <CardDescription className="text-right min-w-[500px] md:min-w-full">بيانات الحساب</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto max-md:px-2">
                 {editMode ? (
                   <form onSubmit={handleEditProfile} className="space-y-4 text-right">
                     <label className="block font-semibold">الاسم</label>
@@ -182,8 +182,8 @@ const UserProfile = () => {
           {/* سجل الاختبارات */}
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-right">سجل الاختبارات</CardTitle>
-              <CardDescription className="text-right">نتائج الاختبارات السابقة</CardDescription>
+              <CardTitle className="text-right min-w-[500px] md:min-w-full">سجل الاختبارات</CardTitle>
+              <CardDescription className="text-right min-w-[500px] md:min-w-full">نتائج الاختبارات السابقة</CardDescription>
               <Button 
                 variant="destructive" 
                 size="sm"
@@ -196,7 +196,7 @@ const UserProfile = () => {
                 حذف الكل
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-x-auto max-md:px-2">
               {testHistory.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">لا يوجد سجل اختبارات بعد</div>
               ) : (
@@ -204,7 +204,6 @@ const UserProfile = () => {
                   <thead className="bg-gradient-to-l from-primary/10 to-secondary/10">
                     <tr>
                       <th className="py-2 px-4">التاريخ</th>
-                      <th className="py-2 px-4">نوع الاختبار</th>
                       <th className="py-2 px-4">النتيجة</th>
                       <th className="py-2 px-4">الإجابات الصحيحة</th>
                       <th className="py-2 px-4">التفاصيل</th>
@@ -214,7 +213,6 @@ const UserProfile = () => {
                     {testHistory.map((test, idx) => (
                       <tr key={test.id || idx} className="border-b">
                         <td className="py-2 px-4">{formatDate(test.date)}</td>
-                        <td className="py-2 px-4">{test.type}</td>
                         <td className="py-2 px-4">{test.score}%</td>
                         <td className="py-2 px-4">{test.correctAnswers || (test.questions ? test.questions.filter(q => q.userAnswer === q.correctAnswer).length : 0)} من {test.totalQuestions || (test.questions ? test.questions.length : 0)}</td>
                         <td className="py-2 px-4">
@@ -231,10 +229,6 @@ const UserProfile = () => {
                                   <div>
                                     <p className="font-semibold">التاريخ:</p>
                                     <p>{formatDate(test.date)}</p>
-                                  </div>
-                                  <div>
-                                    <p className="font-semibold">نوع الاختبار:</p>
-                                    <p>{test.type}</p>
                                   </div>
                                   <div>
                                     <p className="font-semibold">النتيجة:</p>
