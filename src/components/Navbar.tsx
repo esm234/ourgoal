@@ -60,20 +60,17 @@ const Navbar = () => {
               <Calculator size={20} className="ml-2" />
               <span>حاسبة المعادلة</span>
             </Link>
-            <Link
-              to="/performance"
-              className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
-            >
-              <BarChart size={20} className="ml-2" />
-              <span>لوحة الأداء</span>
-            </Link>
+            
 
             {isLoggedIn ? (
               <div className="flex items-center">
-                <div className="flex items-center px-3 py-2 mx-2 text-foreground">
+                <Link
+                  to="/user-profile"
+                  className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
+                >
                   <User size={20} className="ml-2" />
-                  <span>مرحباً، {username}</span>
-                </div>
+                  <span>الملف الشخصي</span>
+                </Link>
                 <Button
                   variant="ghost"
                   className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
@@ -124,21 +121,18 @@ const Navbar = () => {
               <Calculator size={20} className="ml-2" />
               <span>جلسة المعادلة</span>
             </Link>
-            <Link
-              to="/performance"
-              className="flex items-center px-3 py-2 rounded-md hover:bg-muted transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <BarChart size={20} className="ml-2" />
-              <span>لوحة الأداء</span>
-            </Link>
+            
 
             {isLoggedIn ? (
               <>
-                <div className="flex items-center px-3 py-2 text-foreground">
+                <Link
+                  to="/user-profile"
+                  className="flex items-center px-3 py-2 rounded-md hover:bg-muted transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   <User size={20} className="ml-2" />
-                  <span>مرحباً، {username}</span>
-                </div>
+                  <span>الملف الشخصي</span>
+                </Link>
                 <Button
                   variant="ghost"
                   className="flex items-center justify-start px-3 py-2 rounded-md hover:bg-muted transition-colors w-full"
