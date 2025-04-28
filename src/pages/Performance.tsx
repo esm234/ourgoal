@@ -30,25 +30,38 @@ const Performance = () => {
   const fetchUserResults = async () => {
     try {
       setLoading(true);
+      // Use type assertion to handle additional fields
+      type ExamResultWithData = {
+        id: string;
+        user_id: string;
+        test_id: string;
+        score: number;
+        total_questions: number;
+        time_taken: number;
+        created_at: string;
+        questions_data: any[];
+        test_type?: string;
+      };
+
       const { data, error } = await supabase
         .from("exam_results")
         .select("*")
         .eq("user_id", user!.id)
-        .order("date", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       // Transform database results to match TestResult type
-      const formattedResults: TestResult[] = data.map(result => ({
+      const formattedResults: TestResult[] = (data as ExamResultWithData[]).map(result => ({
         testId: result.test_id,
         score: result.score,
-        correctAnswers: result.questions_data.filter(
+        correctAnswers: result.questions_data?.filter(
           (q: any) => q.userAnswer === q.correctAnswer
-        ).length,
+        ).length || 0,
         totalQuestions: result.total_questions,
-        date: result.date,
-        type: result.test_type || 'mixed',
-        questions: result.questions_data
+        date: result.created_at,
+        type: (result.test_type as "verbal" | "quantitative" | "mixed") || 'mixed',
+        questions: result.questions_data || []
       }));
 
       setTestResults(formattedResults);
@@ -203,7 +216,7 @@ const Performance = () => {
                                             >
                                               <div className="flex items-center justify-between mb-2">
                                                 <span className="font-semibold text-black">السؤال {qIndex + 1}</span>
-                                                <Badge variant={isCorrect ? "success" : "destructive"}>
+                                                <Badge variant={isCorrect ? "default" : "destructive"}>
                                                   {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
                                                 </Badge>
                                               </div>
