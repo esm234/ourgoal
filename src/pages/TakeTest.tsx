@@ -193,17 +193,93 @@ const TakeTest = () => {
       }))
     };
 
+    console.log("Preparing to save test result:", { 
+      testId, 
+      userId: user?.id, 
+      score, 
+      questionsCount: questions.length 
+    });
+
     // Only save to database for signed-in users
     if (isLoggedIn && user) {
       try {
-        await supabase.from("exam_results").insert({
-          test_id: testId,
-          user_id: user.id,
-          score: score,
-          total_questions: questions.length,
-          time_taken: test.duration, // Using test duration as time taken
-          questions_data: result.questions, // Store questions data in the database
-          created_at: new Date().toISOString() // Use created_at instead of date field
+        console.log("Saving to database...");
+        
+        // First check if the table exists
+        const { data: tableInfo, error: tableError } = await supabase
+          .from('exam_results')
+          .select('*')
+          .limit(1);
+          
+        if (tableError) {
+          console.error("Error checking exam_results table:", tableError);
+          
+          // Try again with the correct table name if there was an error
+          const { data: tablesListData } = await supabase
+            .from('pg_tables')
+            .select('tablename')
+            .eq('schemaname', 'public');
+            
+          console.log("Available tables:", tablesListData);
+          
+          // Try with test_results as an alternative table name
+          const { data: testResultsCheck, error: testResultsError } = await supabase
+            .from('test_results')
+            .select('*')
+            .limit(1);
+            
+          if (!testResultsError) {
+            console.log("Found test_results table instead of exam_results");
+            
+            const resultData = {
+              test_id: testId,
+              user_id: user.id,
+              score: score,
+              total_questions: questions.length,
+              time_taken: test.duration,
+              questions_data: result.questions,
+              created_at: new Date().toISOString()
+            };
+            
+            const { data, error } = await supabase
+              .from("test_results")
+              .insert(resultData)
+              .select();
+              
+            console.log("Save result to test_results:", { data, error });
+            
+            if (error) throw error;
+          } else {
+            throw tableError;
+          }
+        } else {
+          // Original code to save to exam_results
+          const resultData = {
+            test_id: testId,
+            user_id: user.id,
+            score: score,
+            total_questions: questions.length,
+            time_taken: test.duration,
+            questions_data: result.questions,
+            created_at: new Date().toISOString()
+          };
+          
+          console.log("Data to be inserted:", resultData);
+          
+          const { data, error } = await supabase
+            .from("exam_results")
+            .insert(resultData)
+            .select();
+          
+          console.log("Save result:", { data, error });
+          
+          if (error) throw error;
+        }
+        
+        toast({
+          title: "تم حفظ النتائج بنجاح",
+          description: "تم حفظ نتائج الاختبار بنجاح. يمكنك الآن مشاهدتها في لوحة الأداء.",
+          variant: "default",
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
@@ -214,6 +290,7 @@ const TakeTest = () => {
         });
       }
     } else {
+      console.log("User not logged in, not saving to database");
       toast({
         title: "تنبيه",
         description: "يجب تسجيل الدخول لحفظ نتائج الاختبار.",
