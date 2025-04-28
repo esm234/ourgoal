@@ -154,7 +154,8 @@ const TakeTest = () => {
             ...question,
             options: optionsData.map(opt => opt.text),
             correctAnswer: correctIndex,
-            type: question.type as "verbal" | "quantitative" | "mixed"
+            type: question.type as "verbal" | "quantitative" | "mixed",
+            imageUrl: question.image_url || ""
           } as ExtendedQuestion;
         })
       );
@@ -233,6 +234,17 @@ const TakeTest = () => {
   };
 
   const handleSubmit = () => {
+    // التحقق من وجود إجابات لجميع الأسئلة
+    const allAnswered = questions.every((_, index) => answers[index] !== undefined);
+    if (!allAnswered) {
+      toast({
+        title: "لا يمكن إرسال الاختبار",
+        description: "يوجد أسئلة لم تتم الإجابة عليها. الرجاء الإجابة على جميع الأسئلة قبل الإرسال.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Calculate score
     const correctAnswers = answers.reduce((acc, answer, index) => {
       const question = questions[index];
@@ -397,13 +409,20 @@ const TakeTest = () => {
                 السابق
               </Button>
               {currentQuestion === questions.length - 1 ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={answers.length !== questions.length}
-                >
-                  <Check className="mr-2" size={16} />
-                  إنهاء الاختبار
-                </Button>
+                <>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={answers.length !== questions.length}
+                  >
+                    <Check className="mr-2" size={16} />
+                    إنهاء الاختبار
+                  </Button>
+                  {answers.length < questions.length && (
+                    <div className="mt-2 text-sm text-red-600">
+                      ! يرجى التأكد من الإجابة على جميع الأسئلة قبل الإرسال
+                  </div>
+                  )}
+                </>
               ) : (
                 <Button onClick={handleNext}>
                   التالي
