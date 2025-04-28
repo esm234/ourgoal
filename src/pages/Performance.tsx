@@ -1,17 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { TestResult } from "@/types/testResults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 const Performance = () => {
-  const testResults: TestResult[] = JSON.parse(localStorage.getItem('testResults') || '[]');
-  const [expandedResult, setExpandedResult] = useState<number | null>(null);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { isLoggedIn, user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      fetchUserResults();
+    } else {
+      setLoading(false);
+    }
+  }, [isLoggedIn, user]);
+
+  const fetchUserResults = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("exam_results")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("date", { ascending: false });
+
+      if (error) throw error;
+
+      // Transform database results to match TestResult type
+      const formattedResults: TestResult[] = data.map(result => ({
+        testId: result.test_id,
+        score: result.score,
+        correctAnswers: result.questions_data.filter(
+          (q: any) => q.userAnswer === q.correctAnswer
+        ).length,
+        totalQuestions: result.total_questions,
+        date: result.date,
+        type: result.test_type || 'mixed',
+        questions: result.questions_data
+      }));
+
+      setTestResults(formattedResults);
+    } catch (error: any) {
+      console.error("Error fetching results:", error);
+      toast({
+        title: "خطأ في تحميل النتائج",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -24,6 +75,33 @@ const Performance = () => {
       minute: 'numeric',
     }).format(date);
   };
+
+  // Restrict access to signed-in users only
+  if (!isLoggedIn) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <p className="text-xl mb-4">يجب تسجيل الدخول لعرض سجل أدائك</p>
+          <Button
+            className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded"
+            onClick={() => navigate('/login')}
+          >
+            الذهاب لتسجيل الدخول
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <p className="text-xl mb-4">جاري تحميل نتائج الاختبارات...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
