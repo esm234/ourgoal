@@ -184,6 +184,17 @@ const UserProfile = () => {
             <CardHeader>
               <CardTitle className="text-right">سجل الاختبارات</CardTitle>
               <CardDescription className="text-right">نتائج الاختبارات السابقة</CardDescription>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => {
+                  setTestHistory([]);
+                  localStorage.removeItem('testResults');
+                }}
+                className="float-left"
+              >
+                حذف الكل
+              </Button>
             </CardHeader>
             <CardContent>
               {testHistory.length === 0 ? (
@@ -197,7 +208,6 @@ const UserProfile = () => {
                       <th className="py-2 px-4">النتيجة</th>
                       <th className="py-2 px-4">الإجابات الصحيحة</th>
                       <th className="py-2 px-4">التفاصيل</th>
-                      <th className="py-2 px-4">حذف</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -207,19 +217,6 @@ const UserProfile = () => {
                         <td className="py-2 px-4">{test.type}</td>
                         <td className="py-2 px-4">{test.score}%</td>
                         <td className="py-2 px-4">{test.correctAnswers || (test.questions ? test.questions.filter(q => q.userAnswer === q.correctAnswer).length : 0)} من {test.totalQuestions || (test.questions ? test.questions.length : 0)}</td>
-                        <td className="py-2 px-4">
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => handleDeleteTest(idx)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M3 6h18" />
-                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                            </svg>
-                          </Button>
-                        </td>
                         <td className="py-2 px-4">
                           <Dialog>
                             <DialogTrigger asChild>
