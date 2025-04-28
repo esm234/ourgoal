@@ -8,13 +8,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home";
 import QiyasTests from "@/pages/QiyasTests";
 import TakeTest from "@/pages/TakeTest";
-import Performance from "@/pages/Performance";
 import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import TestManagement from "@/pages/TestManagement";
 import TestQuestions from "@/pages/TestQuestions";
 import EditTest from "@/pages/EditTest";
+import UserProfile from "@/pages/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -29,12 +29,12 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/qiyas-tests" element={<QiyasTests />} />
             <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
-            <Route path="/performance" element={<Performance />} />
-            <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
+                        <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
             <Route path="/login" element={<Login />} />
             <Route path="/test-management" element={<TestManagement />} />
             <Route path="/test-management/:testId/questions" element={<TestQuestions />} />
             <Route path="/test-management/:testId/edit" element={<EditTest />} />
+            <Route path="/user-profile" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
