@@ -176,13 +176,85 @@ const Performance = () => {
                     {JSON.stringify(testResults, null, 2)}
                   </pre>
                 </details>
-                <div className="mt-4">
+                <div className="mt-4 flex gap-2">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => fetchUserResults()}
                   >
                     Refresh Data
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        // Create a sample test result
+                        const sampleResult = {
+                          test_id: "test-1",
+                          user_id: user!.id,
+                          score: 85,
+                          total_questions: 10,
+                          time_taken: 30,
+                          questions_data: [
+                            {
+                              id: "q1",
+                              text: "سؤال تجريبي 1",
+                              type: "verbal",
+                              options: ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+                              correctAnswer: 1,
+                              userAnswer: 1,
+                              explanation: "شرح للإجابة"
+                            }
+                          ],
+                          created_at: new Date().toISOString()
+                        };
+                        
+                        // Try both tables
+                        let insertResult;
+                        try {
+                          insertResult = await supabase
+                            .from("exam_results")
+                            .insert(sampleResult);
+                            
+                          if (insertResult.error) {
+                            console.log("Error inserting to exam_results, trying test_results");
+                            insertResult = await supabase
+                              .from("test_results")
+                              .insert(sampleResult);
+                          }
+                        } catch (err) {
+                          console.error("Error inserting sample:", err);
+                        }
+                        
+                        console.log("Insert result:", insertResult);
+                        
+                        if (insertResult?.error) {
+                          toast({
+                            title: "خطأ في إنشاء العينة",
+                            description: insertResult.error.message,
+                            variant: "destructive",
+                          });
+                        } else {
+                          toast({
+                            title: "تم إنشاء عينة اختبار",
+                            description: "تم إضافة نتيجة اختبار تجريبي بنجاح",
+                            variant: "default",
+                          });
+                          // Refresh after creating sample
+                          setTimeout(() => fetchUserResults(), 500);
+                        }
+                      } catch (error: any) {
+                        console.error("Error creating sample:", error);
+                        toast({
+                          title: "خطأ",
+                          description: error.message,
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    Create Test Sample
                   </Button>
                 </div>
               </CardContent>
