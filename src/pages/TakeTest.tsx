@@ -117,7 +117,10 @@ const TakeTest = () => {
             id: staticTest.testId,
             title: `اختبار تجريبي ${staticTest.testId}`
           });
-          setQuestions(staticTest.questions as unknown as ExtendedQuestion[]);
+          setQuestions(staticTest.questions.map(q => ({
+  ...q,
+  imageUrl: q.image_url || ""
+})) as ExtendedQuestion[]);
           setLoading(false);
           return;
         } else {
@@ -185,6 +188,7 @@ const TakeTest = () => {
         id: q.id,
         text: q.text,
         type: q.type,
+        imageUrl: q.imageUrl || "",
         options: Array.isArray(q.options) ? q.options.map(opt => 
           typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
         ) : [],
@@ -303,7 +307,7 @@ const TakeTest = () => {
                   const userAnswer = answers[index];
                   const isCorrect = userAnswer === q.correctAnswer;
                   return (
-                    <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div key={q.id} className={`p-4 rounded-lg ${isCorrect ? "bg-green-50" : "bg-red-50"}`}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-semibold text-black">السؤال {index + 1}</span>
                         {isCorrect ? (
@@ -342,9 +346,7 @@ const TakeTest = () => {
                 })}
               </div>
               <div className="mt-8 text-center">
-                <Button onClick={() => navigate("/qiyas-tests")}>
-                  العودة للاختبارات
-                </Button>
+                <Button onClick={() => navigate("/qiyas-tests")}>العودة للاختبارات</Button>
               </div>
             </CardContent>
           </Card>
@@ -373,9 +375,9 @@ const TakeTest = () => {
                 </div>
               </div>
               {/* Question prompt: show image if available, otherwise text */}
-              {question.image_url ? (
+              {question.imageUrl ? (
                 <img
-                  src={question.image_url}
+                  src={question.imageUrl}
                   alt="صورة السؤال"
                   className="mb-6 max-h-64 mx-auto rounded border"
                 />
