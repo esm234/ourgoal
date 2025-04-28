@@ -43,7 +43,7 @@ const Home = () => {
             </div>
             <div className="lg:w-1/2">
               <img
-                src="https://lh7-us.googleusercontent.com/pbYvrUffQasCqI5i42vKBc3U55GKAFa-N5ay84n7xjEiGM7a6x4drbhVuZRM6KwBCPtzls-Yb7u-QNDrUPksvxC7J14YXurFNIibdg_Hjrm2tWSP3pNW4Pt5Wf1x3o5i19QiPihN-xBTyqI7UuvvMO1b0KWQ7nB2XHGm9kr7N1vhVg4mpqJrkhreRlH9MpBTeFnqtKph?key=hEv8vchztg3tFh4Mt59OTQ"
+                src="=https://lh7-us.googleusercontent.com/KSYH2NPv3M7_lKp0UxDsGOcGD4VgGST6-NHzxybVB5TVyisNC7rXCJsMg_fY3OJEjgJxRRhvxUr7HQ6EsqLUwCGUoCrmh5jA8j4JqiiuBTyMLWc7so5jtr6NacI-GmnYsJEpVd2s-59OhERbXIy0UCSlXH7mB1bCqZbJlEisyb7i75wSYozxuXtb6iCfmxjeszJMK3fY?key=hEv8vchztg3tFh4Mt59OTQ"
                 alt="طلاب يدرسون"
                 className="rounded-lg shadow-xl w-full h-auto object-cover"
               />
