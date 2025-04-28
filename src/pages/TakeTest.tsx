@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -183,23 +184,46 @@ const TakeTest = () => {
       ) : [],
       correctAnswer: q.correctAnswer || 0,
       userAnswer: answers[index],
-      explanation: q.explanation || undefined
+      explanation: q.explanation || undefined,
+      image_url: q.image_url
     }));
 
     try {
-      const { error } = await supabase
-        .from('exam_results')
-        .insert({
-          test_id: testId!,
-          user_id: user.id,
-          score: score,
-          correct_answers: correctAnswers,
-          total_questions: questions.length,
-          time_taken: test.duration, // Using test duration as time taken
-          questions_data: questionsData
-        });
+      // Create the data object without the questions_data field first
+      const examResultData = {
+        test_id: testId!,
+        user_id: user.id,
+        score: score,
+        correct_answers: correctAnswers,
+        total_questions: questions.length,
+        time_taken: test.duration // Using test duration as time taken
+      };
 
-      if (error) throw error;
+      // First insert the basic exam result data
+      const { data: examResult, error: insertError } = await supabase
+        .from('exam_results')
+        .insert(examResultData)
+        .select('id')
+        .single();
+
+      if (insertError) throw insertError;
+
+      // If we have the result ID, update with questions_data in a separate operation
+      if (examResult) {
+        const { error: updateError } = await supabase
+          .from('exam_results')
+          .update({ questions_data: questionsData })
+          .eq('id', examResult.id);
+
+        if (updateError) {
+          console.error("Error updating questions data:", updateError);
+          toast({
+            title: "تم حفظ النتيجة",
+            description: "تم حفظ النتائج الأساسية ولكن حدث خطأ في حفظ تفاصيل الأسئلة",
+            variant: "default",
+          });
+        }
+      }
     } catch (error: any) {
       console.error("Error saving result to database:", error);
       toast({
