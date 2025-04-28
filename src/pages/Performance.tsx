@@ -107,10 +107,11 @@ const Performance = () => {
                                         <p className="font-semibold">النتيجة:</p>
                                         <p>{result.score}%</p>
                                       </div>
-                                      <div>
-                                        <p className="font-semibold">الإجابات الصحيحة:</p>
-                                        <p>{result.correctAnswers} من {result.totalQuestions}</p>
-                                      </div>
+                                    </div>
+                                    <div className="border-t pt-4">
+                                      <p className="font-semibold mb-2">ملخص الإجابات:</p>
+                                      <p>عدد الإجابات الصحيحة: {result.correctAnswers} من {result.totalQuestions}</p>
+                                      <p>نسبة النجاح: {result.score}%</p>
                                     </div>
                                     <div className="border-t pt-4 mt-4">
                                       <p className="font-semibold mb-4">تفاصيل الأسئلة:</p>
@@ -128,15 +129,7 @@ const Performance = () => {
                                                   {isCorrect ? "إجابة صحيحة" : "إجابة خاطئة"}
                                                 </Badge>
                                               </div>
-                                              {question.image_url ? (
-                                                <img
-                                                  src={question.image_url}
-                                                  alt="صورة السؤال"
-                                                  className="mb-2 max-h-40 rounded border"
-                                                />
-                                              ) : (
-                                                <p className="mb-2 text-black">{question.text}</p>
-                                              )}
+                                              <p className="mb-2 text-black">{question.text}</p>
                                               <div className="space-y-2">
                                                 <p className="font-semibold text-black">إجابتك:</p>
                                                 <p className="text-black">{question.options[question.userAnswer]}</p>
@@ -178,4 +171,3 @@ const Performance = () => {
 };
 
 export default Performance;
- 

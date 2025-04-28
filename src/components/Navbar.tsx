@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Book, Calculator, BarChart, LogIn, LogOut, Menu, X, User, UserCircle } from "lucide-react";
+import { Home, Book, Calculator, BarChart, LogIn, LogOut, Menu, X, User } from "lucide-react";
 
 const Navbar = () => {
   const { isLoggedIn, username, logout } = useAuth();
@@ -70,13 +70,6 @@ const Navbar = () => {
 
             {isLoggedIn ? (
               <div className="flex items-center">
-                <Link
-                  to="/profile"
-                  className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
-                >
-                  <UserCircle size={20} className="ml-2" />
-                  <span>الملف الشخصي</span>
-                </Link>
                 <div className="flex items-center px-3 py-2 mx-2 text-foreground">
                   <User size={20} className="ml-2" />
                   <span>مرحباً، {username}</span>
@@ -142,14 +135,6 @@ const Navbar = () => {
 
             {isLoggedIn ? (
               <>
-                <Link
-                  to="/profile"
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-muted transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <UserCircle size={20} className="ml-2" />
-                  <span>الملف الشخصي</span>
-                </Link>
                 <div className="flex items-center px-3 py-2 text-foreground">
                   <User size={20} className="ml-2" />
                   <span>مرحباً، {username}</span>
