@@ -1,11 +1,10 @@
-
 import React from "react";
 import { Test } from "@/types/testManagement";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash, PenLine, Check, X, Plus, List } from "lucide-react";
+import { Trash, PenLine, Check, X, Plus, List, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface TestListProps {
@@ -13,9 +12,10 @@ interface TestListProps {
   loading: boolean;
   onDelete: (id: string) => void;
   onTogglePublish: (id: string, currentStatus: boolean) => void;
+  getCategoryText?: (category?: string) => string;
 }
 
-const TestList = ({ tests, loading, onDelete, onTogglePublish }: TestListProps) => {
+const TestList = ({ tests, loading, onDelete, onTogglePublish, getCategoryText }: TestListProps) => {
   if (loading) {
     return (
       <div className="space-y-3">
@@ -43,6 +43,7 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish }: TestListProps) 
         <TableRow>
           <TableHead className="text-right">العنوان</TableHead>
           <TableHead className="text-right">المدة</TableHead>
+          <TableHead className="text-right">التصنيف</TableHead>
           <TableHead className="text-right">الحالة</TableHead>
           <TableHead className="text-right">الإجراءات</TableHead>
         </TableRow>
@@ -52,6 +53,12 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish }: TestListProps) 
           <TableRow key={test.id}>
             <TableCell className="font-medium">{test.title}</TableCell>
             <TableCell>{test.duration} دقيقة</TableCell>
+            <TableCell>
+              <Badge variant="outline" className={`${test.category === 'sample' ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-green-500/10 border-green-500/30 text-green-500'}`}>
+                <BookOpen className="h-3 w-3 mr-1" />
+                {getCategoryText ? getCategoryText(test.category) : test.category === 'sample' ? 'اختبارات نموذجية' : 'اختبارات اسبوعية'}
+              </Badge>
+            </TableCell>
             <TableCell>
               <Badge variant={test.published ? "default" : "outline"}>
                 {test.published ? "منشور" : "مسودة"}
