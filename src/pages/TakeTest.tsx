@@ -13,6 +13,7 @@ import { ArrowLeft, ArrowRight, Clock, AlertCircle, HelpCircle, BookOpen, Chevro
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import Leaderboard from "@/components/Leaderboard";
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -217,17 +218,78 @@ const TakeTest = () => {
     // If user is logged in, also save to database
     if (isLoggedIn && user) {
       try {
-        await supabase.from("exam_results").insert({
-          test_id: testId,
+        // Ensure testId is a string
+        const testIdString = String(testId);
+        
+        console.log("Saving test result to database with data:", {
+          test_id: testIdString,
+          user_id: user.id,
+          score: score,
+          total_questions: questions.length,
+          time_taken: test.duration
+        });
+
+        const { data, error } = await supabase.from("exam_results").insert({
+          test_id: testIdString,
           user_id: user.id,
           score: score,
           total_questions: questions.length,
           time_taken: test.duration, // Using test duration as time taken
           questions_data: result.questions // Store questions data in the database
+        }).select();
+
+        if (error) {
+          console.error("Error saving result to Supabase:", error);
+          throw error;
+        }
+
+        console.log("Test result saved successfully:", data);
+        
+        // Verify the result was saved by checking the database
+        await verifyResultSaved(user.id, testIdString);
+        
+        // Show success message
+        toast({
+          title: "تم حفظ النتيجة",
+          description: "تم حفظ نتيجة الاختبار بنجاح",
         });
       } catch (error) {
         console.error("Error saving result to database:", error);
+        toast({
+          title: "خطأ في حفظ النتيجة",
+          description: "حدث خطأ أثناء حفظ النتيجة، يرجى المحاولة مرة أخرى",
+          variant: "destructive",
+        });
       }
+    }
+  };
+
+  // Function to verify the result was saved
+  const verifyResultSaved = async (userId: string, testIdString: string) => {
+    try {
+      // Wait briefly to allow the database to process the insert
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const { data, error } = await supabase
+        .from("exam_results")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("test_id", testIdString);
+        
+      if (error) {
+        console.error("Error verifying result:", error);
+        return;
+      }
+      
+      console.log("Verification check - Results found:", data);
+      
+      if (!data || data.length === 0) {
+        console.warn("Verification failed: Result not found in database after saving!");
+      } else {
+        console.log("Verification successful: Result found in database!");
+      }
+    } catch (err) {
+      console.error("Error during verification:", err);
     }
   };
 
@@ -358,69 +420,90 @@ const TakeTest = () => {
       <Layout>
         <div className="min-h-screen py-8 px-4" style={{ backgroundColor: 'hsl(222, 47%, 11%)' }}>
           <div className="container mx-auto max-w-4xl">
-            <Card className="bg-gray-800/80 border-0 shadow-xl overflow-hidden">
-              <div className="bg-primary/80 p-6 text-center">
-                <h1 className="text-3xl font-bold text-white mb-2">نتائج الاختبار</h1>
-                <p className="text-white/80">{test?.title || 'اختبار'}</p>
-              </div>
-              <CardContent className="p-6">
-                <div className="mb-8">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-gray-700/30 rounded-xl">
-                    <div className="text-center md:text-right space-y-1">
-                      <h2 className="text-white text-lg font-medium">النتيجة النهائية</h2>
-                      <p className="text-gray-400 text-sm">إجمالي الأسئلة: {questions.length}</p>
-                    </div>
-                    
-                    <div className="relative w-32 h-32">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-3xl font-bold text-primary">
-                          {Math.round((answers.reduce((acc, answer, index) => {
-                            return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                          }, 0) / questions.length) * 100)}%
-                        </span>
-                      </div>
-                      <svg viewBox="0 0 36 36" className="-rotate-90 w-32 h-32">
-                        <path
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          fill="none"
-                          stroke="#444"
-                          strokeWidth="3"
-                          strokeDasharray="100, 100"
-                        />
-                        <path
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          fill="none"
-                          stroke={
-                            Math.round((answers.reduce((acc, answer, index) => {
-                              return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                            }, 0) / questions.length) * 100) >= 90 ? '#10b981' : 
-                            Math.round((answers.reduce((acc, answer, index) => {
-                              return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                            }, 0) / questions.length) * 100) >= 70 ? '#3b82f6' : 
-                            Math.round((answers.reduce((acc, answer, index) => {
-                              return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                            }, 0) / questions.length) * 100) >= 50 ? '#f59e0b' : '#ef4444'
-                          }
-                          strokeWidth="3"
-                          strokeDasharray={`${Math.round((answers.reduce((acc, answer, index) => {
-                            return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                          }, 0) / questions.length) * 100)}, 100`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                    
-                    <div className="text-center md:text-left space-y-1">
-                      <p className="text-white text-lg">
-                        {answers.reduce((acc, answer, index) => {
-                          return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                        }, 0)} / {questions.length}
-                      </p>
-                      <p className="text-gray-400 text-sm">الإجابات الصحيحة</p>
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <div className="lg:col-span-2">
+                <Card className="bg-gray-800/80 border-0 shadow-xl overflow-hidden">
+                  <div className="bg-primary/80 p-6 text-center">
+                    <h1 className="text-3xl font-bold text-white mb-2">نتائج الاختبار</h1>
+                    <p className="text-white/80">{test?.title || 'اختبار'}</p>
                   </div>
-                </div>
-                
+                  <CardContent className="p-6">
+                    <div className="mb-8">
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-gray-700/30 rounded-xl">
+                        <div className="text-center md:text-right space-y-1">
+                          <h2 className="text-white text-lg font-medium">النتيجة النهائية</h2>
+                          <p className="text-gray-400 text-sm">إجمالي الأسئلة: {questions.length}</p>
+                        </div>
+                        
+                        <div className="relative w-32 h-32">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-3xl font-bold text-primary">
+                              {Math.round((answers.reduce((acc, answer, index) => {
+                                return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+                              }, 0) / questions.length) * 100)}%
+                            </span>
+                          </div>
+                          <svg viewBox="0 0 36 36" className="-rotate-90 w-32 h-32">
+                            <path
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none"
+                              stroke="#444"
+                              strokeWidth="3"
+                              strokeDasharray="100, 100"
+                            />
+                            <path
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none"
+                              stroke={
+                                Math.round((answers.reduce((acc, answer, index) => {
+                                  return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+                                }, 0) / questions.length) * 100) >= 90 ? '#10b981' : 
+                                Math.round((answers.reduce((acc, answer, index) => {
+                                  return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+                                }, 0) / questions.length) * 100) >= 70 ? '#3b82f6' : 
+                                Math.round((answers.reduce((acc, answer, index) => {
+                                  return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+                                }, 0) / questions.length) * 100) >= 50 ? '#f59e0b' : '#ef4444'
+                              }
+                              strokeWidth="3"
+                              strokeDasharray={`${Math.round((answers.reduce((acc, answer, index) => {
+                                return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+                              }, 0) / questions.length) * 100)}, 100`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </div>
+                        
+                        <div className="text-center md:text-left space-y-1">
+                          <p className="text-white text-lg">
+                            {answers.reduce((acc, answer, index) => {
+                              return acc + (answer === questions[index].correctAnswer ? 1 : 0);
+                            }, 0)} / {questions.length}
+                          </p>
+                          <p className="text-gray-400 text-sm">الإجابات الصحيحة</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-8 text-center">
+                      <Button 
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg"
+                        onClick={() => navigate("/qiyas-tests")}
+                      >
+                        العودة للاختبارات
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div>
+                <Leaderboard testId={testId!} />
+              </div>
+            </div>
+            
+            <Card className="bg-gray-800/80 border-0 shadow-xl overflow-hidden mt-6">
+              <CardContent className="p-6">
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <ClipboardIcon className="w-5 h-5 text-primary" />
@@ -528,15 +611,6 @@ const TakeTest = () => {
                       </div>
                     );
                   })}
-                </div>
-                
-                <div className="mt-8 text-center">
-                  <Button 
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg"
-                    onClick={() => navigate("/qiyas-tests")}
-                  >
-                    العودة للاختبارات
-                  </Button>
                 </div>
               </CardContent>
             </Card>
