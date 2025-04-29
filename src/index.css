@@ -48,6 +48,12 @@
   }
 }
 
+@layer components {
+  .font-tajawal {
+    font-family: 'Tajawal', sans-serif;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
