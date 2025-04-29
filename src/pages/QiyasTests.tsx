@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Plus, PenLine } from "lucide-react";
+import { ArrowRight, Plus, PenLine, Clock, Users, BookOpen, Trophy, Star, ChevronRight, CheckCircle2 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { testQuestions } from "@/data/testQuestions";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import { Test } from "@/types/testManagement";
 
 interface TestType {
   id: string;
@@ -16,6 +20,14 @@ interface TestType {
   description: string;
   numberOfQuestions: number;
   duration: number; // in minutes
+  category?: 'sample' | 'user'; // Added category field
+}
+
+// Extended test type that includes numberOfQuestions
+interface ExtendedTest extends Test {
+  numberOfQuestions: number;
+  questions: any[];
+  category: 'sample' | 'user';
 }
 
 const mockTests: TestType[] = [
@@ -25,6 +37,7 @@ const mockTests: TestType[] = [
     description: "اختبار مختلط (لفظي وكمي) يحاكي اختبار القدرات العامة",
     numberOfQuestions: 50,
     duration: 75,
+    category: 'sample',
   },
   {
     id: "test-2",
@@ -32,6 +45,7 @@ const mockTests: TestType[] = [
     description: "اختبار مختلط (لفظي وكمي) مع تركيز على الأسئلة اللفظية",
     numberOfQuestions: 50,
     duration: 75,
+    category: 'sample',
   },
   {
     id: "test-3",
@@ -39,6 +53,7 @@ const mockTests: TestType[] = [
     description: "اختبار مختلط (لفظي وكمي) مع تركيز على الأسئلة الكمية",
     numberOfQuestions: 50,
     duration: 75,
+    category: 'sample',
   },
   {
     id: "test-4",
@@ -46,6 +61,7 @@ const mockTests: TestType[] = [
     description: "اختبار سريع لتقييم مستواك الحالي",
     numberOfQuestions: 20,
     duration: 30,
+    category: 'sample',
   },
   {
     id: "test-5",
@@ -53,6 +69,7 @@ const mockTests: TestType[] = [
     description: "اختبار سريع للتدرب على الأسئلة الأكثر صعوبة",
     numberOfQuestions: 20,
     duration: 30,
+    category: 'sample',
   },
   {
     id: "test-6",
@@ -60,260 +77,381 @@ const mockTests: TestType[] = [
     description: "اختبار شامل يحاكي الاختبار الحقيقي بالكامل",
     numberOfQuestions: 100,
     duration: 150,
+    category: 'sample',
   },
 ];
+
+// Card variants for animation
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  })
+};
 
 const QiyasTests = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isLoggedIn, role } = useAuth();
-  const [userTests, setUserTests] = useState<any[]>([]);
+  const [userTests, setUserTests] = useState<ExtendedTest[]>([]);
+  const [sampleTests, setSampleTests] = useState<ExtendedTest[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("sample-tests");
 
   useEffect(() => {
     if (isLoggedIn) {
-      fetchUserTests();
+      fetchTests();
+    } else {
+      // If not logged in, still fetch published tests
+      fetchTests();
     }
   }, [isLoggedIn]);
 
-  const fetchUserTests = async () => {
+  const fetchTests = async () => {
     setLoading(true);
     try {
-      // Get published tests created by users
       const { data, error } = await supabase
         .from("tests")
         .select("*, questions(*)")
-        .eq("published", true)
-        .order("created_at", { ascending: false });
+        .eq("published", true);
 
       if (error) throw error;
 
-      // Map tests to include question count
-      const testsWithQuestionCount = data.map(test => ({
-        ...test,
-        numberOfQuestions: test.questions?.length || 0
-      }));
+      console.log("Raw data from database:", data);
 
-      setUserTests(testsWithQuestionCount);
-    } catch (error) {
-      console.error("Error fetching user tests:", error);
+      // Map tests to include question count and ensure they have proper category
+      const testsWithDetails = data.map(test => ({
+        ...test,
+        numberOfQuestions: test.questions?.length || 0,
+        category: test.category || 'user' // Ensure category exists, default to 'user'
+      })) as ExtendedTest[];
+
+      console.log("Tests with added details:", testsWithDetails);
+
+      // Filter tests by category (explicitly check for 'sample' and anything else goes to user)
+      const sampleTestsData = testsWithDetails.filter(test => {
+        const isSample = test.category === 'sample';
+        console.log(`Test "${test.title}" category: "${test.category}" -> isSample: ${isSample}`);
+        return isSample;
+      });
+      
+      const userTestsData = testsWithDetails.filter(test => test.category !== 'sample');
+      
+      console.log("Filtered sample tests:", sampleTestsData);
+      console.log("Filtered user tests:", userTestsData);
+
+      setUserTests(userTestsData);
+      setSampleTests(sampleTestsData);
+    } catch (error: any) {
+      console.error("Error fetching tests:", error);
+      toast({
+        title: "خطأ في جلب الاختبارات",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleStartTest = (testId: string) => {
+    // Check if it's one of our static mock tests
     const testData = testQuestions.find(test => test.testId === testId);
     
     if (testData) {
       navigate(`/qiyas-tests/${testId}`);
     } else {
-      toast({
-        title: "قريباً",
-        description: "سيتم إطلاق هذا الاختبار التجريبي قريباً",
-      });
+      // Otherwise, try to find it in our database tests
+      const dbTest = [...sampleTests, ...userTests].find(test => test.id === testId);
+      
+      if (dbTest) {
+        navigate(`/qiyas-tests/${testId}`);
+      } else {
+        toast({
+          title: "قريباً",
+          description: "سيتم إطلاق هذا الاختبار التجريبي قريباً",
+        });
+      }
     }
   };
 
   const handleEditTest = (testId: string) => {
-    // Check if it's a mock test
-    if (testId.startsWith('test-')) {
-      toast({
-        title: "لا يمكن تعديل الاختبارات النموذجية",
-        description: "هذه الاختبارات النموذجية ولا يمكن تعديلها",
-        variant: "destructive",
-      });
-      return;
-    }
+    // We now allow editing all tests if admin
     navigate(`/test-management/${testId}/edit`);
+  };
+
+  // Get difficulty badge color
+  const getDifficultyColor = (testId: string) => {
+    if (testId === "test-6") return "bg-red-500/20 text-red-500 border-red-600/20";
+    if (testId.includes("5")) return "bg-orange-500/20 text-orange-500 border-orange-600/20";
+    if (testId.includes("4")) return "bg-yellow-500/20 text-yellow-500 border-yellow-600/20";
+    return "bg-green-500/20 text-green-500 border-green-600/20";
+  };
+
+  // Get test card gradient based on id
+  const getCardGradient = (testId: string) => {
+    if (testId === "test-6") return "from-blue-950/40 to-indigo-900/40";
+    if (testId.includes("5")) return "from-indigo-950/40 to-purple-900/40";
+    if (testId.includes("4")) return "from-purple-950/40 to-fuchsia-900/40";
+    if (testId.includes("3")) return "from-emerald-950/40 to-teal-900/40";
+    if (testId.includes("2")) return "from-sky-950/40 to-blue-900/40";
+    return "from-violet-950/40 to-indigo-900/40";
+  };
+
+  const TestCard = ({ test, index, isUserTest = false }: { test: TestType | ExtendedTest, index: number, isUserTest?: boolean }) => {
+    return (
+      <motion.div 
+        custom={index} 
+        initial="hidden" 
+        animate="visible" 
+        variants={cardVariants}
+        className="h-full"
+      >
+        <Card className={`overflow-hidden border border-white/10 bg-gradient-to-br ${getCardGradient(test.id)} hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 h-full group relative`}>
+          <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_75%)]"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 to-primary/20"></div>
+          
+          <CardContent className="p-6 relative">
+            <div className="flex justify-between items-start mb-3">
+              <Badge variant="outline" className={`${getDifficultyColor(test.id)} px-2 py-1 text-xs`}>
+                {test.numberOfQuestions >= 50 
+                  ? "اختبار كامل" 
+                  : test.numberOfQuestions >= 30 
+                    ? "اختبار متوسط" 
+                    : "اختبار قصير"}
+              </Badge>
+              
+              {isLoggedIn && role === "admin" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditTest(test.id)}
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <PenLine className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            
+            <h3 className="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">{test.title}</h3>
+            <p className="text-gray-400 text-sm mb-4 line-clamp-2">{test.description}</p>
+            
+            <div className="flex flex-wrap gap-4 mb-5">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+                  <BookOpen className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span>{test.numberOfQuestions} سؤال</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Clock className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span>{test.duration} دقيقة</span>
+              </div>
+            </div>
+            
+            <Button
+              className="w-full bg-primary/90 hover:bg-primary group-hover:translate-y-0 translate-y-0 transition-all duration-300 overflow-hidden relative"
+              onClick={() => handleStartTest(test.id)}
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                ابدأ الاختبار
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
+              <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
   };
 
   return (
     <Layout>
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
+      <section className="py-16 px-4 min-h-screen relative">
+        <div className="absolute inset-0 bg-grid-white/[0.03] [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_75%)]"></div>
+        
+        <div className="container mx-auto relative z-10">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">اختبارات قياس التجريبية</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <div className="inline-block mb-3">
+              <Badge variant="outline" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/20">
+                تحضير للاختبار
+              </Badge>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">اختبارات قياس التجريبية</h1>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               تدرب على اختبارات تحاكي اختبار القدرات العامة بقسميه اللفظي والكمي
             </p>
           </div>
 
           {isLoggedIn && role === "admin" && (
-            <div className="mb-8 text-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mb-10 text-center"
+            >
               <Link to="/test-management">
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="mr-2" size={16} />
-                  إنشاء اختبارات خاصة بك
+                <Button className="bg-primary/90 hover:bg-primary px-6 py-6 h-auto group relative overflow-hidden">
+                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-primary to-primary-foreground/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
+                    إنشاء اختبارات خاصة بك
+                  </span>
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           )}
 
           <Tabs 
             defaultValue="sample-tests"
             value={activeTab} 
             onValueChange={setActiveTab}
-            className="max-w-3xl mx-auto mb-8"
+            className="max-w-3xl mx-auto mb-12"
           >
-            <TabsList className="grid grid-cols-2 w-[400px] mx-auto">
-              <TabsTrigger value="sample-tests">اختبارات نموذجية</TabsTrigger>
-              <TabsTrigger value="user-tests">اختبارات المستخدمين</TabsTrigger>
+            <TabsList className="grid grid-cols-2 w-[400px] mx-auto bg-background/30 p-1 backdrop-blur-sm">
+              <TabsTrigger 
+                value="sample-tests" 
+                className="data-[state=active]:bg-primary/90 data-[state=active]:text-white"
+              >
+                اختبارات نموذجية
+              </TabsTrigger>
+              <TabsTrigger 
+                value="user-tests"
+                className="data-[state=active]:bg-primary/90 data-[state=active]:text-white"
+              >
+                اختبارات اسبوعية
+              </TabsTrigger>
             </TabsList>
-          </Tabs>
 
-          {activeTab === "sample-tests" && (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {mockTests.map((test) => (
-                <Card key={test.id} className="overflow-hidden border-2 border-border bg-secondary hover:border-primary transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-bold">{test.title}</h3>
-                      {isLoggedIn && role === "admin" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditTest(test.id)}
-                        >
-                          <PenLine className="h-4 w-4 mr-1" />
-                          تعديل
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground mb-4">{test.description}</p>
-                    <div className="flex justify-between text-sm text-muted-foreground mb-6">
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 ml-1 text-primary"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        {test.numberOfQuestions} سؤال
-                      </span>
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 ml-1 text-primary"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        {test.duration} دقيقة
-                      </span>
-                    </div>
-                    <Button
-                      className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
-                      onClick={() => handleStartTest(test.id)}
-                    >
-                      ابدأ الاختبار
-                      <ArrowRight className="mr-2" size={16} />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {activeTab === "user-tests" && (
-            <div>
-              {loading ? (
-                <div className="text-center py-10">
-                  <p>جاري تحميل الاختبارات...</p>
-                </div>
-              ) : userTests.length > 0 ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {userTests.map((test) => (
-                    <Card key={test.id} className="overflow-hidden border-2 border-border bg-secondary hover:border-primary transition-colors">
+            <TabsContent value="sample-tests" className="mt-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {loading ? (
+                  // Skeleton loader for sample tests
+                  [1, 2, 3].map((i) => (
+                    <Card key={i} className="overflow-hidden border border-white/10 bg-gradient-to-br from-gray-950/40 to-gray-900/40">
                       <CardContent className="p-6">
-                        <h3 className="text-xl font-bold mb-2">{test.title}</h3>
-                        <p className="text-muted-foreground mb-4">{test.description}</p>
-                        <div className="flex justify-between text-sm text-muted-foreground mb-6">
-                          <span className="flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 ml-1 text-primary"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            {test.numberOfQuestions} سؤال
-                          </span>
-                          <span className="flex items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 ml-1 text-primary"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            {test.duration} دقيقة
-                          </span>
+                        <Skeleton className="h-6 w-32 mb-3" />
+                        <Skeleton className="h-8 w-full mb-2" />
+                        <Skeleton className="h-4 w-4/5 mb-6" />
+                        <div className="flex gap-4 mb-6">
+                          <Skeleton className="h-8 w-24" />
+                          <Skeleton className="h-8 w-24" />
                         </div>
-                        <Button
-                          className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
-                          onClick={() => navigate(`/qiyas-tests/${test.id}`)}
-                        >
-                          ابدأ الاختبار
-                          <ArrowRight className="mr-2" size={16} />
-                        </Button>
+                        <Skeleton className="h-10 w-full" />
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : sampleTests.length > 0 ? (
+                  // Database sample tests
+                  sampleTests.map((test, index) => (
+                    <TestCard key={test.id} test={test} index={index} />
+                  ))
+                ) : (
+                  // Fallback to static sample tests if none in database
+                  mockTests.map((test, index) => (
+                    <TestCard key={test.id} test={test} index={index} />
+                  ))
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="user-tests" className="mt-8">
+              {loading ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="overflow-hidden border border-white/10 bg-gradient-to-br from-gray-950/40 to-gray-900/40">
+                      <CardContent className="p-6">
+                        <Skeleton className="h-6 w-32 mb-3" />
+                        <Skeleton className="h-8 w-full mb-2" />
+                        <Skeleton className="h-4 w-4/5 mb-6" />
+                        <div className="flex gap-4 mb-6">
+                          <Skeleton className="h-8 w-24" />
+                          <Skeleton className="h-8 w-24" />
+                        </div>
+                        <Skeleton className="h-10 w-full" />
                       </CardContent>
                     </Card>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-10">
-                  <p className="text-muted-foreground mb-4">لا توجد اختبارات منشورة من المستخدمين حتى الآن</p>
-                  {isLoggedIn && role === "admin" ? (
-                    <Link to="/test-management">
-                      <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="mr-2" size={16} />
-                        كن أول من ينشئ اختباراً
-                      </Button>
-                    </Link>
-                  ) : isLoggedIn ? (
-                    <p>يمكن للمشرفين فقط إنشاء اختبارات جديدة</p>
-                  ) : (
-                    <Link to="/login">
-                      <Button className="bg-primary hover:bg-primary/90">
-                        تسجيل الدخول
-                      </Button>
-                    </Link>
-                  )}
+              ) : userTests.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {userTests.map((test, index) => (
+                    <TestCard key={test.id} test={test} index={index} isUserTest={true} />
+                  ))}
                 </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-center py-16 px-4 max-w-md mx-auto"
+                >
+                  <div className="bg-gray-900/50 border border-gray-800 p-8 rounded-xl">
+                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Trophy className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">لا توجد اختبارات منشورة</h3>
+                    <p className="text-gray-400 mb-6">لا توجد اختبارات منشورة من المستخدمين حتى الآن</p>
+                    
+                    {isLoggedIn && role === "admin" ? (
+                      <Link to="/test-management">
+                        <Button className="bg-primary hover:bg-primary/90 w-full">
+                          <Plus className="mr-2" size={16} />
+                          كن أول من ينشئ اختباراً
+                        </Button>
+                      </Link>
+                    ) : isLoggedIn ? (
+                      <p className="text-gray-500 text-sm">يمكن للمشرفين فقط إنشاء اختبارات جديدة</p>
+                    ) : (
+                      <Link to="/login">
+                        <Button className="bg-primary hover:bg-primary/90 w-full">
+                          تسجيل الدخول
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </motion.div>
               )}
+            </TabsContent>
+          </Tabs>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="text-center mt-16"
+          >
+            <div className="bg-primary/10 rounded-2xl border border-primary/20 p-6 max-w-3xl mx-auto">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                <Star className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">استعد لاختبار القدرات العامة</h3>
+              <p className="text-gray-400 mb-4">نوفر لك مجموعة متنوعة من الاختبارات التجريبية لتكون مستعداً بشكل كامل</p>
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                <div className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>اختبارات متنوعة</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>تقييم فوري</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>محاكاة للاختبار الحقيقي</span>
+                </div>
+              </div>
             </div>
-          )}
+          </motion.div>
         </div>
       </section>
     </Layout>
