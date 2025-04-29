@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,9 +42,13 @@ const signupSchema = z.object({
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { isLoggedIn, login, signup } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get the page the user was trying to access before being redirected to login
+  const from = location.state?.from || "/";
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -66,9 +69,9 @@ const Login = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/");
+      navigate(from);
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, from]);
 
   const handleLogin = async (data: z.infer<typeof loginSchema>) => {
     setIsSubmitting(true);
@@ -81,7 +84,7 @@ const Login = () => {
         toast({
           title: "تم تسجيل الدخول بنجاح",
         });
-        navigate("/");
+        navigate(from);
       }
     } catch (error: any) {
       toast({
@@ -104,10 +107,11 @@ const Login = () => {
       } else {
         toast({
           title: "تم إنشاء الحساب بنجاح",
-          description: "يمكنك الآن تسجيل الدخول باستخدام بريدك الإلكتروني وكلمة المرور",
+          description: "سيتم توجيهك لإكمال الملف الشخصي",
         });
-        loginForm.setValue("email", data.email);
-        loginForm.setValue("password", data.password);
+        
+        // Navigate to profile setup instead of setting login form values
+        navigate("/profile-setup");
       }
     } catch (error: any) {
       toast({
