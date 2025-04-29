@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -13,7 +12,7 @@ import { Test } from "@/types/testManagement";
 
 const EditTest = () => {
   const { testId } = useParams();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, role } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [test, setTest] = useState<Test | null>(null);
@@ -24,11 +23,16 @@ const EditTest = () => {
       navigate("/login");
       return;
     }
+    
+    if (role !== "admin") {
+      navigate("/");
+      return;
+    }
 
     if (testId) {
       fetchTestDetails();
     }
-  }, [isLoggedIn, testId]);
+  }, [isLoggedIn, role, testId, navigate]);
 
   const fetchTestDetails = async () => {
     try {
@@ -39,7 +43,14 @@ const EditTest = () => {
         .single();
 
       if (error) throw error;
-      setTest(data);
+      
+      if (data) {
+        const formattedTest: Test = {
+          ...data,
+          category: data.category as 'sample' | 'user'
+        };
+        setTest(formattedTest);
+      }
     } catch (error: any) {
       toast({
         title: "خطأ في جلب تفاصيل الاختبار",
@@ -78,6 +89,10 @@ const EditTest = () => {
       });
     }
   };
+
+  if (!isLoggedIn || role !== "admin") {
+    return null;
+  }
 
   if (loading) {
     return (
