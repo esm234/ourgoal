@@ -30,7 +30,7 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/qiyas-tests" element={<QiyasTests />} />
             <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
-            <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
+                        <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             
