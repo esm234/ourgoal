@@ -13,6 +13,15 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Test } from "@/types/testManagement";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Leaderboard from "@/components/Leaderboard";
 
 interface TestType {
   id: string;
@@ -205,8 +214,11 @@ const QiyasTests = () => {
   };
 
   const TestCard = ({ test, index, isUserTest = false }: { test: TestType | ExtendedTest, index: number, isUserTest?: boolean }) => {
+    // Add a state for the leaderboard dialog
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
+    
     return (
-      <motion.div 
+      <motion.div
         custom={index} 
         initial="hidden" 
         animate="visible" 
@@ -227,16 +239,43 @@ const QiyasTests = () => {
                     : "اختبار قصير"}
               </Badge>
               
-              {isLoggedIn && role === "admin" && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditTest(test.id)}
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  <PenLine className="h-4 w-4" />
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {/* Add Leaderboard button */}
+                <Dialog open={showLeaderboard} onOpenChange={setShowLeaderboard}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-amber-400 hover:text-amber-300 hover:bg-amber-950/30"
+                    >
+                      <Trophy className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-gray-800/95 border-gray-700 text-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                        <Trophy className="h-5 w-5 text-amber-400" />
+                        المتصدرون في {test.title}
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-400">
+                        أفضل 5 طلاب في هذا الاختبار
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Leaderboard testId={test.id} />
+                  </DialogContent>
+                </Dialog>
+                
+                {isLoggedIn && role === "admin" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditTest(test.id)}
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    <PenLine className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
             
             <h3 className="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">{test.title}</h3>
