@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Book, Calculator, BarChart, LogIn, LogOut, Menu, X, User } from "lucide-react";
+import { Home, Book, Calculator, BarChart, LogIn, Menu, X, User } from "lucide-react";
+import LogoutButton from "./LogoutButton";
 
 const Navbar = () => {
-  const { isLoggedIn, username, logout } = useAuth();
+  const { isLoggedIn, username } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleToggleMenu = () => {
@@ -71,14 +72,7 @@ const Navbar = () => {
                   <User size={20} className="ml-2" />
                   <span>الملف الشخصي</span>
                 </Link>
-                <Button
-                  variant="ghost"
-                  className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors"
-                  onClick={logout}
-                >
-                  <LogOut size={20} className="ml-2" />
-                  <span>تسجيل الخروج</span>
-                </Button>
+                <LogoutButton className="px-3 py-2 mx-2 rounded-md hover:bg-muted transition-colors" />
               </div>
             ) : (
               <Link to="/login">
@@ -133,17 +127,11 @@ const Navbar = () => {
                   <User size={20} className="ml-2" />
                   <span>الملف الشخصي</span>
                 </Link>
-                <Button
-                  variant="ghost"
-                  className="flex items-center justify-start px-3 py-2 rounded-md hover:bg-muted transition-colors w-full"
-                  onClick={() => {
-                    logout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <LogOut size={20} className="ml-2" />
-                  <span>تسجيل الخروج</span>
-                </Button>
+                <LogoutButton 
+                  fullWidth 
+                  className="px-3 py-2 rounded-md hover:bg-muted transition-colors" 
+                  onLogoutSuccess={() => setIsMobileMenuOpen(false)}
+                />
               </>
             ) : (
               <Link 
