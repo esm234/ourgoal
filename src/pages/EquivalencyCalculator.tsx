@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Calculator } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Calculator, School, BookOpen, Search, ArrowRight, BarChart4, GraduationCap, Briefcase, Check } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { motion } from "framer-motion";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 
 function calculateFinalEquivalencyScore(highSchoolPercentage: number, qiyasScore: number): number {
   const average = (highSchoolPercentage + qiyasScore) / 2;
@@ -11,7 +18,7 @@ function calculateFinalEquivalencyScore(highSchoolPercentage: number, qiyasScore
   return Math.round(finalScore * 100) / 100; // rounded to 2 decimal places
 }
 
-// Placeholder colleges data (replace with real data later)
+// Complete colleges data
 const collegesMale = [
   { name: "طب القاهرة", minScore: 410.000 },
   { name: "طب أسنان القاهرة", minScore: 410.000 },
@@ -241,6 +248,7 @@ const collegesMale = [
   { name: "معهد الوادي العالي للهندسة والتكنولوجيا قليوبية", minScore: 311.449935 },
   { name: "المعهد العالي للهندسة والتكنولوجيا ببرج العرب بالأسكندرية", minScore: 309.485351 }
 ];
+
 const collegesFemale = [
   { name: "طب أسنان القاهرة", minScore: 410.000000 },
   { name: "طب أسنان الإسكندرية", minScore: 410.000000 },
@@ -492,166 +500,437 @@ const collegesFemale = [
 ];
 
 const EquivalencyCalculator = () => {
-  const [highSchool, setHighSchool] = useState<number | ''>('');
-  const [qiyas, setQiyas] = useState<number | ''>('');
-  const [result, setResult] = useState<number | null>(null);
-  const [showColleges, setShowColleges] = useState(false);
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-
+  const [highSchoolPercentage, setHighSchoolPercentage] = useState("");
+  const [qiyasScore, setQiyasScore] = useState("");
+  const [finalScore, setFinalScore] = useState<number | null>(null);
+  const [gender, setGender] = useState<"male" | "female">("male");
+  const [eligibleColleges, setEligibleColleges] = useState<Array<{ name: string; minScore: number }>>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("calculator");
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (highSchool !== '' && qiyas !== '') {
-      const score = calculateFinalEquivalencyScore(Number(highSchool), Number(qiyas));
-      setResult(score);
-      setShowColleges(false);
-    }
+    setIsCalculating(true);
+    
+    // Simulate calculation with progress
+    setProgress(0);
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 50);
+    
+    setTimeout(() => {
+      const hsPercentage = parseFloat(highSchoolPercentage);
+      const qsScore = parseFloat(qiyasScore);
+      
+      if (!isNaN(hsPercentage) && !isNaN(qsScore)) {
+        const finalEquivalencyScore = calculateFinalEquivalencyScore(hsPercentage, qsScore);
+        setFinalScore(finalEquivalencyScore);
+        
+        // Filter colleges based on eligibility
+        const collegesList = gender === "male" ? collegesMale : collegesFemale;
+        const eligible = collegesList.filter(college => college.minScore <= finalEquivalencyScore);
+        setEligibleColleges(eligible);
+        
+        // Switch to results tab
+        setActiveTab("result");
+      }
+      
+      setIsCalculating(false);
+    }, 600);
   };
 
-  const availableColleges = (gender === 'male' ? collegesMale : collegesFemale).filter(college => result !== null && result >= college.minScore);
+  const resetCalculator = () => {
+    setHighSchoolPercentage("");
+    setQiyasScore("");
+    setFinalScore(null);
+    setEligibleColleges([]);
+    setSearchTerm("");
+    setActiveTab("calculator");
+  };
+
+  // Filter colleges based on search term
+  const filteredColleges = eligibleColleges.filter(college =>
+    college.name.includes(searchTerm)
+  );
 
   return (
     <Layout>
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
+      <section className="py-16 px-4 overflow-hidden relative">
+        <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_75%)]"></div>
+        
+        <div className="container mx-auto max-w-6xl relative z-10">
+          {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-primary">معادلة المسارات</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              احسب معدلك النهائي بناءً على نسبة الثانوية العامة ودرجة اختبار القدرات
-            </p>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-block mb-3"
+            >
+              <Badge variant="outline" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/20">
+                حاسبة النسبة الموزونة
+              </Badge>
+            </motion.div>
+            <motion.h1 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-4xl md:text-5xl font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"
+            >
+              حاسبة المعادلة والقبول بالجامعات
+            </motion.h1>
+            <motion.p 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-lg text-gray-400 max-w-2xl mx-auto"
+            >
+              احسب نسبتك الموزونة ومعرفة الكليات المتاحة لك في الجامعات المصرية
+            </motion.p>
           </div>
 
-          <div className="flex justify-center">
-            <Card className="w-full max-w-md border-2 border-border bg-secondary">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-3xl mx-auto">
+            <TabsList className="grid grid-cols-2 w-[400px] mx-auto bg-background/30 p-1 backdrop-blur-sm">
+              <TabsTrigger 
+                value="calculator"
+                className="data-[state=active]:bg-primary/90 data-[state=active]:text-white"
+              >
+                الحاسبة
+              </TabsTrigger>
+              <TabsTrigger 
+                value="result"
+                className="data-[state=active]:bg-primary/90 data-[state=active]:text-white"
+                disabled={finalScore === null}
+              >
+                النتائج
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="calculator" className="mt-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="border border-white/10 bg-gradient-to-br from-gray-950/40 to-gray-900/40 shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-2xl flex items-center gap-2 mb-2">
+                      <Calculator className="h-6 w-6 text-primary" />
+                      حاسبة النسبة الموزونة
+                    </CardTitle>
+                    <CardDescription>
+                      ادخل نسبة الثانوية العامة ودرجة اختبار القدرات لحساب نسبتك الموزونة
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleCalculate} className="space-y-6">
+                      {/* Gender Selection */}
+                      <div className="space-y-2">
+                        <Label className="text-right block mb-2">الجنس</Label>
+                        <div className="flex justify-center gap-3">
+                          <Button
+                            type="button"
+                            variant={gender === "male" ? "default" : "outline"}
+                            className={`flex-1 ${gender === "male" ? "bg-primary/90" : ""}`}
+                            onClick={() => setGender("male")}
+                          >
+                            ذكر
+                          </Button>
+                          <Button
+                            type="button"
+                            variant={gender === "female" ? "default" : "outline"}
+                            className={`flex-1 ${gender === "female" ? "bg-primary/90" : ""}`}
+                            onClick={() => setGender("female")}
+                          >
+                            أنثى
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* High School Percentage */}
+                      <div className="space-y-2">
+                        <Label className="text-right block">نسبة الثانوية العامة (%)</Label>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={highSchoolPercentage}
+                            onChange={(e) => setHighSchoolPercentage(e.target.value)}
+                            className="pr-4 text-right"
+                            placeholder="مثال: 98.5"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            required
+                          />
+                          <School className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        </div>
+                      </div>
+
+                      {/* Qiyas Score */}
+                      <div className="space-y-2">
+                        <Label className="text-right block">درجة اختبار القدرات</Label>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={qiyasScore}
+                            onChange={(e) => setQiyasScore(e.target.value)}
+                            className="pr-4 text-right"
+                            placeholder="مثال: 85"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            required
+                          />
+                          <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        </div>
+                      </div>
+
+                      {/* Submit Button */}
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-primary/90 hover:bg-primary group relative overflow-hidden"
+                        size="lg"
+                        disabled={isCalculating}
+                      >
+                        {isCalculating ? (
+                          <div className="w-full">
+                            <div className="mb-1">جاري الحساب...</div>
+                            <Progress value={progress} className="h-1.5" />
+                          </div>
+                        ) : (
+                          <>
+                            <span className="relative z-10 flex items-center gap-2">
+                              حساب النسبة الموزونة
+                              <Calculator className="h-4 w-4" />
+                            </span>
+                            <span className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="result" className="mt-8">
+              {finalScore !== null && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-8"
+                >
+                  {/* Result Card */}
+                  <Card className="border border-primary/20 bg-gradient-to-br from-gray-950/60 to-gray-900/60 shadow-lg shadow-primary/5">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-xl flex items-center gap-2">
+                        <BarChart4 className="h-5 w-5 text-primary" />
+                        نتيجة الحساب
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-8 py-4">
+                        <div className="text-center md:text-right space-y-2">
+                          <p className="text-sm text-muted-foreground">البيانات المدخلة:</p>
+                          <div className="flex gap-x-8 gap-y-2 flex-wrap justify-center md:justify-start">
+                            <div className="bg-gray-800/50 px-3 py-1.5 rounded-md border border-gray-700/50">
+                              <p className="text-xs text-gray-400">الثانوية العامة</p>
+                              <p className="font-bold text-white">{highSchoolPercentage}%</p>
+                            </div>
+                            <div className="bg-gray-800/50 px-3 py-1.5 rounded-md border border-gray-700/50">
+                              <p className="text-xs text-gray-400">اختبار القدرات</p>
+                              <p className="font-bold text-white">{qiyasScore}</p>
+                            </div>
+                            <div className="bg-gray-800/50 px-3 py-1.5 rounded-md border border-gray-700/50">
+                              <p className="text-xs text-gray-400">الجنس</p>
+                              <p className="font-bold text-white">{gender === "male" ? "ذكر" : "أنثى"}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="relative w-28 h-28 mx-auto">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-3xl font-bold text-primary">{finalScore}</span>
+                            </div>
+                            <svg viewBox="0 0 36 36" className="-rotate-90 w-28 h-28">
+                              <path
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="#444"
+                                strokeWidth="3"
+                                strokeDasharray="100, 100"
+                              />
+                              <path
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke={finalScore >= 400 ? '#4ade80' : finalScore >= 380 ? '#3b82f6' : finalScore >= 350 ? '#f59e0b' : '#ef4444'}
+                                strokeWidth="3"
+                                strokeDasharray={`${Math.min((finalScore / 410) * 100, 100)}, 100`}
+                                strokeLinecap="round"
+                                className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+                              />
+                            </svg>
+                          </div>
+                          <p className="mt-2 font-medium text-lg">النسبة الموزونة</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-6 pt-6 border-t border-gray-800/70">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center">
+                            <GraduationCap className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">الكليات المتاحة</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {eligibleColleges.length > 0 
+                                ? `يمكنك التقديم إلى ${eligibleColleges.length} كلية`
+                                : "لا توجد كليات متاحة بهذه النسبة"}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 my-4">
+                          <Badge variant={finalScore >= 400 ? "default" : "outline"} className="text-xs">
+                            القمة {finalScore >= 400 ? <Check className="h-3 w-3 ml-1" /> : null}
+                          </Badge>
+                          <Badge variant={finalScore >= 380 ? "default" : "outline"} className="text-xs">
+                            ممتاز {finalScore >= 380 ? <Check className="h-3 w-3 ml-1" /> : null}
+                          </Badge>
+                          <Badge variant={finalScore >= 350 ? "default" : "outline"} className="text-xs">
+                            جيد {finalScore >= 350 ? <Check className="h-3 w-3 ml-1" /> : null}
+                          </Badge>
+                        </div>
+                        
+                        <Button 
+                          onClick={resetCalculator} 
+                          variant="outline" 
+                          className="w-full mt-2"
+                        >
+                          حساب جديد
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Colleges List */}
+                  {eligibleColleges.length > 0 && (
+                    <Card className="border border-white/10 bg-gradient-to-br from-gray-950/40 to-gray-900/40">
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-center">
+                          <CardTitle className="text-xl flex items-center gap-2">
+                            <Briefcase className="h-5 w-5 text-primary" />
+                            الكليات المتاحة
+                          </CardTitle>
+                          <Badge variant="outline">
+                            {eligibleColleges.length} كلية
+                          </Badge>
+                        </div>
+                        <CardDescription>
+                          الكليات التي يمكنك التقديم إليها بناءً على نسبتك الموزونة
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="relative mb-4">
+                          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="ابحث عن كلية..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 text-right"
+                          />
+                        </div>
+
+                        <div className="space-y-2 mt-4 max-h-[400px] overflow-y-auto pr-2 
+                          scrollbar-thin scrollbar-thumb-primary/40 scrollbar-track-gray-800/20 
+                          hover:scrollbar-thumb-primary/60 scrollbar-thumb-rounded-full 
+                          scrollbar-track-rounded-full">
+                          {filteredColleges.length > 0 ? (
+                            filteredColleges.map((college, index) => (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.03 }}
+                                className="flex justify-between items-center p-3 bg-gray-800/40 rounded-md border border-gray-700/30 hover:border-primary/30 hover:bg-gray-800/60 transition-colors"
+                              >
+                                <Badge 
+                                  variant="outline" 
+                                  className={`
+                                    ${college.minScore >= 400 ? 'bg-green-900/20 text-green-400 border-green-700/30' : 
+                                    college.minScore >= 380 ? 'bg-blue-900/20 text-blue-400 border-blue-700/30' : 
+                                    'bg-yellow-900/20 text-yellow-400 border-yellow-700/30'}
+                                  `}
+                                >
+                                  {college.minScore}
+                                </Badge>
+                                <span className="font-medium text-sm text-right">{college.name}</span>
+                              </motion.div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8">
+                              <p className="text-muted-foreground">لا توجد نتائج للبحث</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter className="text-xs text-center text-muted-foreground pt-2 border-t border-gray-800/30">
+                        ملاحظة: هذه النتائج تقريبية وقد تختلف النسب الفعلية عن السنوات السابقة
+                      </CardFooter>
+                    </Card>
+                  )}
+                </motion.div>
+              )}
+            </TabsContent>
+          </Tabs>
+          
+          {/* Info Cards */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-16 grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+          >
+            <Card className="border border-white/10 bg-gray-900/50 hover:bg-gray-900/70 transition-colors hover:border-primary/20">
               <CardHeader>
-                <CardTitle className="text-center">حساب النسبة المكافئة النهائية</CardTitle>
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                  <Calculator className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg">حاسبة دقيقة</CardTitle>
+                <CardDescription>تحصل على نتائج دقيقة بناءً على معادلة النسبة الموزونة الرسمية</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                {result === null && (
-                  <form onSubmit={handleCalculate} className="space-y-6">
-                    <div className="flex justify-center mb-4 gap-2">
-                      <Button
-                        type="button"
-                        variant={gender === 'male' ? 'default' : 'outline'}
-                        className={gender === 'male' ? 'bg-primary text-white' : ''}
-                        onClick={() => setGender('male')}
-                      >
-                        البنين
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={gender === 'female' ? 'default' : 'outline'}
-                        className={gender === 'female' ? 'bg-primary text-white' : ''}
-                        onClick={() => setGender('female')}
-                      >
-                        البنات
-                      </Button>
-                    </div>
-                    <div>
-                      <label className="block mb-1 text-right">النسبة المئوية للثانوية العامة (من 100)</label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={highSchool}
-                        onChange={e => setHighSchool(e.target.value === '' ? '' : Number(e.target.value))}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-1 text-right">درجة قياس (من 100)</label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={qiyas}
-                        onChange={e => setQiyas(e.target.value === '' ? '' : Number(e.target.value))}
-                        required
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center"
-                    >
-                      <Calculator className="ml-2" size={18} />
-                      احسب النتيجة النهائية
-                    </Button>
-                  </form>
-                )}
-
-                {result !== null && !showColleges && (
-                  <div className="mt-8 p-4 bg-background rounded-lg border-2 border-primary text-center">
-                    <div className="flex justify-center mb-4 gap-2">
-                      <Button
-                        type="button"
-                        variant={gender === 'male' ? 'default' : 'outline'}
-                        className={gender === 'male' ? 'bg-primary text-white' : ''}
-                        onClick={() => setGender('male')}
-                      >
-                        البنين
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={gender === 'female' ? 'default' : 'outline'}
-                        className={gender === 'female' ? 'bg-primary text-white' : ''}
-                        onClick={() => setGender('female')}
-                      >
-                        البنات
-                      </Button>
-                    </div>
-                    <h3 className="text-lg font-bold mb-2">المجموع الاعتباري</h3>
-                    <p className="text-4xl font-bold text-primary mb-1">{result} <span className="text-lg text-muted-foreground">/ 410</span></p>
-                    <Button
-                      className="mt-4 w-full"
-                      onClick={() => setShowColleges(true)}
-                    >
-                      عرض الكليات المتاحة
-                    </Button>
-                  </div>
-                )}
-
-                {result !== null && showColleges && (
-                  <div className="mt-8 p-4 bg-background rounded-lg border-2 border-primary text-center">
-                    <div className="flex justify-center mb-4 gap-2">
-                      <Button
-                        type="button"
-                        variant={gender === 'male' ? 'default' : 'outline'}
-                        className={gender === 'male' ? 'bg-primary text-white' : ''}
-                        onClick={() => setGender('male')}
-                      >
-                        البنين
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={gender === 'female' ? 'default' : 'outline'}
-                        className={gender === 'female' ? 'bg-primary text-white' : ''}
-                        onClick={() => setGender('female')}
-                      >
-                        البنات
-                      </Button>
-                    </div>
-                    <h3 className="text-lg font-bold mb-4">الكليات المتاحة</h3>
-                    {availableColleges.length > 0 ? (
-                      <ul className="text-right">
-                        {availableColleges.map(college => (
-                          <li key={college.name} className="mb-2 font-semibold text-primary/90 bg-primary/10 rounded px-3 py-2">
-                            {college.name} — {college.minScore}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>لا توجد كليات متاحة لهذا المجموع</p>
-                    )}
-                    <Button
-                      className="mt-4 w-full"
-                      onClick={() => setShowColleges(false)}
-                    >
-                      العودة للنتيجة
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
             </Card>
-          </div>
+            
+            <Card className="border border-white/10 bg-gray-900/50 hover:bg-gray-900/70 transition-colors hover:border-primary/20">
+              <CardHeader>
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg">معرفة الكليات المتاحة</CardTitle>
+                <CardDescription>اكتشف الكليات التي يمكنك التقديم إليها بناءً على نسبتك الموزونة</CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <Card className="border border-white/10 bg-gray-900/50 hover:bg-gray-900/70 transition-colors hover:border-primary/20">
+              <CardHeader>
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                  <BarChart4 className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg">بيانات محدّثة</CardTitle>
+                <CardDescription>نسب القبول مبنية على بيانات السنوات السابقة مع تحديثات دورية</CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
         </div>
       </section>
     </Layout>
