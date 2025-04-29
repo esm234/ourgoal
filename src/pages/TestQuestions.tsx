@@ -14,7 +14,7 @@ import { Test, Question, CreateQuestionForm } from "@/types/testManagement";
 
 const TestQuestions = () => {
   const { testId } = useParams();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, role } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("questions-list");
@@ -28,12 +28,22 @@ const TestQuestions = () => {
       navigate("/login");
       return;
     }
+    
+    if (role !== "admin") {
+      navigate("/");
+      return;
+    }
 
     if (testId) {
       fetchTestDetails();
       fetchQuestions();
     }
-  }, [isLoggedIn, testId]);
+  }, [isLoggedIn, role, testId, navigate]);
+
+  // Early return if not authenticated
+  if (!isLoggedIn || role !== "admin") {
+    return null;
+  }
 
   const fetchTestDetails = async () => {
     try {
@@ -44,7 +54,14 @@ const TestQuestions = () => {
         .single();
 
       if (error) throw error;
-      setTest(data);
+      
+      if (data) {
+        const formattedTest: Test = {
+          ...data,
+          category: data.category as 'sample' | 'user'
+        };
+        setTest(formattedTest);
+      }
     } catch (error: any) {
       toast({
         title: "خطأ في جلب تفاصيل الاختبار",
