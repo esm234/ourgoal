@@ -56,4 +56,6 @@ export interface ExtendedQuestion {
   created_at: string;
   options: (Option | { text: string })[] | string[]; // Can be Option[], simple objects, or string[]
   correctAnswer?: number; // Index of the correct answer
+  imageUrl?: string; // URL for question image
+  image_url?: string; // Database field for the image URL
 }
