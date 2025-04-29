@@ -1,4 +1,3 @@
-
 export interface Test {
   id: string;
   title: string;
@@ -7,6 +6,7 @@ export interface Test {
   created_at: string;
   user_id: string;
   published: boolean;
+  category?: 'sample' | 'user';
 }
 
 export interface Question {
@@ -32,6 +32,7 @@ export interface CreateTestForm {
   title: string;
   description: string;
   duration: number;
+  category: 'sample' | 'user';
 }
 
 export interface CreateQuestionForm {
