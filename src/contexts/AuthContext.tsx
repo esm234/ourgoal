@@ -10,7 +10,7 @@ interface AuthContextType {
   role: string | null;
   login: (email: string, password: string) => Promise<{ error: any | null }>;
   signup: (email: string, password: string) => Promise<{ error: any | null }>;
-  logout: () => Promise<void>;
+  logout: () => Promise<{ error: any | null }>;
   loading: boolean;
 }
 
@@ -82,17 +82,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setLoading(true);
     try {
-      await supabase.auth.signOut();
-      toast({
-        title: "تم تسجيل الخروج بنجاح",
-        description: "سيتم تحويلك إلى الصفحة الرئيسية",
-      });
+      const { error } = await supabase.auth.signOut();
+      
+      // Reset auth state synchronously
+      setIsLoggedIn(false);
+      setUser(null);
+      setSession(null);
+      setUsername(null);
+      setRole(null);
+      
+      return { error };
     } catch (error: any) {
-      toast({
-        title: "خطأ في تسجيل الخروج",
-        description: error.message,
-        variant: "destructive",
-      });
+      return { error };
     } finally {
       setLoading(false);
     }
