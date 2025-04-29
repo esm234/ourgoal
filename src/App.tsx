@@ -1,10 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "@/pages/Home";
 import QiyasTests from "@/pages/QiyasTests";
 import TakeTest from "@/pages/TakeTest";
@@ -15,6 +15,7 @@ import TestManagement from "@/pages/TestManagement";
 import TestQuestions from "@/pages/TestQuestions";
 import EditTest from "@/pages/EditTest";
 import UserProfile from "@/pages/UserProfile";
+import ProfileSetup from "@/pages/ProfileSetup";
 
 const queryClient = new QueryClient();
 
@@ -29,12 +30,32 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/qiyas-tests" element={<QiyasTests />} />
             <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
-                        <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
+            <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/test-management" element={<TestManagement />} />
-            <Route path="/test-management/:testId/questions" element={<TestQuestions />} />
-            <Route path="/test-management/:testId/edit" element={<EditTest />} />
-            <Route path="/user-profile" element={<UserProfile />} />
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            
+            {/* Protected Routes */}
+            <Route path="/test-management" element={
+              <ProtectedRoute>
+                <TestManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/test-management/:testId/questions" element={
+              <ProtectedRoute>
+                <TestQuestions />
+              </ProtectedRoute>
+            } />
+            <Route path="/test-management/:testId/edit" element={
+              <ProtectedRoute>
+                <EditTest />
+              </ProtectedRoute>
+            } />
+            <Route path="/user-profile" element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
