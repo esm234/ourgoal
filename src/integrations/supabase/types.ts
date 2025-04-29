@@ -150,6 +150,7 @@ export type Database = {
           published: boolean
           title: string
           user_id: string
+          category: string
         }
         Insert: {
           created_at?: string
@@ -159,6 +160,7 @@ export type Database = {
           published?: boolean
           title: string
           user_id: string
+          category?: string
         }
         Update: {
           created_at?: string
@@ -168,8 +170,17 @@ export type Database = {
           published?: boolean
           title?: string
           user_id?: string
+          category?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
