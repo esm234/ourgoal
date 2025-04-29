@@ -93,12 +93,12 @@ const TakeTest = () => {
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">تسجيل الدخول مطلوب</h2>
             <p className="text-gray-300 mb-6">يجب تسجيل الدخول لبدء الاختبار</p>
-            <Button
+          <Button
               className="bg-primary text-white w-full py-2 rounded-lg hover:bg-primary/90"
-              onClick={() => navigate('/login')}
-            >
-              الذهاب لتسجيل الدخول
-            </Button>
+            onClick={() => navigate('/login')}
+          >
+            الذهاب لتسجيل الدخول
+          </Button>
           </div>
         </div>
       </Layout>
@@ -131,9 +131,9 @@ const TakeTest = () => {
             title: `اختبار تجريبي ${staticTest.testId}`
           });
           setQuestions(staticTest.questions.map(q => ({
-            ...q,
-            imageUrl: q.image_url || ""
-          })) as ExtendedQuestion[]);
+  ...q,
+  imageUrl: q.image_url || ""
+})) as ExtendedQuestion[]);
           setLoading(false);
           return;
         } else {
@@ -503,17 +503,17 @@ const TakeTest = () => {
             </div>
             
             <Card className="bg-gray-800/80 border-0 shadow-xl overflow-hidden mt-6">
-              <CardContent className="p-6">
-                <div className="space-y-6">
+            <CardContent className="p-6">
+              <div className="space-y-6">
                   <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <ClipboardIcon className="w-5 h-5 text-primary" />
                     نتائج الأسئلة
                   </h3>
                   
-                  {questions.map((q, index) => {
-                    const userAnswer = answers[index];
-                    const isCorrect = userAnswer === q.correctAnswer;
-                    return (
+                {questions.map((q, index) => {
+                  const userAnswer = answers[index];
+                  const isCorrect = userAnswer === q.correctAnswer;
+                  return (
                       <div key={q.id || index} className={`p-6 rounded-xl border transition-all ${
                         isCorrect ? "bg-green-900/20 border-green-800/50" : "bg-red-900/20 border-red-800/50"
                       }`}>
@@ -521,12 +521,12 @@ const TakeTest = () => {
                           <div className={`mt-1 w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                             isCorrect ? 'bg-green-600/30' : 'bg-red-600/30'
                           }`}>
-                            {isCorrect ? (
+                        {isCorrect ? (
                               <Check className="h-4 w-4 text-green-400" />
-                            ) : (
+                        ) : (
                               <X className="h-4 w-4 text-red-400" />
-                            )}
-                          </div>
+                        )}
+                      </div>
                           <div className="flex-1">
                             <div className="flex justify-between items-start mb-2">
                               <Badge variant={isCorrect ? "default" : "destructive"} className="mb-2">
@@ -540,7 +540,7 @@ const TakeTest = () => {
                               <div className="mb-4 bg-gray-800 p-2 rounded-lg border border-gray-700">
                                 <img
                                   src={q.imageUrl}
-                                  alt="صورة السؤال"
+                          alt="صورة السؤال"
                                   className="rounded max-h-60 mx-auto"
                                 />
                               </div>
@@ -607,13 +607,13 @@ const TakeTest = () => {
                               </div>
                             )}
                           </div>
-                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
           </div>
         </div>
       </Layout>
@@ -674,12 +674,12 @@ const TakeTest = () => {
               
               {/* Question Content */}
               <div className="mb-8">
-                {question.imageUrl ? (
+              {question.imageUrl ? (
                   <div className="mb-4">
                     <div className="bg-gray-900/80 p-3 rounded-xl border border-gray-700">
-                      <img
-                        src={question.imageUrl}
-                        alt="صورة السؤال"
+                <img
+                  src={question.imageUrl}
+                  alt="صورة السؤال"
                         className="rounded-lg max-h-72 mx-auto"
                       />
                     </div>
@@ -694,9 +694,9 @@ const TakeTest = () => {
               <div className="space-y-3">
                 {Array.isArray(question.options) && question.options.map((option, index) => {
                   const optionText = typeof option === 'string' 
-                    ? option 
-                    : 'text' in option 
-                      ? option.text 
+                      ? option 
+                      : 'text' in option 
+                        ? option.text 
                       : '';
                   
                   return (
@@ -731,34 +731,34 @@ const TakeTest = () => {
           
           {/* Navigation Buttons */}
           <div className="flex justify-between mb-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
-              className="bg-gray-800/70 border-gray-700 text-gray-200 hover:bg-gray-700"
-            >
-              <ArrowRight className="ml-2 rtl:rotate-180" size={16} />
-              السابق
-            </Button>
-            
-            {currentQuestion === questions.length - 1 ? (
               <Button
-                onClick={handleSubmit}
-                className="bg-primary hover:bg-primary/90 text-white"
-                disabled={answers.length !== questions.length}
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+              className="bg-gray-800/70 border-gray-700 text-gray-200 hover:bg-gray-700"
               >
-                <Check className="ml-2" size={16} />
-                إنهاء الاختبار
+              <ArrowRight className="ml-2 rtl:rotate-180" size={16} />
+                السابق
               </Button>
+            
+              {currentQuestion === questions.length - 1 ? (
+                  <Button
+                    onClick={handleSubmit}
+                className="bg-primary hover:bg-primary/90 text-white"
+                    disabled={answers.length !== questions.length}
+                  >
+                <Check className="ml-2" size={16} />
+                    إنهاء الاختبار
+                  </Button>
             ) : (
               <Button 
                 onClick={handleNext}
                 className="bg-primary hover:bg-primary/90 text-white"
               >
-                التالي
+                  التالي
                 <ArrowLeft className="mr-2 rtl:rotate-180" size={16} />
-              </Button>
-            )}
+                </Button>
+              )}
           </div>
           
           {/* Question Navigation */}
