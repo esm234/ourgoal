@@ -213,8 +213,8 @@ const Home = () => {
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden group hover:bg-white/10 transition-all duration-300 hover:-translate-y-2">
                 <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-1">اسلام احمد</h3>
-                <p className="text-primary/90 mb-4">مطور البرمجيات</p>
-                <p className="text-gray-300 text-sm">مطور برمجيات متخصص في تطوير منصات التعليم الإلكتروني واختبارات قياس.</p>
+                <p className="text-primary/90 mb-4">مطور الموقع</p>
+                <p className="text-gray-300 text-sm">المطور مسؤول عن برمجة الموقع واضافة الميزات.</p>
                 <div className="flex gap-3 mt-4">
                   <a href="#" className="text-gray-400 hover:text-white transition-colors">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -233,8 +233,8 @@ const Home = () => {
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden group hover:bg-white/10 transition-all duration-300 hover:-translate-y-2">
                 <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-1">محمد منصور</h3>
-                <p className="text-primary/90 mb-4">خبير المحتوى التعليمي</p>
-                <p className="text-gray-300 text-sm">متخصص في إعداد وتطوير المحتوى التعليمي لاختبارات قياس بخبرة أكثر من 5 سنوات.</p>
+                <p className="text-primary/90 mb-4">مدير المنصة</p>
+                <p className="text-gray-300 text-sm">المتخصص في اضافة الاختبارات.</p>
                 <div className="flex gap-3 mt-4">
                   <a href="#" className="text-gray-400 hover:text-white transition-colors">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -253,8 +253,8 @@ const Home = () => {
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden group hover:bg-white/10 transition-all duration-300 hover:-translate-y-2">
                 <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-1">عمر علام</h3>
-                <p className="text-primary/90 mb-4">مسؤول تطوير الاختبارات</p>
-                <p className="text-gray-300 text-sm">متخصص في تصميم وتطوير الاختبارات التفاعلية وخبرة في تحليل البيانات التعليمية.</p>
+                <p className="text-primary/90 mb-4">مدير المنصة</p>
+                <p className="text-gray-300 text-sm">المتخصص في اضافة الاختبارات.</p>
                 <div className="flex gap-3 mt-4">
                   <a href="#" className="text-gray-400 hover:text-white transition-colors">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -274,7 +274,7 @@ const Home = () => {
                 <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-1">محمد اسامة</h3>
                 <p className="text-primary/90 mb-4">مدير المنصة</p>
-                <p className="text-gray-300 text-sm">مدير المنصة ومتخصص في بناء تجربة المستخدم وتطوير استراتيجيات التعلم الإلكتروني.</p>
+                <p className="text-gray-300 text-sm">المتخصص في اضافة الاختبارات.</p>
                 <div className="flex gap-3 mt-4">
                   <a href="#" className="text-gray-400 hover:text-white transition-colors">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
