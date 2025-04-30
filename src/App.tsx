@@ -16,7 +16,6 @@ import TestQuestions from "@/pages/TestQuestions";
 import EditTest from "@/pages/EditTest";
 import UserProfile from "@/pages/UserProfile";
 import ProfileSetup from "@/pages/ProfileSetup";
-import { Analytics } from '@vercel/analytics/react';
 
 
 const queryClient = new QueryClient();
@@ -66,7 +65,6 @@ const App = () => (
   </QueryClientProvider>
 );
 
-<Analytics />
 
 
 export default App;
