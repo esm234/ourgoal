@@ -16,6 +16,7 @@ import TestQuestions from "@/pages/TestQuestions";
 import EditTest from "@/pages/EditTest";
 import UserProfile from "@/pages/UserProfile";
 import ProfileSetup from "@/pages/ProfileSetup";
+import AdminDashboard from "@/pages/AdminDashboard";
 
 
 const queryClient = new QueryClient();
@@ -34,7 +35,7 @@ const App = () => (
                         <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
-            
+
             {/* Protected Routes */}
             <Route path="/test-management" element={
               <ProtectedRoute>
@@ -56,7 +57,13 @@ const App = () => (
                 <UserProfile />
               </ProtectedRoute>
             } />
-            
+
+            <Route path="/admin" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
