@@ -182,6 +182,47 @@ export type Database = {
           }
         ]
       }
+      courses: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          price: number
+          published: boolean
+          user_id: string
+          created_at: string
+          image_url: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string
+          price?: number
+          published?: boolean
+          user_id: string
+          created_at?: string
+          image_url?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          price?: number
+          published?: boolean
+          user_id?: string
+          created_at?: string
+          image_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
