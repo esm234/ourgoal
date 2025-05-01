@@ -46,7 +46,7 @@ const Login = () => {
   const { toast } = useToast();
   const { isLoggedIn, login, signup } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Get the page the user was trying to access before being redirected to login
   const from = location.state?.from || "/";
 
@@ -77,7 +77,7 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       const { error } = await login(data.email, data.password);
-      
+
       if (error) {
         throw error;
       } else {
@@ -101,7 +101,7 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       const { error } = await signup(data.email, data.password);
-      
+
       if (error) {
         throw error;
       } else {
@@ -109,7 +109,7 @@ const Login = () => {
           title: "تم إنشاء الحساب بنجاح",
           description: "سيتم توجيهك لإكمال الملف الشخصي",
         });
-        
+
         // Navigate to profile setup instead of setting login form values
         navigate("/profile-setup");
       }
@@ -133,7 +133,7 @@ const Login = () => {
               <TabsTrigger value="login">تسجيل الدخول</TabsTrigger>
               <TabsTrigger value="signup">إنشاء حساب</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="login">
               <Card>
                 <CardHeader>
@@ -150,9 +150,9 @@ const Login = () => {
                           <FormItem className="text-right">
                             <FormLabel>البريد الإلكتروني</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="name@example.com" 
-                                {...field} 
+                              <Input
+                                placeholder="name@example.com"
+                                {...field}
                                 type="email"
                                 dir="ltr"
                               />
@@ -161,17 +161,27 @@ const Login = () => {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={loginForm.control}
                         name="password"
                         render={({ field }) => (
                           <FormItem className="text-right">
-                            <FormLabel>كلمة المرور</FormLabel>
+                            <div className="flex items-center justify-between">
+                              <Button
+                                variant="link"
+                                className="p-0 h-auto text-xs text-primary"
+                                type="button"
+                                onClick={() => navigate("/forgot-password")}
+                              >
+                                نسيت كلمة المرور؟
+                              </Button>
+                              <FormLabel>كلمة المرور</FormLabel>
+                            </div>
                             <FormControl>
-                              <Input 
-                                placeholder="••••••••" 
-                                {...field} 
+                              <Input
+                                placeholder="••••••••"
+                                {...field}
                                 type="password"
                                 dir="ltr"
                               />
@@ -180,10 +190,10 @@ const Login = () => {
                           </FormItem>
                         )}
                       />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
+
+                      <Button
+                        type="submit"
+                        className="w-full"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
@@ -193,7 +203,7 @@ const Login = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="signup">
               <Card>
                 <CardHeader>
@@ -210,9 +220,9 @@ const Login = () => {
                           <FormItem className="text-right">
                             <FormLabel>البريد الإلكتروني</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="name@example.com" 
-                                {...field} 
+                              <Input
+                                placeholder="name@example.com"
+                                {...field}
                                 type="email"
                                 dir="ltr"
                               />
@@ -221,7 +231,7 @@ const Login = () => {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={signupForm.control}
                         name="password"
@@ -229,9 +239,9 @@ const Login = () => {
                           <FormItem className="text-right">
                             <FormLabel>كلمة المرور</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="••••••••" 
-                                {...field} 
+                              <Input
+                                placeholder="••••••••"
+                                {...field}
                                 type="password"
                                 dir="ltr"
                               />
@@ -240,7 +250,7 @@ const Login = () => {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={signupForm.control}
                         name="confirmPassword"
@@ -248,9 +258,9 @@ const Login = () => {
                           <FormItem className="text-right">
                             <FormLabel>تأكيد كلمة المرور</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="••••••••" 
-                                {...field} 
+                              <Input
+                                placeholder="••••••••"
+                                {...field}
                                 type="password"
                                 dir="ltr"
                               />
@@ -259,10 +269,10 @@ const Login = () => {
                           </FormItem>
                         )}
                       />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
+
+                      <Button
+                        type="submit"
+                        className="w-full"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
