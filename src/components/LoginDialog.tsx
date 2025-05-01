@@ -30,9 +30,9 @@ interface LoginDialogProps {
   description?: string;
 }
 
-const LoginDialog = ({ 
-  isOpen, 
-  setIsOpen, 
+const LoginDialog = ({
+  isOpen,
+  setIsOpen,
   redirectPath = "/user-profile",
   description = "يرجى تسجيل الدخول للوصول إلى ملفك الشخصي ومشاهدة تقارير الأداء الخاصة بك"
 }: LoginDialogProps) => {
@@ -40,7 +40,7 @@ const LoginDialog = ({
   const { toast } = useToast();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -53,7 +53,7 @@ const LoginDialog = ({
     setIsSubmitting(true);
     try {
       const { error } = await login(data.email, data.password);
-      
+
       if (error) {
         throw error;
       } else {
@@ -100,9 +100,9 @@ const LoginDialog = ({
                       <span className="absolute left-3 top-2.5 text-muted-foreground">
                         <User size={16} />
                       </span>
-                      <Input 
-                        placeholder="name@example.com" 
-                        {...field} 
+                      <Input
+                        placeholder="name@example.com"
+                        {...field}
                         type="email"
                         dir="ltr"
                         className="pl-10"
@@ -113,21 +113,34 @@ const LoginDialog = ({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem className="text-right">
-                  <FormLabel>كلمة المرور</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto text-xs text-primary"
+                      type="button"
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigate("/forgot-password");
+                      }}
+                    >
+                      نسيت كلمة المرور؟
+                    </Button>
+                    <FormLabel>كلمة المرور</FormLabel>
+                  </div>
                   <FormControl>
                     <div className="relative">
                       <span className="absolute left-3 top-2.5 text-muted-foreground">
                         <Lock size={16} />
                       </span>
-                      <Input 
-                        placeholder="••••••••" 
-                        {...field} 
+                      <Input
+                        placeholder="••••••••"
+                        {...field}
                         type="password"
                         dir="ltr"
                         className="pl-10"
@@ -138,10 +151,10 @@ const LoginDialog = ({
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter className="flex flex-col gap-3 sm:gap-0 mt-6">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-primary hover:bg-primary/90 text-white py-2 rounded-lg flex items-center justify-center gap-2"
                 disabled={isSubmitting}
               >
@@ -150,9 +163,9 @@ const LoginDialog = ({
               </Button>
               <div className="text-center mt-4 text-sm">
                 ليس لديك حساب؟{" "}
-                <Button 
-                  variant="link" 
-                  className="p-0" 
+                <Button
+                  variant="link"
+                  className="p-0"
                   onClick={() => {
                     setIsOpen(false);
                     navigate("/login");
@@ -169,4 +182,4 @@ const LoginDialog = ({
   );
 };
 
-export default LoginDialog; 
+export default LoginDialog;
