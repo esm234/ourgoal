@@ -24,18 +24,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper to fetch role from profiles
+  // Helper to fetch role from profiles and verify admin status
   const fetchUserRole = async (userId: string | undefined | null) => {
     if (!userId) {
       setRole(null);
       return;
     }
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .single();
-    setRole(data?.role ?? null);
+
+    try {
+      // First, get the role from the profiles table
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+
+      const clientRole = data?.role ?? null;
+
+      // If the client claims to be an admin, verify it with the backend
+      if (clientRole === 'admin') {
+        // Use the secure RPC function to verify admin status
+        const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin');
+
+        if (adminError) {
+          console.error("Error verifying admin status:", adminError);
+          setRole('user'); // Downgrade to user on error
+          return;
+        }
+
+        // Only set as admin if the backend confirms it
+        setRole(isAdmin ? 'admin' : 'user');
+      } else {
+        // For non-admin roles, trust the database value
+        setRole(clientRole);
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      setRole(null);
+    }
   };
 
   useEffect(() => {
@@ -83,14 +111,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
-      
+
       // Reset auth state synchronously
       setIsLoggedIn(false);
       setUser(null);
       setSession(null);
       setUsername(null);
       setRole(null);
-      
+
       return { error };
     } catch (error: any) {
       return { error };
@@ -100,14 +128,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      isLoggedIn, 
-      username, 
-      user, 
-      session, 
+    <AuthContext.Provider value={{
+      isLoggedIn,
+      username,
+      user,
+      session,
       role,
-      login, 
-      signup, 
+      login,
+      signup,
       logout,
       loading
     }}>
@@ -118,10 +146,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  
+
   return context;
 };
