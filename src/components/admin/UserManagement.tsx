@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 import {
   Table,
   TableBody,
@@ -31,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash, Search, UserCog, Shield, User as UserIcon } from "lucide-react";
+import { Pencil, Trash, Search, UserCog, Shield, User as UserIcon, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface User {
@@ -44,6 +45,7 @@ interface User {
 
 const UserManagement = () => {
   const { toast } = useToast();
+  const { isAdmin, isVerifying, error: adminCheckError } = useAdminCheck();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,8 +56,20 @@ const UserManagement = () => {
   const [newRole, setNewRole] = useState<string>("");
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    // Only fetch users if we're confirmed as an admin
+    if (isAdmin && !isVerifying) {
+      fetchUsers();
+    }
+
+    // Show error if admin check failed
+    if (adminCheckError) {
+      toast({
+        title: "خطأ في التحقق من الصلاحيات",
+        description: adminCheckError,
+        variant: "destructive",
+      });
+    }
+  }, [isAdmin, isVerifying, adminCheckError]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -177,6 +191,36 @@ const UserManagement = () => {
       return <Badge variant="outline">مستخدم</Badge>;
     }
   };
+
+  // If still verifying admin status, show loading
+  if (isVerifying) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center py-8">
+            <ShieldAlert className="h-12 w-12 text-primary animate-pulse mb-4" />
+            <h2 className="text-xl font-bold mb-2">جاري التحقق من الصلاحيات...</h2>
+            <p className="text-muted-foreground">يرجى الانتظار بينما نتحقق من صلاحياتك</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If not admin, show access denied
+  if (!isAdmin) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center py-8">
+            <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+            <h2 className="text-xl font-bold mb-2">غير مصرح</h2>
+            <p className="text-muted-foreground">ليس لديك صلاحية الوصول إلى هذه الصفحة</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
