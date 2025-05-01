@@ -50,74 +50,37 @@ const ResetPassword = () => {
     },
   });
 
-  // Check if we have a valid hash in the URL and handle authentication state
+  // Check if we have a valid hash in the URL and handle auto-login
   useEffect(() => {
-    const checkAuthAndHash = async () => {
-      // First check if user is already authenticated
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // If user is already authenticated and doesn't have a recovery token,
-      // redirect them to the homepage
-      if (session?.user && !window.location.hash.includes('type=recovery')) {
-        toast({
-          title: "أنت مسجل الدخول بالفعل",
-          description: "تم توجيهك إلى الصفحة الرئيسية",
-        });
-        navigate("/");
-        return;
-      }
-      
-      // Check for valid recovery hash
-      const hash = window.location.hash;
-      if (!hash || !hash.includes('type=recovery')) {
-        toast({
-          title: "رابط غير صالح",
-          description: "يبدو أن رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية",
-          variant: "destructive",
-        });
-        // Redirect to home page if the hash is invalid
-        navigate("/");
-        return;
-      }
-      
-      // If we have a valid recovery token, proceed with password reset flow
-      // Store the access token temporarily (we'll need it for the password update)
-      const accessToken = new URLSearchParams(hash.substring(1)).get('access_token');
-      if (accessToken) {
-        sessionStorage.setItem('resetPasswordToken', accessToken);
-      }
+    const hash = window.location.hash;
+    if (!hash || !hash.includes('type=recovery')) {
+      toast({
+        title: "رابط غير صالح",
+        description: "يبدو أن رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية",
+        variant: "destructive",
+      });
+      // Redirect to home page if the hash is invalid
+      navigate("/");
+      return;
+    }
+    
+    // After password reset, we'll manually log the user out for security
+    const handlePasswordReset = async () => {
+      // We'll let the user update their password first, then log them out
+      // This ensures they have to log in with their new password
     };
     
-    checkAuthAndHash();
+    handlePasswordReset();
   }, [toast, navigate]);
 
   const handleSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
     setIsSubmitting(true);
     try {
-      // Get the stored access token
-      const accessToken = sessionStorage.getItem('resetPasswordToken');
-      
-      // If we have a token, use it to update the password
-      let result;
-      if (accessToken) {
-        // Use the token to update password
-        result = await supabase.auth.updateUser(
-          { password: data.password },
-          { accessToken }
-        );
-      } else {
-        // Fall back to the normal update method
-        result = await updatePassword(data.password);
-      }
-      
-      const { error } = result;
+      const { error } = await updatePassword(data.password);
       
       if (error) {
         throw error;
       } else {
-        // Clear the stored token
-        sessionStorage.removeItem('resetPasswordToken');
-        
         setResetComplete(true);
         toast({
           title: "تم تغيير كلمة المرور بنجاح",
@@ -248,10 +211,6 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
-
-
-
-
 
 
 
