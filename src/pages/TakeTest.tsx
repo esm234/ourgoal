@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { TestResult } from "@/types/testResults";
-import type { Question, Option, ExtendedQuestion } from "@/types/testManagement";
-import { ArrowLeft, ArrowRight, Clock, AlertCircle, HelpCircle, BookOpen, ChevronRight, Check, X } from "lucide-react";
+import type { Option, ExtendedQuestion } from "@/types/testManagement";
+import { ArrowLeft, ArrowRight, Clock, AlertCircle, HelpCircle, BookOpen, BookText, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -131,9 +131,11 @@ const TakeTest = () => {
             title: `اختبار تجريبي ${staticTest.testId}`
           });
           setQuestions(staticTest.questions.map(q => ({
-  ...q,
-  imageUrl: q.image_url || ""
-})) as ExtendedQuestion[]);
+            ...q,
+            imageUrl: (q as any).imageUrl || (q as any).image_url || "",
+            subtype: (q as any).subtype || "general",
+            passage: (q as any).passage || null
+          })) as ExtendedQuestion[]);
           setLoading(false);
           return;
         } else {
@@ -142,7 +144,7 @@ const TakeTest = () => {
       }
 
       setTest(testData);
-      
+
       // Then, get the questions for this test
       const { data: questionsData, error: questionsError } = await supabase
         .from("questions")
@@ -171,7 +173,9 @@ const TakeTest = () => {
             options: optionsData.map(opt => opt.text),
             correctAnswer: correctIndex,
             type: question.type as "verbal" | "quantitative" | "mixed",
-            imageUrl: question.image_url || ""
+            subtype: (question as any).subtype as "general" | "reading_comprehension" || "general",
+            passage: (question as any).passage || null,
+            imageUrl: (question as any).image_url || ""
           } as ExtendedQuestion;
         })
       );
@@ -201,8 +205,10 @@ const TakeTest = () => {
         id: q.id,
         text: q.text,
         type: q.type,
+        subtype: q.subtype || "general",
+        passage: q.passage || null,
         imageUrl: q.imageUrl || "",
-        options: Array.isArray(q.options) ? q.options.map(opt => 
+        options: Array.isArray(q.options) ? q.options.map((opt: any) =>
           typeof opt === 'string' ? opt : 'text' in opt ? opt.text : ''
         ) : [],
         correctAnswer: q.correctAnswer || 0,
@@ -220,7 +226,7 @@ const TakeTest = () => {
       try {
         // Ensure testId is a string
         const testIdString = String(testId);
-        
+
         console.log("Saving test result to database with data:", {
           test_id: testIdString,
           user_id: user.id,
@@ -244,10 +250,10 @@ const TakeTest = () => {
         }
 
         console.log("Test result saved successfully:", data);
-        
+
         // Verify the result was saved by checking the database
         await verifyResultSaved(user.id, testIdString);
-        
+
         // Show success message
         toast({
           title: "تم حفظ النتيجة",
@@ -269,20 +275,20 @@ const TakeTest = () => {
     try {
       // Wait briefly to allow the database to process the insert
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const { data, error } = await supabase
         .from("exam_results")
         .select("*")
         .eq("user_id", userId)
         .eq("test_id", testIdString);
-        
+
       if (error) {
         console.error("Error verifying result:", error);
         return;
       }
-      
+
       console.log("Verification check - Results found:", data);
-      
+
       if (!data || data.length === 0) {
         console.warn("Verification failed: Result not found in database after saving!");
       } else {
@@ -353,9 +359,12 @@ const TakeTest = () => {
     return letters[index] || index.toString();
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: string, subtype?: string) => {
     switch (type) {
       case "verbal":
+        if (subtype === "reading_comprehension") {
+          return <BookText className="w-4 h-4" />;
+        }
         return <BookOpen className="w-4 h-4" />;
       case "quantitative":
         return <HelpCircle className="w-4 h-4" />;
@@ -364,18 +373,9 @@ const TakeTest = () => {
     }
   };
 
-  const getTimeLeftPercentage = () => {
-    if (!test?.duration) return 100;
-    const totalSeconds = test.duration * 60;
-    return (timeLeft / totalSeconds) * 100;
-  };
 
-  const getProgressColor = () => {
-    const percentage = getTimeLeftPercentage();
-    if (percentage > 50) return "bg-primary";
-    if (percentage > 25) return "bg-yellow-500";
-    return "bg-red-500";
-  };
+
+
 
   if (loading) {
     return (
@@ -403,7 +403,7 @@ const TakeTest = () => {
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">الاختبار غير موجود</h2>
             <p className="text-gray-300 mb-6">لم نتمكن من العثور على الاختبار المطلوب</p>
-            <Button 
+            <Button
               className="bg-primary text-white w-full py-2 rounded-lg hover:bg-primary/90"
               onClick={() => navigate("/qiyas-tests")}
             >
@@ -434,7 +434,7 @@ const TakeTest = () => {
                           <h2 className="text-white text-lg font-medium">النتيجة النهائية</h2>
                           <p className="text-gray-400 text-sm">إجمالي الأسئلة: {questions.length}</p>
                         </div>
-                        
+
                         <div className="relative w-32 h-32">
                           <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-3xl font-bold text-primary">
@@ -457,10 +457,10 @@ const TakeTest = () => {
                               stroke={
                                 Math.round((answers.reduce((acc, answer, index) => {
                                   return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                                }, 0) / questions.length) * 100) >= 90 ? '#10b981' : 
+                                }, 0) / questions.length) * 100) >= 90 ? '#10b981' :
                                 Math.round((answers.reduce((acc, answer, index) => {
                                   return acc + (answer === questions[index].correctAnswer ? 1 : 0);
-                                }, 0) / questions.length) * 100) >= 70 ? '#3b82f6' : 
+                                }, 0) / questions.length) * 100) >= 70 ? '#3b82f6' :
                                 Math.round((answers.reduce((acc, answer, index) => {
                                   return acc + (answer === questions[index].correctAnswer ? 1 : 0);
                                 }, 0) / questions.length) * 100) >= 50 ? '#f59e0b' : '#ef4444'
@@ -473,7 +473,7 @@ const TakeTest = () => {
                             />
                           </svg>
                         </div>
-                        
+
                         <div className="text-center md:text-left space-y-1">
                           <p className="text-white text-lg">
                             {answers.reduce((acc, answer, index) => {
@@ -484,9 +484,9 @@ const TakeTest = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-8 text-center">
-                      <Button 
+                      <Button
                         className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg"
                         onClick={() => navigate("/qiyas-tests")}
                       >
@@ -496,12 +496,12 @@ const TakeTest = () => {
                   </CardContent>
                 </Card>
               </div>
-              
+
               <div>
                 <Leaderboard testId={testId!} />
               </div>
             </div>
-            
+
             <Card className="bg-gray-800/80 border-0 shadow-xl overflow-hidden mt-6">
             <CardContent className="p-6">
               <div className="space-y-6">
@@ -509,7 +509,7 @@ const TakeTest = () => {
                     <ClipboardIcon className="w-5 h-5 text-primary" />
                     نتائج الأسئلة
                   </h3>
-                  
+
                 {questions.map((q, index) => {
                   const userAnswer = answers[index];
                   const isCorrect = userAnswer === q.correctAnswer;
@@ -534,57 +534,71 @@ const TakeTest = () => {
                               </Badge>
                               <span className="text-sm text-gray-400">السؤال {index + 1}</span>
                             </div>
+                            {/* Reading Passage */}
+                            {q.type === "verbal" && q.subtype === "reading_comprehension" && q.passage && (
+                              <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <BookText className="h-4 w-4 text-blue-400" />
+                                  <h4 className="font-medium text-blue-400 text-sm">نص القطعة:</h4>
+                                </div>
+                                <div className="bg-blue-900/20 border border-blue-800/30 p-4 rounded-lg mb-4">
+                                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{q.passage}</p>
+                                </div>
+                                <Separator className="my-4 opacity-30" />
+                              </div>
+                            )}
+
                             <p className="text-white text-lg font-medium mb-4">{q.text}</p>
-                            
+
                             {q.imageUrl && (
                               <div className="mb-4 bg-gray-800 p-2 rounded-lg border border-gray-700">
                                 <img
                                   src={q.imageUrl}
-                          alt="صورة السؤال"
+                                  alt="صورة السؤال"
                                   className="rounded max-h-60 mx-auto"
                                 />
                               </div>
                             )}
-                            
+
                             <div className="mt-3 space-y-2">
-                              {Array.isArray(q.options) && q.options.map((option, optIndex) => {
+                              {Array.isArray(q.options) && q.options.map((option: any, optIndex: number) => {
                                 const optionText = getOptionText(option);
                                 const isUserAnswer = optIndex === userAnswer;
                                 const isCorrectAnswer = optIndex === q.correctAnswer;
-                                
+
                                 return (
-                                  <div 
-                                    key={optIndex} 
+                                  <div
+                                    key={optIndex}
                                     className={`p-3 border rounded-lg flex items-center gap-3 transition-all ${
-                                      isUserAnswer && isCorrectAnswer ? 'bg-green-900/40 border-green-700' : 
-                                      isUserAnswer && !isCorrectAnswer ? 'bg-red-900/40 border-red-700' : 
-                                      isCorrectAnswer ? 'bg-green-900/20 border-green-700/50' : 
+                                      isUserAnswer && isCorrectAnswer ? 'bg-green-900/40 border-green-700' :
+                                      isUserAnswer && !isCorrectAnswer ? 'bg-red-900/40 border-red-700' :
+                                      isCorrectAnswer ? 'bg-green-900/20 border-green-700/50' :
                                       'border-gray-700 bg-gray-800/40'
                                     }`}
                                   >
                                     <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                                      isUserAnswer && isCorrectAnswer ? 'bg-green-900/70 border border-green-600 text-green-400' : 
-                                      isUserAnswer && !isCorrectAnswer ? 'bg-red-900/70 border border-red-600 text-red-400' : 
-                                      isCorrectAnswer ? 'bg-green-900/50 border border-green-600 text-green-400' : 
+                                      isUserAnswer && isCorrectAnswer ? 'bg-green-900/70 border border-green-600 text-green-400' :
+                                      isUserAnswer && !isCorrectAnswer ? 'bg-red-900/70 border border-red-600 text-red-400' :
+                                      isCorrectAnswer ? 'bg-green-900/50 border border-green-600 text-green-400' :
                                       'bg-gray-800 border border-gray-600 text-gray-400'
                                     }`}>
                                       {getOptionLetterByIndex(optIndex)}
                                     </div>
                                     <span className={`text-sm ${
-                                      isUserAnswer && isCorrectAnswer ? 'text-green-300 font-medium' : 
-                                      isUserAnswer && !isCorrectAnswer ? 'text-red-300 font-medium' : 
-                                      isCorrectAnswer ? 'text-green-400' : 
+                                      isUserAnswer && isCorrectAnswer ? 'text-green-300 font-medium' :
+                                      isUserAnswer && !isCorrectAnswer ? 'text-red-300 font-medium' :
+                                      isCorrectAnswer ? 'text-green-400' :
                                       'text-gray-300'
                                     }`}>
                                       {optionText}
                                     </span>
-                                    
+
                                     {isUserAnswer && (
                                       <div className="ml-auto">
                                         <span className="px-2 py-0.5 text-xs rounded-full bg-gray-700 text-gray-300">اختيارك</span>
                                       </div>
                                     )}
-                                    
+
                                     {!isUserAnswer && isCorrectAnswer && (
                                       <div className="ml-auto">
                                         <span className="px-2 py-0.5 text-xs rounded-full bg-green-900/70 text-green-300">الإجابة الصحيحة</span>
@@ -594,7 +608,7 @@ const TakeTest = () => {
                                 );
                               })}
                             </div>
-                            
+
                             {q.explanation && !isCorrect && (
                               <div className="mt-4 p-4 bg-blue-900/20 border border-blue-800/40 rounded-lg">
                                 <div className="flex items-center gap-2 mb-1">
@@ -639,7 +653,7 @@ const TakeTest = () => {
                   <p className="text-gray-400 text-sm">{answeredQuestions} من {questions.length} سؤال</p>
                 </div>
               </div>
-              
+
               <div className={`flex items-center gap-2 py-1 px-3 rounded-full ${
                 timeLeft < 300 ? 'bg-red-900/30 text-red-400' : 'bg-gray-700/60 text-gray-300'
               } ${animateTimeLeft ? 'animate-pulse' : ''}`}>
@@ -647,7 +661,7 @@ const TakeTest = () => {
                 <span className="font-mono">{formatTime(timeLeft)}</span>
               </div>
             </div>
-            
+
             {/* Progress bar */}
             <div className="mt-4">
               <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -657,7 +671,7 @@ const TakeTest = () => {
               <Progress value={(answeredQuestions / questions.length) * 100} className="h-2 bg-gray-700" />
             </div>
           </div>
-          
+
           {/* Question Card */}
           <Card className="bg-gray-800/90 border-0 shadow-lg mb-6">
             <CardContent className="p-6">
@@ -666,20 +680,56 @@ const TakeTest = () => {
                 <Badge variant="outline" className="bg-gray-700/60 text-sm">
                   سؤال {currentQuestion + 1} من {questions.length}
                 </Badge>
-                
-                <Badge variant="outline" className="bg-primary/20 text-primary">
-                  {question.type === "verbal" ? "لفظي" : question.type === "quantitative" ? "كمي" : "مختلط"}
+
+                <Badge variant="outline" className={`flex items-center gap-1 ${
+                  question.type === "verbal"
+                    ? question.subtype === "reading_comprehension"
+                      ? "bg-blue-500/20 text-blue-500 border-blue-500/20"
+                      : "bg-primary/20 text-primary border-primary/20"
+                    : question.type === "quantitative"
+                      ? "bg-amber-500/20 text-amber-500 border-amber-500/20"
+                      : "bg-primary/20 text-primary border-primary/20"
+                }`}>
+                  {getTypeIcon(question.type, question.subtype)}
+                  <span>
+                    {question.type === "verbal"
+                      ? question.subtype === "reading_comprehension"
+                        ? "لفظي - استيعاب المقروء"
+                        : "لفظي"
+                      : question.type === "quantitative"
+                        ? "كمي"
+                        : "مختلط"}
+                  </span>
                 </Badge>
               </div>
-              
+
               {/* Question Content */}
               <div className="mb-8">
-              {question.imageUrl ? (
+                {/* Reading Passage for Reading Comprehension */}
+                {question.type === "verbal" && question.subtype === "reading_comprehension" && question.passage && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BookText className="h-5 w-5 text-blue-500" />
+                      <h3 className="font-medium text-blue-400">نص القطعة:</h3>
+                    </div>
+                    <div className="bg-blue-900/20 border border-blue-800/30 p-4 rounded-lg mb-6">
+                      <p className="text-white/90 text-base leading-relaxed whitespace-pre-line">{question.passage}</p>
+                    </div>
+                    <Separator className="my-4 opacity-30" />
+                    <div className="flex items-center gap-2 mb-2">
+                      <HelpCircle className="h-5 w-5 text-primary" />
+                      <h3 className="font-medium text-primary">السؤال:</h3>
+                    </div>
+                  </div>
+                )}
+
+                {/* Question Image */}
+                {question.imageUrl ? (
                   <div className="mb-4">
                     <div className="bg-gray-900/80 p-3 rounded-xl border border-gray-700">
-                <img
-                  src={question.imageUrl}
-                  alt="صورة السؤال"
+                      <img
+                        src={question.imageUrl}
+                        alt="صورة السؤال"
                         className="rounded-lg max-h-72 mx-auto"
                       />
                     </div>
@@ -689,21 +739,21 @@ const TakeTest = () => {
                   <h2 className="text-xl font-semibold text-white rtl mb-4">{question.text}</h2>
                 )}
               </div>
-              
+
               {/* Options */}
               <div className="space-y-3">
-                {Array.isArray(question.options) && question.options.map((option, index) => {
-                  const optionText = typeof option === 'string' 
-                      ? option 
-                      : 'text' in option 
-                        ? option.text 
+                {Array.isArray(question.options) && question.options.map((option: any, index: number) => {
+                  const optionText = typeof option === 'string'
+                      ? option
+                      : 'text' in option
+                        ? option.text
                       : '';
-                  
+
                   return (
                     <button
                       key={index}
                       className={`w-full p-4 rounded-xl rtl flex items-center gap-3 transition-all ${
-                        answers[currentQuestion] === index 
+                        answers[currentQuestion] === index
                           ? 'bg-primary/20 border-2 border-primary/50 text-white'
                           : 'bg-gray-700/50 border border-gray-700 hover:bg-gray-700/80 text-gray-200'
                       }`}
@@ -728,7 +778,7 @@ const TakeTest = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Navigation Buttons */}
           <div className="flex justify-between mb-4">
               <Button
@@ -740,7 +790,7 @@ const TakeTest = () => {
               <ArrowRight className="ml-2 rtl:rotate-180" size={16} />
                 السابق
               </Button>
-            
+
               {currentQuestion === questions.length - 1 ? (
                   <Button
                     onClick={handleSubmit}
@@ -751,7 +801,7 @@ const TakeTest = () => {
                     إنهاء الاختبار
                   </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={handleNext}
                 className="bg-primary hover:bg-primary/90 text-white"
               >
@@ -760,7 +810,7 @@ const TakeTest = () => {
                 </Button>
               )}
           </div>
-          
+
           {/* Question Navigation */}
           <div className="bg-gray-800/90 rounded-xl p-4 shadow-lg">
             <h3 className="text-white font-medium mb-3 text-center">تنقل بين الأسئلة</h3>
@@ -770,8 +820,8 @@ const TakeTest = () => {
                   key={index}
                   onClick={() => setCurrentQuestion(index)}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-all ${
-                    currentQuestion === index 
-                      ? 'bg-primary text-white' 
+                    currentQuestion === index
+                      ? 'bg-primary text-white'
                       : answers[index] !== undefined
                         ? 'bg-green-900/40 text-green-300 border border-green-700/50'
                         : 'bg-gray-700/60 text-gray-300 border border-gray-600/50'
@@ -796,4 +846,4 @@ const ClipboardIcon = ({ className }: { className?: string }) => (
 );
 
 export default TakeTest;
- 
+
