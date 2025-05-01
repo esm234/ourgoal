@@ -24,51 +24,68 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
       try {
         setLoading(true);
         console.log("Fetching leaderboard data for test ID:", testId);
-        
+
         // First, check if any data exists in the exam_results table
         const { data: allResults, error: allResultsError } = await supabase
           .from("exam_results")
           .select("id, score, user_id, test_id")
           .limit(5);
-          
+
         console.log("All test results in database:", allResults);
-        
+
         if (allResultsError) {
           console.error("Error querying all results:", allResultsError);
         } else if (!allResults || allResults.length === 0) {
           console.log("No test results found in database");
         }
-        
-        // Get top 5 scores for this specific test WITHOUT joining to profiles
+
+        // Get top 5 users with their highest scores for this specific test
+        // Using a raw SQL query to group by user_id and get the max score for each user
         const { data: testResults, error: testResultsError } = await supabase
-          .from("exam_results")
-          .select(`
-            id,
-            score,
-            user_id
-          `)
-          .eq("test_id", testId)
-          .order("score", { ascending: false })
-          .limit(5);
+          .from('exam_results')
+          .select('user_id, score')
+          .eq('test_id', testId)
+          .order('score', { ascending: false });
 
         if (testResultsError) {
           console.error("Supabase query error for specific test:", testResultsError);
           throw testResultsError;
         }
 
-        console.log("Test results raw data for test", testId, ":", testResults);
-        
         if (!testResults || testResults.length === 0) {
-          console.log("No leaderboard data found for this test");
+          console.log("No test results found for this test");
           setLeaders([]);
           return;
         }
 
+        // Process the results to get only the highest score per user
+        const userHighestScores: Record<string, number> = {};
+
+        // First pass: collect highest score for each user
+        testResults.forEach(result => {
+          const userId = result.user_id;
+          const score = result.score;
+
+          // If this user doesn't have a score yet, or this score is higher than their previous best
+          if (!userHighestScores[userId] || score > userHighestScores[userId]) {
+            userHighestScores[userId] = score;
+          }
+        });
+
+        // Convert to array and sort by score (highest first)
+        const topUserScores = Object.entries(userHighestScores)
+          .map(([userId, score]) => ({ user_id: userId, max_score: score }))
+          .sort((a, b) => b.max_score - a.max_score)
+          .slice(0, 5); // Take only top 5
+
+        console.log("Test results raw data for test", testId, ":", testResults);
+        console.log("Top user scores:", topUserScores);
+
         // Now create a map to store usernames by user_id
         const userProfiles: Record<string, string> = {};
-        
+
         // For each result, get the profile details if needed
-        for (const result of testResults) {
+        for (const result of topUserScores) {
           // Only fetch if we haven't already
           if (!userProfiles[result.user_id]) {
             try {
@@ -77,7 +94,7 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
                 .select("username")
                 .eq("id", result.user_id)
                 .single();
-              
+
               if (profileError) {
                 console.warn("Error fetching profile for user", result.user_id, ":", profileError);
                 userProfiles[result.user_id] = "مستخدم مجهول";
@@ -92,17 +109,17 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
             }
           }
         }
-        
+
         console.log("User profiles fetched:", userProfiles);
 
         // Format data for display
-        const leaderboardData = testResults.map((item, index) => {
+        const leaderboardData = topUserScores.map((item, index) => {
           // Log each item to understand the structure
           console.log(`Leader ${index + 1}:`, item, "Username:", userProfiles[item.user_id]);
-          
+
           return {
             username: userProfiles[item.user_id] || "مستخدم مجهول",
-            score: item.score || 0, // Ensure score always has a value
+            score: item.max_score || 0, // Using max_score from our processed data
             rank: index + 1
           };
         });
@@ -211,4 +228,4 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
   );
 };
 
-export default Leaderboard; 
+export default Leaderboard;
