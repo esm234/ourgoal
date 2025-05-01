@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Book, Calculator, BarChart, LogIn, Menu, X, User, ShieldAlert } from "lucide-react";
+import { Home, Book, Calculator, LogIn, Menu, X, User, ShieldAlert } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
 const Navbar = () => {
-  const { isLoggedIn, username, role } = useAuth();
+  const { isLoggedIn, role } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleToggleMenu = () => {
