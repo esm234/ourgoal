@@ -14,9 +14,12 @@ export interface Question {
   test_id: string;
   text: string;
   type: 'verbal' | 'quantitative' | 'mixed';
+  subtype?: 'general' | 'reading_comprehension';
+  passage?: string | null;
   explanation: string | null;
   question_order: number;
   created_at: string;
+  image_url?: string | null;
   options: Option[];
 }
 
@@ -36,9 +39,13 @@ export interface CreateTestForm {
 }
 
 export interface CreateQuestionForm {
-  text: string;
+  mode: 'text' | 'image';
+  text?: string;
   type: 'verbal' | 'quantitative' | 'mixed';
+  subtype?: 'general' | 'reading_comprehension';
+  passage?: string;
   explanation?: string;
+  image_url?: string;
   options: {
     text: string;
     is_correct: boolean;
@@ -51,6 +58,8 @@ export interface ExtendedQuestion {
   test_id: string;
   text: string;
   type: 'verbal' | 'quantitative' | 'mixed';
+  subtype?: 'general' | 'reading_comprehension';
+  passage?: string | null;
   explanation: string | null;
   question_order: number;
   created_at: string;
