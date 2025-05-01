@@ -50,7 +50,7 @@ const ResetPassword = () => {
     },
   });
 
-  // Check if we have a valid hash in the URL and handle auto-login
+  // Check if we have a valid hash in the URL and validate the token
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash || !hash.includes('type=recovery')) {
@@ -63,21 +63,41 @@ const ResetPassword = () => {
       navigate("/");
       return;
     }
-    
-    // After password reset, we'll manually log the user out for security
-    const handlePasswordReset = async () => {
-      // We'll let the user update their password first, then log them out
-      // This ensures they have to log in with their new password
+
+    // Only validate the token without creating a session
+    const validateResetToken = async () => {
+      try {
+        // We only need to verify the token is valid, no auto-login
+        // The user will need to manually log in after resetting their password
+        const { error } = await supabase.auth.getUser();
+
+        if (error) {
+          toast({
+            title: "رابط غير صالح",
+            description: "يبدو أن رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية",
+            variant: "destructive",
+          });
+          navigate("/");
+        }
+      } catch (error) {
+        toast({
+          title: "خطأ في التحقق",
+          description: "حدث خطأ أثناء التحقق من صلاحية الرابط",
+          variant: "destructive",
+        });
+        navigate("/");
+      }
     };
-    
-    handlePasswordReset();
+
+    validateResetToken();
   }, [toast, navigate]);
 
   const handleSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
     setIsSubmitting(true);
     try {
+      // Update the password using the token from the URL
       const { error } = await updatePassword(data.password);
-      
+
       if (error) {
         throw error;
       } else {
@@ -86,9 +106,12 @@ const ResetPassword = () => {
           title: "تم تغيير كلمة المرور بنجاح",
           description: "يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة",
         });
-        
-        // Log the user out after password reset for security
+
+        // Ensure the user is logged out after password reset
         await logout();
+
+        // We don't automatically redirect here to allow the user to see the success message
+        // The user will need to click the "Go to Login" button to navigate to the login page
       }
     } catch (error: any) {
       toast({
@@ -122,7 +145,7 @@ const ResetPassword = () => {
                   <p className="text-muted-foreground mb-4">
                     تم تغيير كلمة المرور الخاصة بك بنجاح. يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.
                   </p>
-                  <Button 
+                  <Button
                     className="mt-2"
                     onClick={() => navigate("/login")}
                   >
@@ -143,9 +166,9 @@ const ResetPassword = () => {
                               <span className="absolute left-3 top-2.5 text-muted-foreground">
                                 <Lock size={16} />
                               </span>
-                              <Input 
-                                placeholder="••••••••" 
-                                {...field} 
+                              <Input
+                                placeholder="••••••••"
+                                {...field}
                                 type="password"
                                 dir="ltr"
                                 className="pl-10"
@@ -156,7 +179,7 @@ const ResetPassword = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="confirmPassword"
@@ -168,9 +191,9 @@ const ResetPassword = () => {
                               <span className="absolute left-3 top-2.5 text-muted-foreground">
                                 <Lock size={16} />
                               </span>
-                              <Input 
-                                placeholder="••••••••" 
-                                {...field} 
+                              <Input
+                                placeholder="••••••••"
+                                {...field}
                                 type="password"
                                 dir="ltr"
                                 className="pl-10"
@@ -181,10 +204,10 @@ const ResetPassword = () => {
                         </FormItem>
                       )}
                     />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
+
+                    <Button
+                      type="submit"
+                      className="w-full"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? "جاري التغيير..." : "تغيير كلمة المرور"}
@@ -194,8 +217,8 @@ const ResetPassword = () => {
               )}
             </CardContent>
             <CardFooter className="flex justify-center">
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 onClick={() => navigate("/login")}
                 className="flex items-center gap-1"
               >
