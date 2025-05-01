@@ -131,9 +131,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
+      // Use the production URL for password reset
+      const productionUrl = "https://asrargroup.vercel.app";
+
+      // Determine if we're in production or development
+      const baseUrl = window.location.hostname === "localhost"
+        ? window.location.origin
+        : productionUrl;
+
+      // Make sure the redirectTo URL is exactly correct
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${baseUrl}/reset-password`,
       });
+      
+      console.log("Reset password requested for:", email, "with redirect to:", `${baseUrl}/reset-password`);
       return { error };
     } catch (error: any) {
       return { error };
