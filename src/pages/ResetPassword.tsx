@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ArrowRight, Lock, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
@@ -37,7 +38,7 @@ const resetPasswordSchema = z.object({
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { updatePassword } = useAuth();
+  const { updatePassword, logout } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetComplete, setResetComplete] = useState(false);
 
@@ -49,7 +50,7 @@ const ResetPassword = () => {
     },
   });
 
-  // Check if we have a valid hash in the URL
+  // Check if we have a valid hash in the URL and handle auto-login
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash || !hash.includes('type=recovery')) {
@@ -60,7 +61,16 @@ const ResetPassword = () => {
       });
       // Redirect to home page if the hash is invalid
       navigate("/");
+      return;
     }
+    
+    // After password reset, we'll manually log the user out for security
+    const handlePasswordReset = async () => {
+      // We'll let the user update their password first, then log them out
+      // This ensures they have to log in with their new password
+    };
+    
+    handlePasswordReset();
   }, [toast, navigate]);
 
   const handleSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
@@ -76,6 +86,9 @@ const ResetPassword = () => {
           title: "تم تغيير كلمة المرور بنجاح",
           description: "يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة",
         });
+        
+        // Log the user out after password reset for security
+        await logout();
       }
     } catch (error: any) {
       toast({
@@ -198,6 +211,7 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+
 
 
 
