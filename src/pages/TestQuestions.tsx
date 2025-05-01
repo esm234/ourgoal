@@ -28,7 +28,7 @@ const TestQuestions = () => {
       navigate("/login");
       return;
     }
-    
+
     if (role !== "admin") {
       navigate("/");
       return;
@@ -54,7 +54,7 @@ const TestQuestions = () => {
         .single();
 
       if (error) throw error;
-      
+
       if (data) {
         const formattedTest: Test = {
           ...data,
@@ -99,6 +99,8 @@ const TestQuestions = () => {
             return {
               ...question,
               type: question.type as "verbal" | "quantitative" | "mixed",
+              subtype: question.subtype as "general" | "reading_comprehension" || "general",
+              passage: question.passage || null,
               options: optionsData || [],
             } as Question;
           })
@@ -117,33 +119,47 @@ const TestQuestions = () => {
     }
   };
 
-  const handleCreateQuestion = async (data: CreateQuestionForm) => {
+  const handleCreateQuestion = async (data: CreateQuestionForm, action?: 'add_another' | 'return') => {
     try {
+      console.log("Creating question with data:", data);
+
       // Get the next order number
-      const nextOrder = questions.length > 0 
-        ? Math.max(...questions.map(q => q.question_order)) + 1 
+      const nextOrder = questions.length > 0
+        ? Math.max(...questions.map(q => q.question_order)) + 1
         : 1;
 
+      // Prepare question data
+      const questionData = {
+        test_id: testId,
+        text: data.text,
+        type: data.type,
+        subtype: data.subtype || "general", // Always include the subtype
+        explanation: data.explanation || null,
+        question_order: nextOrder,
+        image_url: data.image_url || null,
+      };
+
+      // Add passage for reading comprehension questions
+      if (data.type === "verbal" && data.subtype === "reading_comprehension") {
+        questionData["passage"] = data.passage;
+      }
+
       // Insert the question first
-      const { data: questionData, error: questionError } = await supabase
+      console.log("Sending question data to database:", questionData);
+      const { data: insertedQuestion, error: questionError } = await supabase
         .from("questions")
-        .insert({
-          test_id: testId,
-          text: data.text,
-          type: data.type,
-          explanation: data.explanation || null,
-          question_order: nextOrder,
-          image_url: data.image_url || null,
-        })
+        .insert(questionData)
         .select();
 
       if (questionError) throw questionError;
 
-      if (!questionData || questionData.length === 0) {
+      console.log("Inserted question:", insertedQuestion);
+
+      if (!insertedQuestion || insertedQuestion.length === 0) {
         throw new Error("لم يتم إنشاء السؤال بشكل صحيح");
       }
 
-      const questionId = questionData[0].id;
+      const questionId = insertedQuestion[0].id;
 
       // Then insert all options for this question
       const optionsToInsert = data.options.map((option, index) => ({
@@ -161,10 +177,16 @@ const TestQuestions = () => {
 
       toast({
         title: "تم إضافة السؤال بنجاح",
+        description: action === 'add_another' ? "يمكنك إضافة سؤال آخر الآن" : undefined,
       });
 
+      // Refresh the questions list
       fetchQuestions();
-      setActiveTab("questions-list");
+
+      // Only navigate back to the list if explicitly requested
+      if (action === 'return') {
+        setActiveTab("questions-list");
+      }
     } catch (error: any) {
       toast({
         title: "خطأ في إضافة السؤال",
@@ -202,19 +224,28 @@ const TestQuestions = () => {
     setActiveTab("add-question");
   };
 
-  const handleUpdateQuestion = async (data: CreateQuestionForm) => {
+  const handleUpdateQuestion = async (data: CreateQuestionForm, action?: 'add_another' | 'return') => {
     if (!editingQuestion) return;
 
     try {
+      // Prepare question data for update
+      const questionData = {
+        text: data.text,
+        type: data.type,
+        subtype: data.subtype || "general", // Always include the subtype
+        explanation: data.explanation || null,
+        image_url: data.image_url || null,
+      };
+
+      // Add passage for reading comprehension questions
+      if (data.type === "verbal" && data.subtype === "reading_comprehension") {
+        questionData["passage"] = data.passage;
+      }
+
       // Update the question
       const { error: questionError } = await supabase
         .from("questions")
-        .update({
-          text: data.text,
-          type: data.type,
-          explanation: data.explanation || null,
-          image_url: data.image_url || null,
-        })
+        .update(questionData)
         .eq("id", editingQuestion.id);
 
       if (questionError) throw questionError;
@@ -243,11 +274,23 @@ const TestQuestions = () => {
 
       toast({
         title: "تم تحديث السؤال بنجاح",
+        description: action === 'add_another' ? "يمكنك إضافة سؤال آخر الآن" : undefined,
       });
 
-      setEditingQuestion(null);
+      // Refresh the questions list
       fetchQuestions();
-      setActiveTab("questions-list");
+
+      // Reset editing state
+      setEditingQuestion(null);
+
+      // Handle navigation based on action
+      if (action === 'add_another') {
+        // Stay on the form to add another question
+        setActiveTab("add-question");
+      } else if (action === 'return' || !action) {
+        // Return to the list by default or when explicitly requested
+        setActiveTab("questions-list");
+      }
     } catch (error: any) {
       toast({
         title: "خطأ في تحديث السؤال",
@@ -307,18 +350,20 @@ const TestQuestions = () => {
                   {editingQuestion ? "تعديل السؤال" : "إضافة سؤال جديد"}
                 </CardTitle>
                 <CardDescription>
-                  {editingQuestion 
+                  {editingQuestion
                     ? "تعديل تفاصيل السؤال والإجابات المحتملة"
                     : "أدخل تفاصيل السؤال والإجابات المحتملة"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <QuestionForm 
+                <QuestionForm
                   onSubmit={editingQuestion ? handleUpdateQuestion : handleCreateQuestion}
                   defaultValues={editingQuestion ? {
                     mode: editingQuestion.image_url ? "image" : "text",
                     text: editingQuestion.text,
                     type: editingQuestion.type,
+                    subtype: editingQuestion.subtype || "general",
+                    passage: editingQuestion.passage || "",
                     explanation: editingQuestion.explanation || "",
                     image_url: editingQuestion.image_url || "",
                     options: editingQuestion.options.map(opt => ({
