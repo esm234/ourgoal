@@ -140,10 +140,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         : productionUrl;
 
       // Make sure the redirectTo URL is exactly correct
+      // This will only send a token for verification without auto-login
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${baseUrl}/reset-password`,
       });
-      
+
       console.log("Reset password requested for:", email, "with redirect to:", `${baseUrl}/reset-password`);
       return { error };
     } catch (error: any) {
@@ -153,6 +154,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePassword = async (newPassword: string) => {
     try {
+      // Update the password using the token from the URL
+      // This does not automatically log in the user
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
