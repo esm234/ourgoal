@@ -13,11 +13,13 @@ import {
   BarChart3,
   ClipboardList,
   Home,
-  LogOut
+  LogOut,
+  ShieldAlert
 } from "lucide-react";
 import UserManagement from "@/components/admin/UserManagement";
 import AdminTestManagement from "@/components/admin/AdminTestManagement";
 import AdminStats from "@/components/admin/AdminStats";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 // Create a placeholder for ExamResultsManagement
 const ExamResultsManagement = () => {
   return (
@@ -31,7 +33,8 @@ const ExamResultsManagement = () => {
 };
 
 const AdminDashboard = () => {
-  const { isLoggedIn, role, logout } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
+  const { isAdmin, isVerifying, error: adminCheckError } = useAdminCheck();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
@@ -50,7 +53,8 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (role !== "admin") {
+    // Check if the user is an admin using our secure hook
+    if (!isVerifying && !isAdmin) {
       toast({
         title: "غير مصرح",
         description: "هذه الصفحة متاحة للمشرفين فقط",
@@ -60,8 +64,22 @@ const AdminDashboard = () => {
       return;
     }
 
-    fetchDashboardStats();
-  }, [isLoggedIn, role, navigate]);
+    // If there was an error checking admin status
+    if (adminCheckError) {
+      toast({
+        title: "خطأ في التحقق من الصلاحيات",
+        description: adminCheckError,
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
+
+    // Only fetch stats if we're confirmed as an admin
+    if (isAdmin) {
+      fetchDashboardStats();
+    }
+  }, [isLoggedIn, isAdmin, isVerifying, adminCheckError, navigate]);
 
   const fetchDashboardStats = async () => {
     setLoading(true);
@@ -123,9 +141,34 @@ const AdminDashboard = () => {
     }
   };
 
-  // Early return if not authenticated or not admin
-  if (!isLoggedIn || role !== "admin") {
-    return null;
+  // Early return if not authenticated, still verifying, or not admin
+  if (!isLoggedIn || isVerifying || !isAdmin) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-8 text-center">
+          {isVerifying ? (
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+              <ShieldAlert className="h-12 w-12 text-primary animate-pulse mb-4" />
+              <h2 className="text-xl font-bold mb-2">جاري التحقق من الصلاحيات...</h2>
+              <p className="text-muted-foreground">يرجى الانتظار بينما نتحقق من صلاحياتك</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+              <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+              <h2 className="text-xl font-bold mb-2">غير مصرح</h2>
+              <p className="text-muted-foreground">ليس لديك صلاحية الوصول إلى هذه الصفحة</p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => navigate("/")}
+              >
+                العودة إلى الصفحة الرئيسية
+              </Button>
+            </div>
+          )}
+        </div>
+      </Layout>
+    );
   }
 
   const handleLogout = async () => {
