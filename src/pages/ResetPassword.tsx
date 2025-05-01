@@ -64,30 +64,66 @@ const ResetPassword = () => {
       return;
     }
     
-    // After password reset, we'll manually log the user out for security
+    // Immediately log the user out for security
     const handlePasswordReset = async () => {
-      // We'll let the user update their password first, then log them out
-      // This ensures they have to log in with their new password
+      try {
+        // Get the access token from the URL hash
+        const accessToken = new URLSearchParams(hash.substring(1)).get('access_token');
+        
+        if (accessToken) {
+          // Store the access token temporarily (we'll need it for the password update)
+          sessionStorage.setItem('resetPasswordToken', accessToken);
+          
+          // Log the user out immediately
+          await logout();
+          
+          toast({
+            title: "تأمين العملية",
+            description: "يرجى إدخال كلمة المرور الجديدة لإكمال عملية إعادة التعيين",
+          });
+        }
+      } catch (error) {
+        console.error("Error during password reset preparation:", error);
+      }
     };
     
     handlePasswordReset();
-  }, [toast, navigate]);
+  }, [toast, navigate, logout]);
 
   const handleSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
     setIsSubmitting(true);
     try {
-      const { error } = await updatePassword(data.password);
+      // Get the stored access token
+      const accessToken = sessionStorage.getItem('resetPasswordToken');
+      
+      // If we have a token, use it to update the password
+      let result;
+      if (accessToken) {
+        // Use the token to update password
+        result = await supabase.auth.updateUser(
+          { password: data.password },
+          { accessToken }
+        );
+      } else {
+        // Fall back to the normal update method
+        result = await updatePassword(data.password);
+      }
+      
+      const { error } = result;
       
       if (error) {
         throw error;
       } else {
+        // Clear the stored token
+        sessionStorage.removeItem('resetPasswordToken');
+        
         setResetComplete(true);
         toast({
           title: "تم تغيير كلمة المرور بنجاح",
           description: "يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة",
         });
         
-        // Log the user out after password reset for security
+        // Ensure the user is logged out
         await logout();
       }
     } catch (error: any) {
@@ -211,6 +247,8 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+
+
 
 
 
