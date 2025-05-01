@@ -4,15 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import { useAdminCheck } from "@/hooks/useAdminCheck";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -23,7 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash, Search, Clock, Eye, EyeOff, Plus, FileText } from "lucide-react";
+import { Pencil, Trash, Search, Clock, Eye, EyeOff, Plus, FileText, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Test } from "@/types/testManagement";
@@ -31,6 +32,7 @@ import { Test } from "@/types/testManagement";
 const AdminTestManagement = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAdmin, isVerifying, error: adminCheckError } = useAdminCheck();
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,8 +40,20 @@ const AdminTestManagement = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
-    fetchTests();
-  }, []);
+    // Only fetch tests if we're confirmed as an admin
+    if (isAdmin && !isVerifying) {
+      fetchTests();
+    }
+
+    // Show error if admin check failed
+    if (adminCheckError) {
+      toast({
+        title: "خطأ في التحقق من الصلاحيات",
+        description: adminCheckError,
+        variant: "destructive",
+      });
+    }
+  }, [isAdmin, isVerifying, adminCheckError]);
 
   const fetchTests = async () => {
     setLoading(true);
@@ -121,13 +135,13 @@ const AdminTestManagement = () => {
 
       toast({
         title: test.published ? "تم إخفاء الاختبار" : "تم نشر الاختبار",
-        description: test.published 
-          ? "لن يظهر الاختبار للمستخدمين" 
+        description: test.published
+          ? "لن يظهر الاختبار للمستخدمين"
           : "أصبح الاختبار متاحًا للمستخدمين",
       });
 
       // Update the test in the local state
-      setTests(tests.map(t => 
+      setTests(tests.map(t =>
         t.id === test.id ? { ...t, published: !test.published } : t
       ));
     } catch (error: any) {
@@ -139,7 +153,7 @@ const AdminTestManagement = () => {
     }
   };
 
-  const filteredTests = tests.filter(test => 
+  const filteredTests = tests.filter(test =>
     test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (test.description && test.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -151,6 +165,36 @@ const AdminTestManagement = () => {
       return <Badge variant="outline">مخصص</Badge>;
     }
   };
+
+  // If still verifying admin status, show loading
+  if (isVerifying) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center py-8">
+            <ShieldAlert className="h-12 w-12 text-primary animate-pulse mb-4" />
+            <h2 className="text-xl font-bold mb-2">جاري التحقق من الصلاحيات...</h2>
+            <p className="text-muted-foreground">يرجى الانتظار بينما نتحقق من صلاحياتك</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If not admin, show access denied
+  if (!isAdmin) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center py-8">
+            <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+            <h2 className="text-xl font-bold mb-2">غير مصرح</h2>
+            <p className="text-muted-foreground">ليس لديك صلاحية الوصول إلى هذه الصفحة</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -229,7 +273,7 @@ const AdminTestManagement = () => {
                           <Badge variant="outline" className="text-muted-foreground">مخفي</Badge>
                         )}
                       </TableCell>
-                      <TableCell>{new Date(test.created_at).toLocaleDateString('ar-EG')}</TableCell>
+                      <TableCell>{new Date(test.created_at).toLocaleDateString('en-US')}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Button
