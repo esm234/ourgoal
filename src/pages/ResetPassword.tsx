@@ -58,8 +58,10 @@ const ResetPassword = () => {
         description: "يبدو أن رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية",
         variant: "destructive",
       });
+      // Redirect to home page if the hash is invalid
+      navigate("/");
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
   const handleSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
     setIsSubmitting(true);
@@ -196,3 +198,6 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+
+
+
