@@ -227,14 +227,6 @@ const TakeTest = () => {
         // Ensure testId is a string
         const testIdString = String(testId);
 
-        console.log("Saving test result to database with data:", {
-          test_id: testIdString,
-          user_id: user.id,
-          score: score,
-          total_questions: questions.length,
-          time_taken: test.duration
-        });
-
         const { data, error } = await supabase.from("exam_results").insert({
           test_id: testIdString,
           user_id: user.id,
@@ -248,8 +240,6 @@ const TakeTest = () => {
           console.error("Error saving result to Supabase:", error);
           throw error;
         }
-
-        console.log("Test result saved successfully:", data);
 
         // Verify the result was saved by checking the database
         await verifyResultSaved(user.id, testIdString);
@@ -286,8 +276,6 @@ const TakeTest = () => {
         console.error("Error verifying result:", error);
         return;
       }
-
-      console.log("Verification check - Results found:", data);
 
       if (!data || data.length === 0) {
         console.warn("Verification failed: Result not found in database after saving!");
