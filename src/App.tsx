@@ -19,6 +19,7 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import initAntiDebug from "./utils/antiDebug";
 
 
 const queryClient = new QueryClient();
