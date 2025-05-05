@@ -78,31 +78,36 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
         // Now create a map to store usernames by user_id
         const userProfiles: Record<string, string> = {};
 
-        // For each result, get the profile details if needed
-        for (const result of topUserScores) {
-          // Only fetch if we haven't already
-          if (!userProfiles[result.user_id]) {
-            try {
-              const { data: profileData, error: profileError } = await supabase
-                .from("profiles")
-                .select("username")
-                .eq("id", result.user_id)
-                .single();
+        // Get all user IDs that need profile info
+        const userIds = topUserScores.map(result => result.user_id);
+        
+        // Fetch all profiles in a single query
+        if (userIds.length > 0) {
+          try {
+            const { data: profilesData, error: profilesError } = await supabase
+              .from("profiles")
+              .select("id, username")
+              .in("id", userIds);
 
-              if (profileError) {
-                console.warn("Error fetching profile data");
-                userProfiles[result.user_id] = "مستخدم مجهول";
-              } else if (profileData && profileData.username) {
-                userProfiles[result.user_id] = profileData.username;
-              } else {
-                userProfiles[result.user_id] = "مستخدم مجهول";
-              }
-            } catch (err) {
-              console.error("Error in profile fetch");
-              userProfiles[result.user_id] = "مستخدم مجهول";
+            if (profilesError) {
+              console.warn("Error fetching profiles data");
+            } else if (profilesData) {
+              // Create a map of user_id to username
+              profilesData.forEach(profile => {
+                userProfiles[profile.id] = profile.username || "مستخدم مجهول";
+              });
             }
+          } catch (err) {
+            console.error("Error in profiles fetch");
           }
         }
+
+        // For any user IDs that don't have a profile, set a default name
+        userIds.forEach(userId => {
+          if (!userProfiles[userId]) {
+            userProfiles[userId] = "مستخدم مجهول";
+          }
+        });
 
         // Format data for display
         const leaderboardData = topUserScores.map((item, index) => {
