@@ -125,9 +125,18 @@ const QiyasTests = () => {
   const fetchTests = async () => {
     setLoading(true);
     try {
+      // Only select the necessary fields and limit questions to just the count
       const { data, error } = await supabase
         .from("tests")
-        .select("*, questions(*)")
+        .select(`
+          id, 
+          title, 
+          description, 
+          duration,
+          category,
+          published,
+          questions:questions(id)
+        `)
         .eq("published", true);
 
       if (error) throw error;
@@ -139,12 +148,8 @@ const QiyasTests = () => {
         category: test.category || 'user' // Ensure category exists, default to 'user'
       })) as ExtendedTest[];
 
-      // Filter tests by category (explicitly check for 'sample' and anything else goes to user)
-      const sampleTestsData = testsWithDetails.filter(test => {
-        const isSample = test.category === 'sample';
-        return isSample;
-      });
-      
+      // Filter tests by category
+      const sampleTestsData = testsWithDetails.filter(test => test.category === 'sample');
       const userTestsData = testsWithDetails.filter(test => test.category !== 'sample');
       
       setUserTests(userTestsData);
