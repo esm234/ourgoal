@@ -23,15 +23,12 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
     const fetchLeaderboard = async () => {
       try {
         setLoading(true);
-        console.log("Fetching leaderboard data for test ID:", testId);
 
         // First, check if any data exists in the exam_results table
         const { data: allResults, error: allResultsError } = await supabase
           .from("exam_results")
           .select("id, score, user_id, test_id")
           .limit(5);
-
-        console.log("All test results in database:", allResults);
 
         if (allResultsError) {
           console.error("Error querying all results:", allResultsError);
@@ -78,9 +75,6 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
           .sort((a, b) => b.max_score - a.max_score)
           .slice(0, 5); // Take only top 5
 
-        console.log("Test results raw data for test", testId, ":", testResults);
-        console.log("Top user scores:", topUserScores);
-
         // Now create a map to store usernames by user_id
         const userProfiles: Record<string, string> = {};
 
@@ -96,7 +90,7 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
                 .single();
 
               if (profileError) {
-                console.warn("Error fetching profile for user", result.user_id, ":", profileError);
+                console.warn("Error fetching profile data");
                 userProfiles[result.user_id] = "مستخدم مجهول";
               } else if (profileData && profileData.username) {
                 userProfiles[result.user_id] = profileData.username;
@@ -104,19 +98,14 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
                 userProfiles[result.user_id] = "مستخدم مجهول";
               }
             } catch (err) {
-              console.error("Error in profile fetch:", err);
+              console.error("Error in profile fetch");
               userProfiles[result.user_id] = "مستخدم مجهول";
             }
           }
         }
 
-        console.log("User profiles fetched:", userProfiles);
-
         // Format data for display
         const leaderboardData = topUserScores.map((item, index) => {
-          // Log each item to understand the structure
-          console.log(`Leader ${index + 1}:`, item, "Username:", userProfiles[item.user_id]);
-
           return {
             username: userProfiles[item.user_id] || "مستخدم مجهول",
             score: item.max_score || 0, // Using max_score from our processed data
@@ -124,10 +113,9 @@ const Leaderboard = ({ testId }: LeaderboardProps) => {
           };
         });
 
-        console.log("Processed leaderboard data:", leaderboardData);
         setLeaders(leaderboardData);
       } catch (error) {
-        console.error("Error fetching leaderboard:", error);
+        console.error("Error fetching leaderboard");
         setLeaders([]); // Set empty array on error
       } finally {
         setLoading(false);
