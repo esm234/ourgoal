@@ -132,8 +132,6 @@ const QiyasTests = () => {
 
       if (error) throw error;
 
-      console.log("Raw data from database:", data);
-
       // Map tests to include question count and ensure they have proper category
       const testsWithDetails = data.map(test => ({
         ...test,
@@ -141,20 +139,14 @@ const QiyasTests = () => {
         category: test.category || 'user' // Ensure category exists, default to 'user'
       })) as ExtendedTest[];
 
-      console.log("Tests with added details:", testsWithDetails);
-
       // Filter tests by category (explicitly check for 'sample' and anything else goes to user)
       const sampleTestsData = testsWithDetails.filter(test => {
         const isSample = test.category === 'sample';
-        console.log(`Test "${test.title}" category: "${test.category}" -> isSample: ${isSample}`);
         return isSample;
       });
       
       const userTestsData = testsWithDetails.filter(test => test.category !== 'sample');
       
-      console.log("Filtered sample tests:", sampleTestsData);
-      console.log("Filtered user tests:", userTestsData);
-
       setUserTests(userTestsData);
       setSampleTests(sampleTestsData);
     } catch (error: any) {
