@@ -145,42 +145,40 @@ const TakeTest = () => {
 
       setTest(testData);
 
-      // Then, get the questions for this test
-      const { data: questionsData, error: questionsError } = await supabase
+      // Use a single query with join to get questions and their options in one go
+      const { data: questionsWithOptions, error: joinError } = await supabase
         .from("questions")
-        .select("*")
+        .select(`
+          *,
+          options:options(*)
+        `)
         .eq("test_id", testId)
         .order("question_order", { ascending: true });
 
-      if (questionsError) throw questionsError;
+      if (joinError) throw joinError;
 
-      // For each question, fetch its options
-      const questionsWithOptions = await Promise.all(
-        questionsData.map(async (question) => {
-          const { data: optionsData, error: optionsError } = await supabase
-            .from("options")
-            .select("*")
-            .eq("question_id", question.id)
-            .order("option_order", { ascending: true });
+      // Process the joined data
+      const formattedQuestions = questionsWithOptions.map(question => {
+        // Sort options by option_order
+        const sortedOptions = question.options.sort((a: any, b: any) => 
+          a.option_order - b.option_order
+        );
+        
+        // Find the correct answer index
+        const correctIndex = sortedOptions.findIndex((opt: any) => opt.is_correct);
 
-          if (optionsError) throw optionsError;
+        return {
+          ...question,
+          options: sortedOptions.map((opt: any) => opt.text),
+          correctAnswer: correctIndex,
+          type: question.type as "verbal" | "quantitative" | "mixed",
+          subtype: (question as any).subtype as "general" | "reading_comprehension" || "general",
+          passage: (question as any).passage || null,
+          imageUrl: (question as any).image_url || ""
+        } as ExtendedQuestion;
+      });
 
-          // Find the correct answer index
-          const correctIndex = optionsData.findIndex(opt => opt.is_correct);
-
-          return {
-            ...question,
-            options: optionsData.map(opt => opt.text),
-            correctAnswer: correctIndex,
-            type: question.type as "verbal" | "quantitative" | "mixed",
-            subtype: (question as any).subtype as "general" | "reading_comprehension" || "general",
-            passage: (question as any).passage || null,
-            imageUrl: (question as any).image_url || ""
-          } as ExtendedQuestion;
-        })
-      );
-
-      setQuestions(questionsWithOptions);
+      setQuestions(formattedQuestions);
     } catch (error: any) {
       console.error("Error fetching test:", error);
       toast({
@@ -241,7 +239,7 @@ const TakeTest = () => {
           throw error;
         }
 
-        // Verify the result was saved by checking the database
+        // Verify the result was saved
         await verifyResultSaved(user.id, testIdString);
 
         // Show success message
@@ -262,15 +260,22 @@ const TakeTest = () => {
 
   // Function to verify the result was saved
   const verifyResultSaved = async (userId: string, testIdString: string) => {
+    // In production, we can skip this verification to reduce DB calls
+    // Only enable for debugging or during development
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+    
     try {
       // Wait briefly to allow the database to process the insert
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       const { data, error } = await supabase
         .from("exam_results")
-        .select("*")
+        .select("id") // Only select the ID field to reduce data transfer
         .eq("user_id", userId)
-        .eq("test_id", testIdString);
+        .eq("test_id", testIdString)
+        .limit(1); // Limit to 1 result since we only need to verify existence
 
       if (error) {
         console.error("Error verifying result:", error);
@@ -360,10 +365,6 @@ const TakeTest = () => {
         return null;
     }
   };
-
-
-
-
 
   if (loading) {
     return (
