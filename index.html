@@ -16,6 +16,48 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ" />
+    <script>
+      // Disable right-click
+      document.addEventListener('contextmenu', event => event.preventDefault());
+      
+      // Disable keyboard shortcuts for inspection
+      document.addEventListener('keydown', function(event) {
+        // F12 key
+        if (event.keyCode === 123) {
+          event.preventDefault();
+          return false;
+        }
+        
+        // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+        if ((event.ctrlKey && event.shiftKey) && 
+            (event.keyCode === 73 || event.keyCode === 74 || event.keyCode === 67)) {
+          event.preventDefault();
+          return false;
+        }
+        
+        // Ctrl+U (View Source)
+        if (event.ctrlKey && event.keyCode === 85) {
+          event.preventDefault();
+          return false;
+        }
+      });
+      
+      // Disable DevTools
+      setInterval(function() {
+        const devtools = function() {};
+        devtools.toString = function() {
+          this.opened = true;
+          return '';
+        };
+        
+        console.log('%c', devtools);
+        
+        if (devtools.opened) {
+          // Optional: redirect or display a message when DevTools is detected
+          window.location.href = window.location.href;
+        }
+      }, 1000);
+    </script>
   </head>
 
   <body>
