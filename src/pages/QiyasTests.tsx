@@ -23,6 +23,45 @@ import {
 } from "@/components/ui/dialog";
 import Leaderboard from "@/components/Leaderboard";
 
+// التخزين المؤقت للاختبارات
+const TESTS_CACHE_KEY = 'cached_test_list';
+const TESTS_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // يوم كامل بالمللي ثانية
+
+// دالة مساعدة للحصول على قائمة الاختبارات المخزنة محليًا
+const getCachedTestsList = () => {
+  try {
+    const cachedData = localStorage.getItem(TESTS_CACHE_KEY);
+    if (!cachedData) return null;
+    
+    const parsed = JSON.parse(cachedData);
+    
+    // التحقق من صلاحية التخزين المؤقت
+    if (parsed.timestamp && Date.now() - parsed.timestamp < TESTS_CACHE_EXPIRY) {
+      return parsed.data;
+    }
+    
+    // مسح التخزين المؤقت منتهي الصلاحية
+    localStorage.removeItem(TESTS_CACHE_KEY);
+    return null;
+  } catch (error) {
+    console.error("خطأ في قراءة قائمة الاختبارات المخزنة:", error);
+    return null;
+  }
+};
+
+// دالة مساعدة لتخزين قائمة الاختبارات محليًا
+const cacheTestsList = (data: any) => {
+  try {
+    localStorage.setItem(TESTS_CACHE_KEY, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }));
+    console.log("تم تخزين قائمة الاختبارات محليًا");
+  } catch (error) {
+    console.error("خطأ في تخزين قائمة الاختبارات محليًا:", error);
+  }
+};
+
 interface TestType {
   id: string;
   title: string;
@@ -112,20 +151,53 @@ const QiyasTests = () => {
   const [sampleTests, setSampleTests] = useState<ExtendedTest[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("sample-tests");
+  const [isFromCache, setIsFromCache] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+  const cacheDuration = 5 * 60 * 1000; // 5 دقائق بالمللي ثانية
 
   useEffect(() => {
     if (isLoggedIn) {
-      fetchTests();
+      loadTests();
     } else {
-      // If not logged in, still fetch published tests
-      fetchTests();
+      // إذا لم يكن المستخدم مسجلاً، نحمل الاختبارات المتاحة للجميع
+      loadTests();
     }
   }, [isLoggedIn]);
 
-  const fetchTests = async () => {
+  const loadTests = async () => {
+    // فحص التخزين المؤقت المحلي أولاً
+    const cachedTests = getCachedTestsList();
+    
+    if (cachedTests) {
+      setSampleTests(cachedTests.sampleTests || []);
+      setUserTests(cachedTests.userTests || []);
+      setIsFromCache(true);
+      console.log("تم تحميل الاختبارات من التخزين المؤقت المحلي");
+      
+      // استخدام إشارة التحميل لإظهار حالة التحميل الكاملة
+      setLoading(false);
+      
+      // فحص ما إذا كان الوقت قد حان لتحديث البيانات في الخلفية
+      const now = Date.now();
+      if (now - lastFetchTime > cacheDuration) {
+        // تحديث في الخلفية دون إظهار مؤشر التحميل للمستخدم
+        fetchTests(false);
+        setLastFetchTime(now);
+      }
+      
+      return;
+    }
+    
+    // إذا لم يكن هناك تخزين مؤقت، نحمل من الخادم
     setLoading(true);
+    await fetchTests(true);
+  };
+
+  const fetchTests = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    
     try {
-      // Only select the necessary fields and limit questions to just the count
+      // استخدام التجميع للحصول على عدد الأسئلة بدلاً من جلب جميع معرفات الأسئلة
       const { data, error } = await supabase
         .from("tests")
         .select(`
@@ -135,34 +207,49 @@ const QiyasTests = () => {
           duration,
           category,
           published,
-          questions:questions(id)
+          questionCount:questions(count)
         `)
         .eq("published", true);
 
       if (error) throw error;
 
-      // Map tests to include question count and ensure they have proper category
+      // معالجة البيانات وإضافة عدد الأسئلة من نتيجة التجميع
       const testsWithDetails = data.map(test => ({
         ...test,
-        numberOfQuestions: test.questions?.length || 0,
-        category: test.category || 'user' // Ensure category exists, default to 'user'
+        numberOfQuestions: test.questionCount[0]?.count || 0,
+        questions: [], // مصفوفة فارغة للحفاظ على توافق النوع
+        category: test.category || 'user' // التأكد من وجود الفئة، الافتراضية هي 'user'
       })) as ExtendedTest[];
 
-      // Filter tests by category
+      // فلترة الاختبارات حسب الفئة
       const sampleTestsData = testsWithDetails.filter(test => test.category === 'sample');
       const userTestsData = testsWithDetails.filter(test => test.category !== 'sample');
       
+      // تحديث حالة المكون
       setUserTests(userTestsData);
       setSampleTests(sampleTestsData);
-    } catch (error: any) {
-      console.error("Error fetching tests:", error);
-      toast({
-        title: "خطأ في جلب الاختبارات",
-        description: error.message,
-        variant: "destructive",
+      setIsFromCache(false);
+      
+      // تخزين البيانات في التخزين المؤقت المحلي
+      cacheTestsList({
+        sampleTests: sampleTestsData,
+        userTests: userTestsData
       });
+      
+      // تحديث وقت آخر جلب
+      setLastFetchTime(Date.now());
+    } catch (error: any) {
+      console.error("خطأ في جلب الاختبارات:", error);
+      
+      if (showLoading) {
+        toast({
+          title: "خطأ في جلب الاختبارات",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
