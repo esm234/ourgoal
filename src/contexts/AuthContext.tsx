@@ -25,8 +25,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastRoleFetch, setLastRoleFetch] = useState<number>(0);
+  const roleCacheTimeMs = 5 * 60 * 1000; // 5 دقائق بالمللي ثانية
+  const roleLocalStorageKey = "cached_user_role";
 
-  // Helper to fetch role from profiles and verify admin status
+  // دالة مساعدة لإدارة دور المستخدم مع التخزين المؤقت
   const fetchUserRole = async (userId: string | undefined | null) => {
     if (!userId) {
       setRole(null);
@@ -34,7 +37,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // First, get the role from the profiles table
+      // التحقق من وجود دور مخزن محليًا أولاً
+      const cachedRoleData = localStorage.getItem(roleLocalStorageKey);
+      if (cachedRoleData) {
+        try {
+          const { role: cachedRole, userId: cachedUserId, timestamp } = JSON.parse(cachedRoleData);
+          // التأكد من أن الدور المخزن هو للمستخدم الحالي وأنه لم ينته وقته
+          if (cachedUserId === userId && Date.now() - timestamp < roleCacheTimeMs) {
+            setRole(cachedRole);
+            return;
+          }
+        } catch (e) {
+          console.error("خطأ في قراءة الدور المخزن محليًا:", e);
+          localStorage.removeItem(roleLocalStorageKey);
+        }
+      }
+
+      // التحقق من صلاحية التخزين المؤقت في الذاكرة
+      const now = Date.now();
+      if (role !== null && now - lastRoleFetch < roleCacheTimeMs) {
+        return;
+      }
+
+      // جلب الدور من قاعدة البيانات
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
@@ -42,55 +67,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) throw error;
-
-      const clientRole = data?.role ?? null;
-
-      // If the client claims to be an admin, verify it with the backend
-      if (clientRole === 'admin') {
-        // Use the secure RPC function to verify admin status
-        const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin');
-
-        if (adminError) {
-          console.error("Error verifying admin status:", adminError);
-          setRole('user'); // Downgrade to user on error
-          return;
-        }
-
-        // Only set as admin if the backend confirms it
-        setRole(isAdmin ? 'admin' : 'user');
-      } else {
-        // For non-admin roles, trust the database value
-        setRole(clientRole);
-      }
+      
+      const userRole = data?.role || "user";
+      setRole(userRole);
+      setLastRoleFetch(now);
+      
+      // تخزين الدور محليًا
+      localStorage.setItem(
+        roleLocalStorageKey,
+        JSON.stringify({
+          role: userRole,
+          userId,
+          timestamp: now
+        })
+      );
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error("خطأ في جلب دور المستخدم:", error);
       setRole(null);
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoggedIn(!!session);
-        setUsername(session?.user?.email ?? null);
-        fetchUserRole(session?.user?.id);
+    // Initial setup to ensure persistent sessions
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoggedIn(!!session);
+      setUsername(session?.user?.email ?? null);
+      
+      if (session?.user?.id) {
+        fetchUserRole(session.user.id);
+      } else {
+        setRole(null);
+        // مسح التخزين المؤقت المحلي عند تسجيل الخروج
+        localStorage.removeItem(roleLocalStorageKey);
       }
-    );
+      
+      // Debug auth state changes
+      console.log("Auth state change:", event, !!session);
+    });
 
-    // Then check for existing session
+    // Check for existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoggedIn(!!session);
       setUsername(session?.user?.email ?? null);
-      fetchUserRole(session?.user?.id);
+      
+      if (session?.user?.id) {
+        fetchUserRole(session.user.id);
+      } else {
+        setRole(null);
+      }
+      
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Clean up subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -102,11 +138,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      // Sign up the user with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          // Set data needed during signup
+          data: {
+            email, // Include email in user metadata
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      // Check if we received a user object
+      if (data?.user) {
+        // Create a profile entry if needed (will be handled by database triggers)
+        console.log("User signed up successfully:", data.user.id);
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      return { error };
+    }
   };
 
   const logout = async () => {
