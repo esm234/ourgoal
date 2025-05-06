@@ -14,49 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { BookText } from "lucide-react";
+import { useQuery } from '@tanstack/react-query';
 
-const mockTestHistory = [
-  {
-    id: 1,
-    date: "2024-06-01T15:30:00Z",
-    type: "لفظي",
-    score: 85,
-    correctAnswers: 17,
-    totalQuestions: 20,
-    details: [
-      { id: 1, text: "سؤال 1", userAnswer: "أ", correctAnswer: "أ", options: ["أ", "ب", "ج", "د"] },
-      {
-        id: 2,
-        text: "ما هو الاستنتاج الصحيح من النص؟",
-        userAnswer: "ب",
-        correctAnswer: "ج",
-        options: ["الحفاظ على البيئة مسؤولية الحكومات فقط", "التطور الصناعي لا يؤثر على البيئة", "الحفاظ على البيئة مسؤولية الجميع", "لا توجد حلول لمشكلات البيئة"],
-        explanation: "الإجابة الصحيحة هي ج لأن النص يشير بوضوح إلى أن الجميع يجب أن يساهم في الحفاظ على البيئة",
-        passage: "تعتبر البيئة من أهم الموارد الطبيعية التي يجب الحفاظ عليها. فهي المصدر الأساسي للغذاء والماء والهواء النقي. وقد أدى التطور الصناعي والتكنولوجي إلى تدهور البيئة بشكل كبير، مما أدى إلى ظهور العديد من المشكلات البيئية مثل التلوث وتغير المناخ وانقراض الكائنات الحية. لذلك، يجب على الجميع المساهمة في الحفاظ على البيئة من خلال ترشيد استهلاك الموارد الطبيعية وإعادة التدوير والتقليل من استخدام المواد الضارة بالبيئة."
-      },
-    ],
-  },
-  {
-    id: 2,
-    date: "2024-05-20T18:00:00Z",
-    type: "كمي",
-    score: 70,
-    correctAnswers: 14,
-    totalQuestions: 20,
-    details: [
-      { id: 1, text: "سؤال 1", userAnswer: "د", correctAnswer: "د", options: ["أ", "ب", "ج", "د"] },
-      {
-        id: 2,
-        text: "ما هي الفكرة الرئيسية للنص؟",
-        userAnswer: "أ",
-        correctAnswer: "ب",
-        options: ["التطور التكنولوجي", "أهمية القراءة", "تاريخ الكتب", "مستقبل التعليم"],
-        explanation: "الإجابة الصحيحة هي ب لأن النص يتحدث عن أهمية القراءة ودورها في التطور الفكري",
-        passage: "القراءة هي مفتاح المعرفة والتطور الفكري. فمن خلال القراءة يمكن للإنسان أن يتعرف على ثقافات وحضارات مختلفة، ويطور مهاراته اللغوية والفكرية. وقد أثبتت الدراسات أن الأشخاص الذين يقرؤون بانتظام يتمتعون بقدرات ذهنية أفضل ومستوى ثقافي أعلى. لذلك، يجب تشجيع الأطفال منذ الصغر على القراءة وجعلها عادة يومية."
-      }
-    ],
-  },
-];
+
 
 const UserProfile = () => {
   const { user, isLoggedIn } = useAuth();
@@ -65,6 +25,7 @@ const UserProfile = () => {
   const userId = user?.id || '';
   const [editMode, setEditMode] = useState(false);
   const [username, setUsername] = useState('');
+  const [originalUsername, setOriginalUsername] = useState('');
 
   // Redirect if not logged in
   useEffect(() => {
@@ -78,25 +39,39 @@ const UserProfile = () => {
     return null;
   }
 
+  // Use React Query to fetch and cache the profile data
+  const fetchProfile = async () => {
+    if (!userId) return { username: '' };
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
+      .single();
+
+    if (error) throw error;
+    return data || { username: '' };
+  };
+
+  const { 
+    data: profileData, 
+    isLoading: profileLoading 
+  } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: fetchProfile,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    enabled: !!userId
+  });
+
+  // 在profileData变化时更新username
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!userId) return;
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', userId)
-        .single();
-
-      if (!error && data) {
-        setUsername(data.username);
-      }
-    };
-    fetchProfile();
-  }, [userId]);
+    if (profileData?.username) {
+      setUsername(profileData.username);
+      setOriginalUsername(profileData.username);
+    }
+  }, [profileData]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [originalUsername, setOriginalUsername] = useState('');
 
   const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +101,6 @@ const UserProfile = () => {
 
   const handleCancelEdit = () => {
     // Restore the original username
-    setUsername(originalUsername);
     setEditMode(false);
   };
 
@@ -148,15 +122,15 @@ const UserProfile = () => {
     }).format(date);
   };
 
-  // Use mock data for testing
+  // Use test results from localStorage
   const [testHistory, setTestHistory] = useState(() => {
     try {
       const stored = localStorage.getItem('testResults');
-      let history = stored ? JSON.parse(stored) : mockTestHistory;
+      let history = stored ? JSON.parse(stored) : [];
       history = history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       return history;
     } catch {
-      return mockTestHistory;
+      return [];
     }
   });
 
