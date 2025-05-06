@@ -15,6 +15,52 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Leaderboard from "@/components/Leaderboard";
 
+// مستودع التخزين المؤقت المحلي للاختبارات
+const TEST_CACHE_KEY = 'cached_tests';
+const TEST_CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // أسبوع بالمللي ثانية
+
+// دالة مساعدة للحصول على الاختبارات المخزنة محليًا
+const getCachedTests = () => {
+  try {
+    const cachedTests = localStorage.getItem(TEST_CACHE_KEY);
+    if (!cachedTests) return {};
+    
+    const parsed = JSON.parse(cachedTests);
+    
+    // التحقق من صلاحية التخزين المؤقت
+    if (parsed.timestamp && Date.now() - parsed.timestamp < TEST_CACHE_EXPIRY) {
+      return parsed.tests || {};
+    } else {
+      // مسح التخزين المؤقت منتهي الصلاحية
+      localStorage.removeItem(TEST_CACHE_KEY);
+      return {};
+    }
+  } catch (error) {
+    console.error("خطأ في قراءة الاختبارات المخزنة:", error);
+    return {};
+  }
+};
+
+// دالة مساعدة لتخزين اختبار محليًا
+const cacheTest = (testId: string, testData: any, questionsData: ExtendedQuestion[]) => {
+  try {
+    const existingCache = getCachedTests();
+    const updatedCache = {
+      ...existingCache,
+      [testId]: { test: testData, questions: questionsData }
+    };
+    
+    localStorage.setItem(TEST_CACHE_KEY, JSON.stringify({
+      tests: updatedCache,
+      timestamp: Date.now()
+    }));
+    
+    console.log(`تم تخزين الاختبار ${testId} محليًا`);
+  } catch (error) {
+    console.error("خطأ في تخزين الاختبار محليًا:", error);
+  }
+};
+
 const TakeTest = () => {
   const { testId } = useParams();
   const navigate = useNavigate();
@@ -28,6 +74,7 @@ const TakeTest = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [animateTimeLeft, setAnimateTimeLeft] = useState(false);
+  const [isFromCache, setIsFromCache] = useState(false);
 
   useEffect(() => {
     if (test?.duration) {
@@ -112,73 +159,92 @@ const TakeTest = () => {
   }, [testId]);
 
   const fetchTestWithQuestions = async () => {
+    if (!testId) return;
+    
     setLoading(true);
+    
     try {
-      // First, get the test details
-      const { data: testData, error: testError } = await supabase
+      // 1. البحث في النماذج الثابتة أولًا
+      const staticTest = testQuestions.find(t => t.testId === testId);
+      if (staticTest) {
+        setTest({
+          ...staticTest,
+          id: staticTest.testId,
+          title: `اختبار تجريبي ${staticTest.testId}`
+        });
+        setQuestions(staticTest.questions.map(q => ({
+          ...q,
+          imageUrl: (q as any).imageUrl || (q as any).image_url || "",
+          subtype: (q as any).subtype || "general",
+          passage: (q as any).passage || null
+        })) as ExtendedQuestion[]);
+        setLoading(false);
+        return;
+      }
+      
+      // 2. البحث في التخزين المؤقت المحلي
+      const cachedTests = getCachedTests();
+      const cachedTest = cachedTests[testId];
+      
+      if (cachedTest) {
+        console.log(`تم استرجاع الاختبار ${testId} من التخزين المؤقت المحلي`);
+        setTest(cachedTest.test);
+        setQuestions(cachedTest.questions);
+        setIsFromCache(true);
+        setLoading(false);
+        return;
+      }
+      
+      // 3. طلب البيانات من الخادم إذا لم تكن موجودة في أي من المصدرين السابقين
+      const { data, error } = await supabase
         .from("tests")
-        .select("*")
+        .select(`
+          *,
+          questions:questions(
+            *,
+            options:options(*)
+          )
+        `)
         .eq("id", testId)
         .single();
 
-      if (testError) {
-        // If not found in database, try the local static data
-        const staticTest = testQuestions.find(t => t.testId === testId);
-        if (staticTest) {
-          setTest({
-            ...staticTest,
-            id: staticTest.testId,
-            title: `اختبار تجريبي ${staticTest.testId}`
-          });
-          setQuestions(staticTest.questions.map(q => ({
-            ...q,
-            imageUrl: (q as any).imageUrl || (q as any).image_url || "",
-            subtype: (q as any).subtype || "general",
-            passage: (q as any).passage || null
-          })) as ExtendedQuestion[]);
-          setLoading(false);
-          return;
-        } else {
-          throw testError;
-        }
-      }
+      if (error) throw error;
 
-      setTest(testData);
-
-      // Use a single query with join to get questions and their options in one go
-      const { data: questionsWithOptions, error: joinError } = await supabase
-        .from("questions")
-        .select(`
-          *,
-          options:options(*)
-        `)
-        .eq("test_id", testId)
-        .order("question_order", { ascending: true });
-
-      if (joinError) throw joinError;
+      // Set test data
+      setTest(data);
 
       // Process the joined data
-      const formattedQuestions = questionsWithOptions.map(question => {
-        // Sort options by option_order
-        const sortedOptions = question.options.sort((a: any, b: any) => 
-          a.option_order - b.option_order
+      if (data.questions && Array.isArray(data.questions)) {
+        const formattedQuestions = data.questions.map(question => {
+          // Sort options by option_order
+          const sortedOptions = question.options.sort((a: any, b: any) => 
+            a.option_order - b.option_order
+          );
+          
+          // Find the correct answer index
+          const correctIndex = sortedOptions.findIndex((opt: any) => opt.is_correct);
+
+          return {
+            ...question,
+            options: sortedOptions.map((opt: any) => opt.text),
+            correctAnswer: correctIndex,
+            type: question.type as "verbal" | "quantitative" | "mixed",
+            subtype: (question as any).subtype as "general" | "reading_comprehension" || "general",
+            passage: (question as any).passage || null,
+            imageUrl: (question as any).image_url || ""
+          } as ExtendedQuestion;
+        });
+
+        // Sort questions by question_order if present
+        formattedQuestions.sort((a, b) => 
+          (a.question_order || 0) - (b.question_order || 0)
         );
+
+        setQuestions(formattedQuestions);
         
-        // Find the correct answer index
-        const correctIndex = sortedOptions.findIndex((opt: any) => opt.is_correct);
-
-        return {
-          ...question,
-          options: sortedOptions.map((opt: any) => opt.text),
-          correctAnswer: correctIndex,
-          type: question.type as "verbal" | "quantitative" | "mixed",
-          subtype: (question as any).subtype as "general" | "reading_comprehension" || "general",
-          passage: (question as any).passage || null,
-          imageUrl: (question as any).image_url || ""
-        } as ExtendedQuestion;
-      });
-
-      setQuestions(formattedQuestions);
+        // تخزين الاختبار في التخزين المؤقت المحلي
+        cacheTest(testId, data, formattedQuestions);
+      }
     } catch (error: any) {
       console.error("Error fetching test:", error);
       toast({
@@ -225,22 +291,19 @@ const TakeTest = () => {
         // Ensure testId is a string
         const testIdString = String(testId);
 
-        const { data, error } = await supabase.from("exam_results").insert({
+        const { error } = await supabase.from("exam_results").insert({
           test_id: testIdString,
           user_id: user.id,
           score: score,
           total_questions: questions.length,
           time_taken: test.duration, // Using test duration as time taken
           questions_data: result.questions // Store questions data in the database
-        }).select();
+        });
 
         if (error) {
           console.error("Error saving result to Supabase:", error);
           throw error;
         }
-
-        // Verify the result was saved
-        await verifyResultSaved(user.id, testIdString);
 
         // Show success message
         toast({
@@ -255,40 +318,6 @@ const TakeTest = () => {
           variant: "destructive",
         });
       }
-    }
-  };
-
-  // Function to verify the result was saved
-  const verifyResultSaved = async (userId: string, testIdString: string) => {
-    // In production, we can skip this verification to reduce DB calls
-    // Only enable for debugging or during development
-    if (process.env.NODE_ENV === 'production') {
-      return;
-    }
-    
-    try {
-      // Wait briefly to allow the database to process the insert
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const { data, error } = await supabase
-        .from("exam_results")
-        .select("id") // Only select the ID field to reduce data transfer
-        .eq("user_id", userId)
-        .eq("test_id", testIdString)
-        .limit(1); // Limit to 1 result since we only need to verify existence
-
-      if (error) {
-        console.error("Error verifying result:", error);
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        console.warn("Verification failed: Result not found in database after saving!");
-      } else {
-        console.log("Verification successful: Result found in database!");
-      }
-    } catch (err) {
-      console.error("Error during verification:", err);
     }
   };
 
