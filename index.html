@@ -46,8 +46,19 @@
         }
       });
 
-      // Detect DevTools
+      // مؤشر لتحديد ما إذا كان الجهاز محمولًا
+      function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      // دالة اكتشاف أدوات المطور المحسّنة (تتجاهل الأجهزة المحمولة)
       function detectDevTools() {
+        // تجاهل الكشف على الأجهزة المحمولة
+        if (isMobileDevice()) {
+          return;
+        }
+        
+        // تطبيق الكشف فقط على أجهزة سطح المكتب
         const widthThreshold = window.outerWidth - window.innerWidth > 160;
         const heightThreshold = window.outerHeight - window.innerHeight > 160;
         
@@ -56,8 +67,10 @@
         }
       }
       
-      // Run detection periodically
-      setInterval(detectDevTools, 1000);
+      // تشغيل الكشف بشكل دوري فقط على أجهزة سطح المكتب
+      if (!isMobileDevice()) {
+        setInterval(detectDevTools, 1000);
+      }
 
       // Disable console
       (() => {
