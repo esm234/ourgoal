@@ -4,6 +4,9 @@ const MaintenancePage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg text-center">
+        <div className="mb-2">
+          <h2 className="text-xl font-bold text-blue-600">Our Goal Is Success</h2>
+        </div>
         <div className="mb-6">
           <svg
             className="mx-auto h-16 w-16 text-yellow-500"
@@ -24,12 +27,16 @@ const MaintenancePage: React.FC = () => {
         <p className="text-gray-600 mb-6">
           نعتذر عن الإزعاج، الموقع حاليًا قيد الصيانة لتحسين خدمتكم. سنعود قريبًا بمميزات جديدة وخدمة أفضل.
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 mb-4">
           نرجو المحاولة مرة أخرى لاحقًا
         </p>
+        <div className="border-t pt-4">
+          <p className="text-md font-semibold text-blue-600">Our Goal Is Success</p>
+          <p className="text-xs text-gray-500">We'll be back soon with improved services</p>
+        </div>
       </div>
     </div>
   );
 };
 
-export default MaintenancePage; 
+export default MaintenancePage;
