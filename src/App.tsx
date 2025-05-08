@@ -19,63 +19,70 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import MaintenancePage from "@/components/MaintenancePage";
 
+// Set this to true to enable maintenance mode
+const MAINTENANCE_MODE = true;
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/qiyas-tests" element={<QiyasTests />} />
-            <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
-                        <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
+const App = () => {
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage />;
+  }
 
-            {/* Protected Routes */}
-            <Route path="/test-management" element={
-              <ProtectedRoute>
-                <TestManagement />
-              </ProtectedRoute>
-            } />
-            <Route path="/test-management/:testId/questions" element={
-              <ProtectedRoute>
-                <TestQuestions />
-              </ProtectedRoute>
-            } />
-            <Route path="/test-management/:testId/edit" element={
-              <ProtectedRoute>
-                <EditTest />
-              </ProtectedRoute>
-            } />
-            <Route path="/user-profile" element={
-              <ProtectedRoute>
-                <UserProfile />
-              </ProtectedRoute>
-            } />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/qiyas-tests" element={<QiyasTests />} />
+              <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
+              <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/profile-setup" element={<ProfileSetup />} />
 
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
+              {/* Protected Routes */}
+              <Route path="/test-management" element={
+                <ProtectedRoute>
+                  <TestManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/test-management/:testId/questions" element={
+                <ProtectedRoute>
+                  <TestQuestions />
+                </ProtectedRoute>
+              } />
+              <Route path="/test-management/:testId/edit" element={
+                <ProtectedRoute>
+                  <EditTest />
+                </ProtectedRoute>
+              } />
+              <Route path="/user-profile" element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              } />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+              <Route path="/admin" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
 
-
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
