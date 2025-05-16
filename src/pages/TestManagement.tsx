@@ -114,28 +114,58 @@ const TestManagement = () => {
     }
   };
 
-  const handleTogglePublish = async (testId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from("tests")
-        .update({ published: !currentStatus })
-        .eq("id", testId);
+ const handleTogglePublish = async (testId: string, currentStatus: boolean) => {
+  try {
+    const { error } = await supabase
+      .from("tests")
+      .update({ published: !currentStatus })
+      .eq("id", testId);
 
-      if (error) throw error;
-      
-      toast({
-        title: !currentStatus ? "تم نشر الاختبار بنجاح" : "تم إلغاء نشر الاختبار بنجاح",
-      });
-      
-      fetchTests();
-    } catch (error: any) {
-      toast({
-        title: "خطأ في تغيير حالة النشر",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (error) {
+      console.error("Error toggling publish status:", error);
+      throw error;
     }
-  };
+    
+    toast({
+      title: !currentStatus ? "تم نشر الاختبار بنجاح" : "تم إلغاء نشر الاختبار بنجاح",
+    });
+    
+    fetchTests();
+  } catch (error: any) {
+    toast({
+      title: "خطأ في تغيير حالة النشر",
+      description: error.message,
+      variant: "destructive",
+    });
+  }
+};
+
+// Update the handleDeleteTest function to ensure it works regardless of test status
+const handleDeleteTest = async (testId: string) => {
+  try {
+    const { error } = await supabase
+      .from("tests")
+      .delete()
+      .eq("id", testId);
+
+    if (error) {
+      console.error("Error deleting test:", error);
+      throw error;
+    }
+    
+    toast({
+      title: "تم حذف الاختبار بنجاح",
+    });
+    
+    fetchTests();
+  } catch (error: any) {
+    toast({
+      title: "خطأ في حذف الاختبار",
+      description: error.message,
+      variant: "destructive",
+    });
+  }
+};
 
   // Add function to handle test category update
   const getCategoryText = (category?: string) => {
