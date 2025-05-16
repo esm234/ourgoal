@@ -23,7 +23,7 @@ const EditTest = () => {
       navigate("/login");
       return;
     }
-
+    
     if (role !== "admin") {
       navigate("/");
       return;
@@ -43,7 +43,7 @@ const EditTest = () => {
         .single();
 
       if (error) throw error;
-
+      
       if (data) {
         const formattedTest: Test = {
           ...data,
@@ -63,7 +63,7 @@ const EditTest = () => {
     }
   };
 
-  const handleUpdateTest = async (data: { title: string; description: string; duration: number; category: 'sample' | 'user' }) => {
+const handleUpdateTest = async (data: { title: string; description: string; duration: number; category: 'sample' | 'user' }) => {
   try {
     const { error } = await supabase
       .from("tests")
@@ -79,11 +79,11 @@ const EditTest = () => {
       console.error("Error updating test:", error);
       throw error;
     }
-
+    
     toast({
       title: "تم تحديث الاختبار بنجاح",
     });
-
+    
     navigate("/test-management");
   } catch (error: any) {
     toast({
@@ -119,7 +119,7 @@ const EditTest = () => {
               العودة إلى قائمة الاختبارات
             </Link>
           </Button>
-
+          
           <Card>
             <CardHeader>
               <CardTitle>تعديل الاختبار</CardTitle>
@@ -127,7 +127,7 @@ const EditTest = () => {
             </CardHeader>
             <CardContent>
               {test && (
-                <TestForm
+                <TestForm 
                   onSubmit={handleUpdateTest}
                   defaultValues={{
                     title: test.title,
