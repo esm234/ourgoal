@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
  * A hook that checks if the current user has permission to edit a specific test
  */
 export const useTestPermission = (testId: string | undefined) => {
-  const { isLoggedIn, role } = useAuth();
+  const { isLoggedIn, role, user } = useAuth();
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,15 +24,18 @@ export const useTestPermission = (testId: string | undefined) => {
         }
 
         // If user is already known to be an admin from client-side, they can edit
-        // But we'll still verify with the backend for security
         if (role === 'admin') {
           setCanEdit(true);
+          setIsVerifying(false);
+          return;
         }
 
-        // Double-check with the backend using the secure RPC function
-        const { data, error } = await supabase.rpc('can_edit_test', {
-          test_id: testId
-        });
+        // Check if the user is the owner of the test
+        const { data, error } = await supabase
+          .from("tests")
+          .select("user_id")
+          .eq("id", testId)
+          .single();
         
         if (error) {
           console.error('Error verifying test permission:', error);
@@ -41,7 +44,8 @@ export const useTestPermission = (testId: string | undefined) => {
           return;
         }
 
-        setCanEdit(!!data);
+        // User can edit if they are the owner
+        setCanEdit(data.user_id === user?.id);
       } catch (err: any) {
         console.error('Unexpected error during permission check:', err);
         setError(err.message || 'An unexpected error occurred');
@@ -52,7 +56,7 @@ export const useTestPermission = (testId: string | undefined) => {
     };
 
     checkPermission();
-  }, [isLoggedIn, role, testId]);
+  }, [isLoggedIn, role, testId, user?.id]);
 
   return { canEdit, isVerifying, error };
 };

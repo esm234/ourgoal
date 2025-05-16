@@ -63,32 +63,36 @@ const EditTest = () => {
     }
   };
 
-  const handleUpdateTest = async (data: { title: string; description: string; duration: number }) => {
-    try {
-      const { error } = await supabase
-        .from("tests")
-        .update({
-          title: data.title,
-          description: data.description,
-          duration: data.duration,
-        })
-        .eq("id", testId);
+  const handleUpdateTest = async (data: { title: string; description: string; duration: number; category: 'sample' | 'user' }) => {
+  try {
+    const { error } = await supabase
+      .from("tests")
+      .update({
+        title: data.title,
+        description: data.description,
+        duration: data.duration,
+        category: data.category
+      })
+      .eq("id", testId);
 
-      if (error) throw error;
-      
-      toast({
-        title: "تم تحديث الاختبار بنجاح",
-      });
-      
-      navigate("/test-management");
-    } catch (error: any) {
-      toast({
-        title: "خطأ في تحديث الاختبار",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (error) {
+      console.error("Error updating test:", error);
+      throw error;
     }
-  };
+    
+    toast({
+      title: "تم تحديث الاختبار بنجاح",
+    });
+    
+    navigate("/test-management");
+  } catch (error: any) {
+    toast({
+      title: "خطأ في تحديث الاختبار",
+      description: error.message,
+      variant: "destructive",
+    });
+  }
+};
 
   if (!isLoggedIn || role !== "admin") {
     return null;

@@ -291,14 +291,15 @@ const TakeTest = () => {
         // Ensure testId is a string
         const testIdString = String(testId);
 
-        const { error } = await supabase.from("exam_results").insert({
-          test_id: testIdString,
-          user_id: user.id,
-          score: score,
-          total_questions: questions.length,
-          time_taken: test.duration, // Using test duration as time taken
-          questions_data: result.questions // Store questions data in the database
-        });
+     const { error } = await supabase.from("exam_results").insert({
+  test_id: testIdString,
+  user_id: user.id,
+  score: score,
+  total_questions: questions.length,
+  time_taken: test.duration, // Using test duration as time taken
+  questions_data: result.questions, // Store questions data in the database
+  correct_answers: correctAnswers // Add the correct_answers field
+});
 
         if (error) {
           console.error("Error saving result to Supabase:", error);

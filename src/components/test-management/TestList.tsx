@@ -65,39 +65,42 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish, getCategoryText }
               </Badge>
             </TableCell>
             <TableCell>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/test-management/${test.id}/questions`}>
-                    <List className="h-4 w-4 mr-1" />
-                    الأسئلة
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/test-management/${test.id}/edit`}>
-                    <PenLine className="h-4 w-4 mr-1" />
-                    تعديل
-                  </Link>
-                </Button>
-                <Button 
-                  variant={test.published ? "destructive" : "default"} 
-                  size="sm"
-                  onClick={() => onTogglePublish(test.id, test.published)}
-                >
-                  {test.published ? (
-                    <X className="h-4 w-4 mr-1" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-1" />
-                  )}
-                  {test.published ? "إلغاء النشر" : "نشر"}
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={() => onDelete(test.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
+             
+            
+
+<div className="flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <Link to={`/test-management/${test.id}/questions`}>
+      <List className="h-4 w-4 mr-1" />
+      الأسئلة
+    </Link>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <Link to={`/test-management/${test.id}/edit`}>
+      <PenLine className="h-4 w-4 mr-1" />
+      تعديل
+    </Link>
+  </Button>
+  <Button 
+    variant={test.published ? "destructive" : "default"} 
+    size="sm"
+    onClick={() => onTogglePublish(test.id, test.published)}
+  >
+    {test.published ? (
+      <X className="h-4 w-4 mr-1" />
+    ) : (
+      <Check className="h-4 w-4 mr-1" />
+    )}
+    {test.published ? "إلغاء النشر" : "نشر"}
+  </Button>
+  <Button 
+    variant="destructive" 
+    size="sm"
+    onClick={() => onDelete(test.id)}
+  >
+    <Trash className="h-4 w-4" />
+  </Button>
+</div>
             </TableCell>
           </TableRow>
         ))}
