@@ -65,7 +65,7 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish, getCategoryText }
               </Badge>
             </TableCell>
             <TableCell>
-            // Ensure all action buttons are always enabled regardless of published status
+            {/* Ensure all action buttons are always enabled regardless of published status */}
 <div className="flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <Link to={`/test-management/${test.id}/questions`}>
@@ -79,8 +79,8 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish, getCategoryText }
       تعديل
     </Link>
   </Button>
-  <Button 
-    variant={test.published ? "destructive" : "default"} 
+  <Button
+    variant={test.published ? "destructive" : "default"}
     size="sm"
     onClick={() => onTogglePublish(test.id, test.published)}
   >
@@ -91,8 +91,8 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish, getCategoryText }
     )}
     {test.published ? "إلغاء النشر" : "نشر"}
   </Button>
-  <Button 
-    variant="destructive" 
+  <Button
+    variant="destructive"
     size="sm"
     onClick={() => onDelete(test.id)}
   >
@@ -108,3 +108,4 @@ const TestList = ({ tests, loading, onDelete, onTogglePublish, getCategoryText }
 };
 
 export default TestList;
+
