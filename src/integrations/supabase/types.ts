@@ -9,226 +9,58 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      exam_results: {
-        Row: {
-          created_at: string
-          id: string
-          score: number
-          test_id: string
-          time_taken: number
-          total_questions: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          score: number
-          test_id: string
-          time_taken: number
-          total_questions: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          score?: number
-          test_id?: string
-          time_taken?: number
-          total_questions?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_results_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      options: {
-        Row: {
-          id: string
-          is_correct: boolean
-          option_order: number
-          question_id: string
-          text: string
-        }
-        Insert: {
-          id?: string
-          is_correct?: boolean
-          option_order: number
-          question_id: string
-          text: string
-        }
-        Update: {
-          id?: string
-          is_correct?: boolean
-          option_order?: number
-          question_id?: string
-          text?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "options_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          id: string
-          updated_at: string
-          username: string | null
-          role: string | null
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          updated_at?: string
-          username?: string | null
-          role?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-          username?: string | null
-          role?: string | null
-        }
-        Relationships: []
-      }
-      questions: {
-        Row: {
-          created_at: string
-          explanation: string | null
-          id: string
-          question_order: number
-          test_id: string
-          text: string
-          type: string
-        }
-        Insert: {
-          created_at?: string
-          explanation?: string | null
-          id?: string
-          question_order: number
-          test_id: string
-          text: string
-          type: string
-        }
-        Update: {
-          created_at?: string
-          explanation?: string | null
-          id?: string
-          question_order?: number
-          test_id?: string
-          text?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "questions_test_id_fkey"
-            columns: ["test_id"]
-            isOneToOne: false
-            referencedRelation: "tests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tests: {
-        Row: {
-          created_at: string
-          description: string | null
-          duration: number
-          id: string
-          published: boolean
-          title: string
-          user_id: string
-          category: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          duration: number
-          id?: string
-          published?: boolean
-          title: string
-          user_id: string
-          category?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          duration?: number
-          id?: string
-          published?: boolean
-          title?: string
-          user_id?: string
-          category?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      courses: {
-        Row: {
-          id: string
-          title: string
-          description: string
-          price: number
-          published: boolean
-          user_id: string
-          created_at: string
-          image_url: string | null
-        }
-        Insert: {
-          id?: string
-          title: string
-          description?: string
-          price?: number
-          published?: boolean
-          user_id: string
-          created_at?: string
-          image_url?: string | null
-        }
-        Update: {
-          id?: string
-          title?: string
-          description?: string
-          price?: number
-          published?: boolean
-          user_id?: string
-          created_at?: string
-          image_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_edit_test: {
+        Args: { test_id: string }
+        Returns: boolean
+      }
+      create_courses_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      delete_user: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      get_admin_dashboard_stats: {
+        Args: { thirty_days_ago: string }
+        Returns: {
+          total_users: number
+          recent_users: number
+          total_tests: number
+          recent_tests: number
+          total_tests_taken: number
+        }[]
+      }
+      get_test_leaderboard: {
+        Args: { test_id_param: string; limit_param?: number }
+        Returns: {
+          username: string
+          user_id: string
+          max_score: number
+        }[]
+      }
+      get_top_scores_for_test: {
+        Args: { test_id_param: string; limit_param: number }
+        Returns: {
+          username: string
+          score: number
+          user_id: string
+        }[]
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      update_user_role: {
+        Args: { user_id: string; new_role: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
