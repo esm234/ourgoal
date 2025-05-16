@@ -19,7 +19,7 @@ const TestManagement = () => {
   const [activeTab, setActiveTab] = useState("my-tests");
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/login");
@@ -44,7 +44,7 @@ const TestManagement = () => {
         .from("tests")
         .select("*")
         .order("created_at", { ascending: false });
-        
+
       if (error) throw error;
       console.log("Fetched tests:", data);
       setTests(data || []);
@@ -62,7 +62,7 @@ const TestManagement = () => {
   const handleCreateTest = async (data: CreateTestForm) => {
     try {
       console.log("Creating test with category:", data.category);
-      
+
       const { data: insertedData, error } = await supabase.from("tests").insert([
         {
           title: data.title,
@@ -74,14 +74,14 @@ const TestManagement = () => {
       ]).select();
 
       if (error) throw error;
-      
+
       console.log("Test created successfully:", insertedData);
-      
+
       toast({
         title: "تم إنشاء الاختبار بنجاح",
         description: "يمكنك الآن إضافة الأسئلة للاختبار",
       });
-      
+
       fetchTests();
       setActiveTab("my-tests");
     } catch (error: any) {
@@ -105,11 +105,11 @@ const TestManagement = () => {
       console.error("Error deleting test:", error);
       throw error;
     }
-    
+
     toast({
       title: "تم حذف الاختبار بنجاح",
     });
-    
+
     fetchTests();
   } catch (error: any) {
     toast({
@@ -131,11 +131,11 @@ const TestManagement = () => {
       console.error("Error toggling publish status:", error);
       throw error;
     }
-    
+
     toast({
       title: !currentStatus ? "تم نشر الاختبار بنجاح" : "تم إلغاء نشر الاختبار بنجاح",
     });
-    
+
     fetchTests();
   } catch (error: any) {
     toast({
@@ -166,7 +166,7 @@ const TestManagement = () => {
             <TabsTrigger value="my-tests">اختباراتي</TabsTrigger>
             <TabsTrigger value="create-test">إنشاء اختبار جديد</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="my-tests">
             <Card>
               <CardHeader>
@@ -174,9 +174,9 @@ const TestManagement = () => {
                 <CardDescription>قائمة بجميع الاختبارات التي أنشأتها</CardDescription>
               </CardHeader>
               <CardContent>
-                <TestList 
-                  tests={tests} 
-                  loading={loading} 
+                <TestList
+                  tests={tests}
+                  loading={loading}
                   onDelete={handleDeleteTest}
                   onTogglePublish={handleTogglePublish}
                   getCategoryText={getCategoryText}
@@ -184,7 +184,7 @@ const TestManagement = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="create-test">
             <Card>
               <CardHeader>

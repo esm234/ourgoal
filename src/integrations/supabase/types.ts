@@ -9,35 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      exam_results: {
-        Row: {
-          created_at: string
-          id: string
-          score: number
-          test_id: string
-          time_taken: number
-          total_questions: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          score: number
-          test_id: string
-          time_taken: number
-          total_questions: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          score?: number
-          test_id?: string
-          time_taken?: number
-          total_questions?: number
-          user_id?: string
-        }
-        Relationships: [
+     exam_results: {
+  Row: {
+    created_at: string
+    id: string
+    questions_data: Json | null
+    score: number
+    test_id: string
+    time_taken: number
+    total_questions: number
+    user_id: string
+    correct_answers: number
+  }
+  Insert: {
+    created_at?: string
+    id?: string
+    questions_data?: Json | null
+    score: number
+    test_id: string
+    time_taken: number
+    total_questions: number
+    user_id: string
+    correct_answers: number
+  }
+  Update: {
+    created_at?: string
+    id?: string
+    questions_data?: Json | null
+    score?: number
+    test_id?: string
+    time_taken?: number
+    total_questions?: number
+    user_id?: string
+    correct_answers?: number
+  }
+      Relationships: [
           {
             foreignKeyName: "exam_results_user_id_fkey"
             columns: ["user_id"]

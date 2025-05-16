@@ -24,9 +24,9 @@ const getCachedTests = () => {
   try {
     const cachedTests = localStorage.getItem(TEST_CACHE_KEY);
     if (!cachedTests) return {};
-    
+
     const parsed = JSON.parse(cachedTests);
-    
+
     // التحقق من صلاحية التخزين المؤقت
     if (parsed.timestamp && Date.now() - parsed.timestamp < TEST_CACHE_EXPIRY) {
       return parsed.tests || {};
@@ -49,12 +49,12 @@ const cacheTest = (testId: string, testData: any, questionsData: ExtendedQuestio
       ...existingCache,
       [testId]: { test: testData, questions: questionsData }
     };
-    
+
     localStorage.setItem(TEST_CACHE_KEY, JSON.stringify({
       tests: updatedCache,
       timestamp: Date.now()
     }));
-    
+
     console.log(`تم تخزين الاختبار ${testId} محليًا`);
   } catch (error) {
     console.error("خطأ في تخزين الاختبار محليًا:", error);
@@ -160,9 +160,9 @@ const TakeTest = () => {
 
   const fetchTestWithQuestions = async () => {
     if (!testId) return;
-    
+
     setLoading(true);
-    
+
     try {
       // 1. البحث في النماذج الثابتة أولًا
       const staticTest = testQuestions.find(t => t.testId === testId);
@@ -181,11 +181,11 @@ const TakeTest = () => {
         setLoading(false);
         return;
       }
-      
+
       // 2. البحث في التخزين المؤقت المحلي
       const cachedTests = getCachedTests();
       const cachedTest = cachedTests[testId];
-      
+
       if (cachedTest) {
         console.log(`تم استرجاع الاختبار ${testId} من التخزين المؤقت المحلي`);
         setTest(cachedTest.test);
@@ -194,7 +194,7 @@ const TakeTest = () => {
         setLoading(false);
         return;
       }
-      
+
       // 3. طلب البيانات من الخادم إذا لم تكن موجودة في أي من المصدرين السابقين
       const { data, error } = await supabase
         .from("tests")
@@ -217,10 +217,10 @@ const TakeTest = () => {
       if (data.questions && Array.isArray(data.questions)) {
         const formattedQuestions = data.questions.map(question => {
           // Sort options by option_order
-          const sortedOptions = question.options.sort((a: any, b: any) => 
+          const sortedOptions = question.options.sort((a: any, b: any) =>
             a.option_order - b.option_order
           );
-          
+
           // Find the correct answer index
           const correctIndex = sortedOptions.findIndex((opt: any) => opt.is_correct);
 
@@ -236,12 +236,12 @@ const TakeTest = () => {
         });
 
         // Sort questions by question_order if present
-        formattedQuestions.sort((a, b) => 
+        formattedQuestions.sort((a, b) =>
           (a.question_order || 0) - (b.question_order || 0)
         );
 
         setQuestions(formattedQuestions);
-        
+
         // تخزين الاختبار في التخزين المؤقت المحلي
         cacheTest(testId, data, formattedQuestions);
       }
@@ -291,15 +291,15 @@ const TakeTest = () => {
         // Ensure testId is a string
         const testIdString = String(testId);
 
-     const { error } = await supabase.from("exam_results").insert({
-  test_id: testIdString,
-  user_id: user.id,
-  score: score,
-  total_questions: questions.length,
-  time_taken: test.duration, // Using test duration as time taken
-  questions_data: result.questions, // Store questions data in the database
-  correct_answers: correctAnswers // Add the correct_answers field
-});
+        const { error } = await supabase.from("exam_results").insert({
+          test_id: testIdString,
+          user_id: user.id,
+          score: score,
+          total_questions: questions.length,
+          time_taken: test.duration, // Using test duration as time taken
+          questions_data: result.questions, // Store questions data in the database
+          correct_answers: correctAnswers // Add the correct_answers field
+        });
 
         if (error) {
           console.error("Error saving result to Supabase:", error);
