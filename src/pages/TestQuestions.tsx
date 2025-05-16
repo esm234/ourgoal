@@ -121,13 +121,6 @@ const TestQuestions = () => {
 
   const handleCreateQuestion = async (data: CreateQuestionForm, action?: 'add_another' | 'return') => {
     try {
-      console.log("Creating question with data:", data);
-
-      // Get the next order number
-      const nextOrder = questions.length > 0
-        ? Math.max(...questions.map(q => q.question_order)) + 1
-        : 1;
-
       // Prepare question data
       const questionData = {
         test_id: testId,
@@ -135,7 +128,7 @@ const TestQuestions = () => {
         type: data.type,
         subtype: data.subtype || "general", // Always include the subtype
         explanation: data.explanation || null,
-        question_order: nextOrder,
+        question_order: questions.length + 1,
         image_url: data.image_url || null,
       };
 
@@ -144,16 +137,16 @@ const TestQuestions = () => {
         questionData["passage"] = data.passage;
       }
 
-      // Insert the question first
-      console.log("Sending question data to database:", questionData);
+      // Insert the question
       const { data: insertedQuestion, error: questionError } = await supabase
         .from("questions")
         .insert(questionData)
         .select();
 
-      if (questionError) throw questionError;
-
-      console.log("Inserted question:", insertedQuestion);
+      if (questionError) {
+        console.error("Error creating question:", questionError);
+        throw questionError;
+      }
 
       if (!insertedQuestion || insertedQuestion.length === 0) {
         throw new Error("لم يتم إنشاء السؤال بشكل صحيح");
@@ -189,7 +182,7 @@ const TestQuestions = () => {
       }
     } catch (error: any) {
       toast({
-        title: "خطأ في إضافة السؤال",
+        title: "خطأ في إنشاء السؤال",
         description: error.message,
         variant: "destructive",
       });
