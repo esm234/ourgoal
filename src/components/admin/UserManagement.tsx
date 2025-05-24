@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash, Search, UserCog, Shield, User as UserIcon, ShieldAlert } from "lucide-react";
+import { Pencil, Trash, Search, UserCog, Shield, User as UserIcon, ShieldAlert, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface User {
@@ -54,6 +54,8 @@ const UserManagement = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [newRole, setNewRole] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Only fetch users if we're confirmed as an admin
@@ -74,8 +76,8 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // Get all profiles
-      const { data, error } = await supabase
+      // Get all profiles with user data
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -85,12 +87,27 @@ const UserManagement = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (profilesError) throw profilesError;
+
+      // Get user emails from auth.users (this requires RLS policies to be set up properly)
+      const userIds = profilesData.map(profile => profile.id);
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+
+      let emailMap: Record<string, string> = {};
+
+      if (!authError && authData?.users) {
+        // Create a map of user IDs to emails
+        authData.users.forEach(user => {
+          if (userIds.includes(user.id)) {
+            emailMap[user.id] = user.email || `user-${user.id.substring(0, 8)}@example.com`;
+          }
+        });
+      }
 
       // Format the data to match our User interface
-      const formattedUsers = data.map(user => ({
+      const formattedUsers = profilesData.map(user => ({
         id: user.id,
-        email: `user-${user.id.substring(0, 8)}@example.com`, // Generate a placeholder email
+        email: emailMap[user.id] || `user-${user.id.substring(0, 8)}@example.com`,
         username: user.username,
         role: user.role,
         created_at: user.created_at,
@@ -98,11 +115,37 @@ const UserManagement = () => {
 
       setUsers(formattedUsers);
     } catch (error: any) {
-      toast({
-        title: "خطأ في جلب المستخدمين",
-        description: error.message,
-        variant: "destructive",
-      });
+      // If auth.admin fails (which it will in frontend), fall back to profiles only
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            username,
+            role,
+            created_at
+          `)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Format with placeholder emails
+        const formattedUsers = data.map(user => ({
+          id: user.id,
+          email: `user-${user.id.substring(0, 8)}@example.com`,
+          username: user.username,
+          role: user.role,
+          created_at: user.created_at,
+        }));
+
+        setUsers(formattedUsers);
+      } catch (fallbackError: any) {
+        toast({
+          title: "خطأ في جلب المستخدمين",
+          description: fallbackError.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -122,6 +165,7 @@ const UserManagement = () => {
   const confirmEditUser = async () => {
     if (!editingUser) return;
 
+    setIsUpdating(true);
     try {
       const { error } = await supabase
         .from('profiles')
@@ -146,6 +190,7 @@ const UserManagement = () => {
         variant: "destructive",
       });
     } finally {
+      setIsUpdating(false);
       setIsEditDialogOpen(false);
       setEditingUser(null);
     }
@@ -154,15 +199,19 @@ const UserManagement = () => {
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
 
+    setIsDeleting(true);
     try {
-      // This will cascade delete the profile due to RLS policies
-      const { error } = await supabase.auth.admin.deleteUser(userToDelete.id);
+      // Delete the user profile (this is safer than trying to delete auth user from frontend)
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userToDelete.id);
 
       if (error) throw error;
 
       toast({
         title: "تم حذف المستخدم",
-        description: "تم حذف المستخدم بنجاح",
+        description: "تم حذف ملف المستخدم بنجاح",
       });
 
       // Remove the user from the local state
@@ -174,6 +223,7 @@ const UserManagement = () => {
         variant: "destructive",
       });
     } finally {
+      setIsDeleting(false);
       setIsDeleteDialogOpen(false);
       setUserToDelete(null);
     }
@@ -228,16 +278,35 @@ const UserManagement = () => {
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
             <CardTitle className="text-2xl">إدارة المستخدمين</CardTitle>
-            <CardDescription>عرض وإدارة جميع المستخدمين في النظام</CardDescription>
+            <CardDescription>
+              عرض وإدارة جميع المستخدمين في النظام
+              {!loading && (
+                <span className="text-primary font-medium">
+                  {" "}• {filteredUsers.length} من أصل {users.length} مستخدم
+                </span>
+              )}
+            </CardDescription>
           </div>
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input
-              placeholder="البحث عن مستخدم..."
-              className="pl-10 w-full md:w-[300px]"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchUsers}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              تحديث
+            </Button>
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+              <Input
+                placeholder="البحث عن مستخدم..."
+                className="pl-10 w-full md:w-[300px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -347,8 +416,17 @@ const UserManagement = () => {
               </Select>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmEditUser}>حفظ التغييرات</AlertDialogAction>
+              <AlertDialogCancel disabled={isUpdating}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmEditUser} disabled={isUpdating}>
+                {isUpdating ? (
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    جاري الحفظ...
+                  </div>
+                ) : (
+                  "حفظ التغييرات"
+                )}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -365,9 +443,20 @@ const UserManagement = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteUser} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                حذف
+              <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteUser}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? (
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    جاري الحذف...
+                  </div>
+                ) : (
+                  "حذف"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

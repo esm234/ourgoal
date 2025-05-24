@@ -9,28 +9,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users,
-  BookOpen,
   BarChart3,
-  ClipboardList,
   Home,
   LogOut,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from "lucide-react";
 import UserManagement from "@/components/admin/UserManagement";
-import AdminTestManagement from "@/components/admin/AdminTestManagement";
 import AdminStats from "@/components/admin/AdminStats";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
-// Create a placeholder for ExamResultsManagement
-const ExamResultsManagement = () => {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <h2 className="text-xl font-bold mb-4">نتائج الاختبارات</h2>
-        <p>سيتم إضافة هذه الميزة قريبًا.</p>
-      </CardContent>
-    </Card>
-  );
-};
 
 const AdminDashboard = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -41,10 +28,10 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalTests: 0,
-    totalTestsTaken: 0,
+    totalFiles: 0,
+    totalExams: 0,
     recentUsers: 0,
-    recentTests: 0,
+    totalDownloads: 0,
   });
 
   useEffect(() => {
@@ -101,34 +88,46 @@ const AdminDashboard = () => {
         .select("*", { count: "exact", head: true })
         .gte("created_at", thirtyDaysAgoStr);
 
-      // Fetch total tests
-      const { count: testCount, error: testError } = await supabase
-        .from("tests")
-        .select("*", { count: "exact", head: true });
+      // For now, we'll set placeholder values for files and exams
+      // These will work once the database tables are created
+      let fileCount = 0;
+      let examCount = 0;
+      let totalDownloads = 0;
 
-      // Fetch recent tests (last 30 days)
-      const { count: recentTestCount, error: recentTestError } = await supabase
-        .from("tests")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", thirtyDaysAgoStr);
+      try {
+        // Try to fetch files data (will work after SQL is run)
+        const { count: filesCount } = await supabase
+          .from("files")
+          .select("*", { count: "exact", head: true });
+        fileCount = filesCount || 0;
 
-      // Fetch total test results
-      const { count: resultCount, error: resultError } = await supabase
-        .from("exam_results")
-        .select("*", { count: "exact", head: true });
+        // Try to fetch exams data
+        const { count: examsCount } = await supabase
+          .from("exams")
+          .select("*", { count: "exact", head: true });
+        examCount = examsCount || 0;
+
+        // Try to fetch total downloads
+        const { data: filesData } = await supabase
+          .from("files")
+          .select("downloads");
+        if (filesData) {
+          totalDownloads = filesData.reduce((sum, file) => sum + (file.downloads || 0), 0);
+        }
+      } catch (dbError) {
+        // Tables don't exist yet, use placeholder values
+        console.log("Files/Exams tables not created yet");
+      }
 
       if (userError) throw userError;
       if (recentUserError) throw recentUserError;
-      if (testError) throw testError;
-      if (recentTestError) throw recentTestError;
-      if (resultError) throw resultError;
 
       setStats({
         totalUsers: userCount || 0,
-        totalTests: testCount || 0,
-        totalTestsTaken: resultCount || 0,
+        totalFiles: fileCount,
+        totalExams: examCount,
         recentUsers: recentUserCount || 0,
-        recentTests: recentTestCount || 0,
+        totalDownloads: totalDownloads,
       });
     } catch (error: any) {
       toast({
@@ -186,16 +185,16 @@ const AdminDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">لوحة تحكم المشرف</h1>
-            <p className="text-muted-foreground">إدارة المستخدمين والاختبارات والدورات وعرض الإحصائيات</p>
+            <p className="text-muted-foreground">إدارة المستخدمين والملفات التعليمية وعرض الإحصائيات</p>
           </div>
           <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
             <Button variant="outline" onClick={() => navigate("/")} className="flex items-center gap-2">
               <Home className="h-4 w-4" />
               <span>الرئيسية</span>
             </Button>
-            <Button variant="outline" onClick={() => navigate("/test-management")} className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              <span>إدارة الاختبارات</span>
+            <Button variant="outline" onClick={() => navigate("/admin/files")} className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span>إدارة الملفات</span>
             </Button>
             <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
               <LogOut className="h-4 w-4" />
@@ -207,7 +206,7 @@ const AdminDashboard = () => {
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 mb-8">
+          <TabsList className="grid grid-cols-3 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               <span>نظرة عامة</span>
@@ -216,13 +215,9 @@ const AdminDashboard = () => {
               <Users className="h-4 w-4" />
               <span>المستخدمين</span>
             </TabsTrigger>
-            <TabsTrigger value="tests" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              <span>الاختبارات</span>
-            </TabsTrigger>
-            <TabsTrigger value="results" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              <span>النتائج</span>
+            <TabsTrigger value="files" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span>الملفات</span>
             </TabsTrigger>
           </TabsList>
 
@@ -234,12 +229,25 @@ const AdminDashboard = () => {
             <UserManagement />
           </TabsContent>
 
-          <TabsContent value="tests">
-            <AdminTestManagement />
-          </TabsContent>
-
-          <TabsContent value="results">
-            <ExamResultsManagement />
+          <TabsContent value="files">
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center space-y-4">
+                  <FileText className="w-16 h-16 text-primary mx-auto" />
+                  <h2 className="text-2xl font-bold">إدارة الملفات التعليمية</h2>
+                  <p className="text-muted-foreground">
+                    يمكنك إدارة الملفات التعليمية والاختبارات من خلال الصفحة المخصصة
+                  </p>
+                  <Button
+                    onClick={() => navigate("/admin/files")}
+                    className="bg-gradient-to-r from-primary to-accent text-black font-bold"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    انتقل إلى إدارة الملفات
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

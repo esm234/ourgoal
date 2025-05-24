@@ -6,23 +6,25 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "@/pages/Home";
-import QiyasTests from "@/pages/QiyasTests";
-import TakeTest from "@/pages/TakeTest";
 import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
+import Files from "@/pages/Files";
+import FileDetails from "@/pages/FileDetails";
+import StudyPlan from "@/pages/StudyPlan";
+import Profile from "@/pages/Profile";
+import Welcome from "@/pages/Welcome";
+import PlanDetails from "@/pages/PlanDetails";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
-import TestManagement from "@/pages/TestManagement";
-import TestQuestions from "@/pages/TestQuestions";
-import EditTest from "@/pages/EditTest";
-import UserProfile from "@/pages/UserProfile";
-import ProfileSetup from "@/pages/ProfileSetup";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminFiles from "@/pages/AdminFiles";
+import AdminExams from "@/pages/AdminExams";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import MaintenancePage from "@/components/MaintenancePage";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Set this to true to enable maintenance mode
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE =  false;
 
 const queryClient = new QueryClient();
 
@@ -38,41 +40,35 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/qiyas-tests" element={<QiyasTests />} />
-              <Route path="/qiyas-tests/:testId" element={<TakeTest />} />
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
+              <Route path="/files" element={<Files />} />
+              <Route path="/files/:id" element={<FileDetails />} />
+              <Route path="/study-plan" element={<StudyPlan />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/plan-details/:planId" element={<PlanDetails />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/profile-setup" element={<ProfileSetup />} />
-
-              {/* Protected Routes */}
-              <Route path="/test-management" element={
-                <ProtectedRoute>
-                  <TestManagement />
-                </ProtectedRoute>
-              } />
-              <Route path="/test-management/:testId/questions" element={
-                <ProtectedRoute>
-                  <TestQuestions />
-                </ProtectedRoute>
-              } />
-              <Route path="/test-management/:testId/edit" element={
-                <ProtectedRoute>
-                  <EditTest />
-                </ProtectedRoute>
-              } />
-              <Route path="/user-profile" element={
-                <ProtectedRoute>
-                  <UserProfile />
-                </ProtectedRoute>
-              } />
 
               <Route path="/admin" element={
                 <ProtectedRoute adminOnly={true}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin/files" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminFiles />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin/files/:fileId/exams" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminExams />
                 </ProtectedRoute>
               } />
 

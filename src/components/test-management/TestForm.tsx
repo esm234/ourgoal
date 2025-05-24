@@ -26,7 +26,7 @@ const formSchema = z.object({
   title: z.string().min(3, "العنوان مطلوب ويجب أن يكون على الأقل 3 أحرف"),
   description: z.string().optional(),
   duration: z.coerce.number().min(1, "مدة الاختبار مطلوبة ويجب أن تكون دقيقة واحدة على الأقل"),
-  category: z.enum(["sample", "user"], {
+  category: z.enum(["verbal", "quantitative"], {
     required_error: "يرجى اختيار تصنيف الاختبار",
   }),
 });
@@ -46,7 +46,7 @@ const TestForm = ({ onSubmit, defaultValues, isEdit = false }: TestFormProps) =>
       title: "",
       description: "",
       duration: 60, // Default 60 minutes
-      category: "user", // Default category is user
+      category: "verbal", // Default category is verbal
     },
   });
 
@@ -111,12 +111,12 @@ const TestForm = ({ onSubmit, defaultValues, isEdit = false }: TestFormProps) =>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="sample">اختبارات نموذجية</SelectItem>
-                  <SelectItem value="user">اختبارات اسبوعية</SelectItem>
+                  <SelectItem value="verbal">اللفظي</SelectItem>
+                  <SelectItem value="quantitative">الكمي</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
-                يحدد هذا الخيار ما إذا كان الاختبار سيظهر في قسم الاختبارات النموذجية أو اختبارات اسبوعية
+                يحدد هذا الخيار ما إذا كان الاختبار سيظهر في قسم الاختبارات اللفظية أو الكمية
               </FormDescription>
               <FormMessage />
             </FormItem>

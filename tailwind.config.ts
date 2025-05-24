@@ -63,19 +63,32 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for our Egyptian Equivalency Platform
-				"teal": {
-					"50": "#f0fdfa",
-					"100": "#ccfbf1",
-					"200": "#99f6e4",
-					"300": "#5eead4",
-					"400": "#2dd4bf",
-					"500": "#14b8a6",
-					"600": "#0d9488",
-					"700": "#0f766e",
-					"800": "#115e59",
-					"900": "#134e4a",
-					"950": "#042f2e"
+				// New Golden Brand Colors
+				"gold": {
+					"50": "#fffef7",
+					"100": "#fffbeb",
+					"200": "#fef3c7",
+					"300": "#fde68a",
+					"400": "#fcd34d",
+					"500": "#f59e0b",
+					"600": "#d97706",
+					"700": "#b45309",
+					"800": "#92400e",
+					"900": "#78350f",
+					"950": "#451a03"
+				},
+				"golden": {
+					"50": "#fffef0",
+					"100": "#fffacd",
+					"200": "#fff59b",
+					"300": "#ffed5e",
+					"400": "#ffe135",
+					"500": "#ffd700",
+					"600": "#d4af37",
+					"700": "#b8860b",
+					"800": "#9a7209",
+					"900": "#7c5e0a",
+					"950": "#4a3505"
 				},
 				"amber": {
 					"50": "#fffbeb",

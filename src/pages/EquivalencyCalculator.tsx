@@ -4,13 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator, School, BookOpen, Search, ArrowRight, BarChart4, GraduationCap, Briefcase, Check } from "lucide-react";
+import {
+  Calculator,
+  School,
+  BookOpen,
+  Search,
+  ArrowRight,
+  BarChart4,
+  GraduationCap,
+  Briefcase,
+  Check,
+  Target,
+  TrendingUp,
+  Award,
+  Users,
+  Zap,
+  Brain,
+  Star,
+  Filter,
+  RefreshCw,
+  ChevronDown,
+  Info
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/use-toast";
 
 // Add CSS to hide number input spinners
 const hideSpinnerStyle = `
@@ -515,6 +537,7 @@ const collegesFemale = [
 ];
 
 const EquivalencyCalculator = () => {
+  const { toast } = useToast();
   const [gender, setGender] = useState<"male" | "female">("male");
   const [highSchoolPercentage, setHighSchoolPercentage] = useState<number | string>("");
   const [qiyasScore, setQiyasScore] = useState<number | string>("");
@@ -525,27 +548,68 @@ const EquivalencyCalculator = () => {
   const [activeTab, setActiveTab] = useState("calculator");
   const [isCalculating, setIsCalculating] = useState(false);
   const [progress, setProgress] = useState(0);
-  
-  const handleCalculate = (e: React.FormEvent) => {
+  const [collegeFilter, setCollegeFilter] = useState<"all" | "available" | "unavailable">("all");
+
+  const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Convert string values to numbers
-    const hsPercentage = typeof highSchoolPercentage === 'string' 
-      ? parseFloat(highSchoolPercentage) 
+    const hsPercentage = typeof highSchoolPercentage === 'string'
+      ? parseFloat(highSchoolPercentage)
       : highSchoolPercentage;
-      
+
     const qScore = typeof qiyasScore === 'string'
       ? parseFloat(qiyasScore)
       : qiyasScore;
-    
-    // Check if values are valid numbers
+
+    // Validation
     if (isNaN(hsPercentage) || isNaN(qScore)) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال قيم صحيحة للنسبة ودرجة القياس",
+        variant: "destructive"
+      });
       return;
     }
-    
+
+    if (hsPercentage < 0 || hsPercentage > 100) {
+      toast({
+        title: "خطأ في نسبة الثانوية",
+        description: "يجب أن تكون نسبة الثانوية بين 0 و 100",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (qScore < 0 || qScore > 100) {
+      toast({
+        title: "خطأ في درجة القياس",
+        description: "يجب أن تكون درجة القياس بين 0 و 100",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Start calculation with animation
+    setIsCalculating(true);
+    setProgress(0);
+
+    // Simulate calculation progress
+    for (let i = 0; i <= 100; i += 10) {
+      setProgress(i);
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
     const score = calculateFinalEquivalencyScore(hsPercentage, qScore);
     setFinalScore(score);
     setShowResult(true);
+    setIsCalculating(false);
+    setActiveTab("results");
+
+    toast({
+      title: "تم حساب المعدل بنجاح",
+      description: `معدلك التقديري هو ${score}`,
+    });
   };
 
   const resetCalculator = () => {
@@ -555,224 +619,449 @@ const EquivalencyCalculator = () => {
     setEligibleColleges([]);
     setSearchTerm("");
     setActiveTab("calculator");
+    setShowResult(false);
+    setProgress(0);
+    setCollegeFilter("all");
+
+    toast({
+      title: "تم إعادة تعيين الحاسبة",
+      description: "يمكنك الآن إدخال بيانات جديدة",
+    });
   };
 
-  // Filter colleges based on search term
-  const filteredColleges = eligibleColleges.filter(college =>
-    college.name.includes(searchTerm)
-  );
+  // Get colleges based on gender
+  const getColleges = () => gender === "male" ? collegesMale : collegesFemale;
+
+  // Filter colleges based on search term and availability
+  const getFilteredColleges = () => {
+    const colleges = getColleges();
+    let filtered = colleges;
+
+    // Filter by availability if score is calculated
+    if (finalScore !== null && collegeFilter !== "all") {
+      if (collegeFilter === "available") {
+        filtered = colleges.filter(college => college.minScore <= finalScore);
+      } else if (collegeFilter === "unavailable") {
+        filtered = colleges.filter(college => college.minScore > finalScore);
+      }
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(college =>
+        college.name.includes(searchTerm)
+      );
+    }
+
+    return filtered.sort((a, b) => b.minScore - a.minScore);
+  };
+
+  // Get score color based on value
+  const getScoreColor = (score: number) => {
+    if (score >= 400) return "text-green-500";
+    if (score >= 350) return "text-yellow-500";
+    if (score >= 300) return "text-orange-500";
+    return "text-red-500";
+  };
+
+  // Get score description
+  const getScoreDescription = (score: number) => {
+    if (score >= 400) return "ممتاز - يمكنك دخول معظم الكليات";
+    if (score >= 350) return "جيد جداً - خيارات متنوعة متاحة";
+    if (score >= 300) return "جيد - خيارات محدودة متاحة";
+    return "يحتاج تحسين - خيارات قليلة متاحة";
+  };
+
+  const filteredColleges = getFilteredColleges();
 
   return (
     <Layout>
       <style>{hideSpinnerStyle}</style>
-      <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-background via-background to-background/80">
-        <div className="container mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 rounded-full text-sm font-medium bg-primary/10 text-primary">
-              <Calculator size={16} />
-              <span>أداة مساعدة</span>
+
+
+
+      {/* Main Content Section */}
+      <section className="py-16 px-4 relative">
+        <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_75%)]"></div>
+
+        <div className="container mx-auto relative z-10">
+          {/* Simple Header */}
+          <div className="text-center mb-12">
+            <div className="inline-block mb-3">
+              <Badge variant="outline" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/20">
+                أداة مساعدة
+              </Badge>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">حاسبة المعادلة التقديرية</h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold mb-5 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">
+              حاسبة المعادلة التقديرية
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               احسب معدلك التقديري للمعادلة المصرية بناء على نسبة الثانوية العامة ودرجة اختبار القدرات
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Calculator Form - Make it responsive */}
-            <div className="lg:col-span-1">
-              <Card className="shadow-lg border border-border/50 h-full">
-                <CardHeader className="bg-primary/5 border-b border-border/20">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="h-5 w-5" />
-                    حاسبة المعدل التقديري
-                  </CardTitle>
-                  <CardDescription>أدخل نسبة الثانوية ودرجة اختبار القدرات</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <form onSubmit={handleCalculate} className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="highSchoolPercentage" className="text-right block mb-2">
-                          نسبة الثانوية العامة (%)
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="highSchoolPercentage"
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            placeholder="أدخل نسبة الثانوية (مثال: 98.5)"
-                            value={highSchoolPercentage}
-                            onChange={(e) => setHighSchoolPercentage(e.target.value)}
-                            className="text-left w-full pr-10"
-                            dir="ltr"
-                            required
-                          />
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+          {/* Tabbed Interface */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          >
+            <Tabs
+              defaultValue="calculator"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              {/* Tab Navigation - Clean style without background */}
+              <div className="flex justify-center mb-12">
+                <TabsList className="grid grid-cols-2 w-[400px] bg-transparent p-2">
+                  <TabsTrigger
+                    value="calculator"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground font-bold py-3 px-6 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Calculator className="w-5 h-5" />
+                      الحاسبة
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="results"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground font-bold py-3 px-6 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!showResult}
+                  >
+                    <div className="flex items-center gap-2">
+                      <BarChart4 className="w-5 h-5" />
+                      النتائج
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Calculator Tab Content */}
+              <TabsContent value="calculator" className="mt-8">
+                <div className="max-w-2xl mx-auto">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Card className="p-8 bg-gradient-to-br from-card/80 to-card/40 border border-primary/20 rounded-3xl backdrop-blur-sm">
+                      {/* Card Header */}
+                      <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <Calculator className="w-8 h-8 text-black" />
                         </div>
+                        <h2 className="text-2xl font-bold text-foreground mb-2">حاسبة المعدل التقديري</h2>
+                        <p className="text-muted-foreground">أدخل بياناتك للحصول على معدلك التقديري والكليات المتاحة</p>
                       </div>
 
-                      <div>
-                        <Label htmlFor="qiyasScore" className="text-right block mb-2">
-                          درجة اختبار القدرات
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="qiyasScore"
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            placeholder="أدخل درجة قياس (مثال: 85)"
-                            value={qiyasScore}
-                            onChange={(e) => setQiyasScore(e.target.value)}
-                            className="text-left w-full"
-                            dir="ltr"
-                            required
-                          />
+                      {/* Form */}
+                      <form onSubmit={handleCalculate} className="space-y-6">
+                        <div className="space-y-6">
+                          {/* High School Percentage */}
+                          <div className="space-y-2">
+                            <Label htmlFor="highSchoolPercentage" className="text-foreground font-medium flex items-center gap-2">
+                              <GraduationCap className="w-4 h-4 text-primary" />
+                              نسبة الثانوية العامة (%)
+                            </Label>
+                            <Input
+                              id="highSchoolPercentage"
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.01"
+                              placeholder="أدخل نسبة الثانوية (مثال: 98.5)"
+                              value={highSchoolPercentage}
+                              onChange={(e) => setHighSchoolPercentage(e.target.value)}
+                              className="text-left w-full py-3 bg-background/50 border-primary/20 rounded-xl"
+                              dir="ltr"
+                              required
+                            />
+                          </div>
+
+                          {/* Qiyas Score */}
+                          <div className="space-y-2">
+                            <Label htmlFor="qiyasScore" className="text-foreground font-medium flex items-center gap-2">
+                              <Target className="w-4 h-4 text-primary" />
+                              درجة اختبار القدرات
+                            </Label>
+                            <div className="relative">
+                              <Input
+                                id="qiyasScore"
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                placeholder="أدخل درجة القدرات (مثال: 85)"
+                                value={qiyasScore}
+                                onChange={(e) => setQiyasScore(e.target.value)}
+                                className="text-left w-full py-3 bg-background/50 border-primary/20 rounded-xl"
+                                dir="ltr"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          {/* Gender Selection */}
+                          <div className="space-y-2">
+                            <Label htmlFor="gender" className="text-foreground font-medium flex items-center gap-2">
+                              <Users className="w-4 h-4 text-primary" />
+                              الجنس
+                            </Label>
+                            <Select value={gender} onValueChange={(value) => setGender(value as "male" | "female")}>
+                              <SelectTrigger className="w-full py-3 bg-background/50 border-primary/20 rounded-xl">
+                                <SelectValue placeholder="اختر الجنس" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="male">ذكر</SelectItem>
+                                <SelectItem value="female">أنثى</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        {isCalculating && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">جاري الحساب...</span>
+                              <span className="text-primary font-medium">{progress}%</span>
+                            </div>
+                            <Progress value={progress} className="h-2" />
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-4 pt-4">
+                          <Button
+                            type="submit"
+                            disabled={isCalculating}
+                            className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-bold py-3 rounded-xl transition-all duration-300 group relative overflow-hidden"
+                          >
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                              {isCalculating ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                  جاري الحساب...
+                                </>
+                              ) : (
+                                <>
+                                  <Calculator className="h-4 w-4" />
+                                  احسب المعدل التقديري
+                                </>
+                              )}
+                            </span>
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={resetCalculator}
+                            className="border-2 border-primary/30 hover:border-primary hover:bg-primary/5 text-foreground font-bold py-3 px-6 rounded-xl transition-all duration-300"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </form>
+
+                      {/* Info Section */}
+                      <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                        <div className="flex items-start gap-3">
+                          <Info className="w-5 h-5 text-primary mt-0.5" />
+                          <div>
+                            <h4 className="font-medium text-foreground mb-1">كيف يتم الحساب؟</h4>
+                            <p className="text-sm text-muted-foreground">
+                              المعدل التقديري = ((نسبة الثانوية + درجة القياس) ÷ 2) × 4.1
+                            </p>
+                          </div>
                         </div>
                       </div>
+                    </Card>
+                  </motion.div>
+                </div>
+              </TabsContent>
 
-                      <div className="pt-2">
-                        <Label htmlFor="gender" className="text-right block mb-2">
-                          الجنس
-                        </Label>
-                        <Select value={gender} onValueChange={(value) => setGender(value as "male" | "female")}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="اختر الجنس" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="male">ذكر</SelectItem>
-                            <SelectItem value="female">أنثى</SelectItem>
-                          </SelectContent>
-                        </Select>
+              {/* Results Tab Content */}
+              <TabsContent value="results" className="mt-8">
+                {finalScore !== null ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-8"
+                  >
+                {/* Score Summary Card */}
+                <Card className="p-8 bg-gradient-to-br from-card/80 to-card/40 border border-primary/20 rounded-3xl backdrop-blur-sm">
+                  <div className="text-center mb-8">
+                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Award className="w-10 h-10 text-black" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-foreground mb-2">معدلك التقديري</h2>
+                    <div className={`text-5xl font-bold mb-2 ${getScoreColor(finalScore)}`}>
+                      {finalScore}
+                    </div>
+                    <p className="text-muted-foreground text-lg">
+                      {getScoreDescription(finalScore)}
+                    </p>
+                  </div>
+
+                  {/* Input Summary */}
+                  <div className="grid md:grid-cols-3 gap-6 mb-8">
+                    <div className="text-center p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                      <GraduationCap className="w-8 h-8 text-primary mx-auto mb-2" />
+                      <div className="text-sm text-muted-foreground mb-1">نسبة الثانوية</div>
+                      <div className="text-2xl font-bold text-foreground">{highSchoolPercentage}%</div>
+                    </div>
+                    <div className="text-center p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                      <Target className="w-8 h-8 text-primary mx-auto mb-2" />
+                      <div className="text-sm text-muted-foreground mb-1">درجة القياس</div>
+                      <div className="text-2xl font-bold text-foreground">{qiyasScore}</div>
+                    </div>
+                    <div className="text-center p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                      <Users className="w-8 h-8 text-primary mx-auto mb-2" />
+                      <div className="text-sm text-muted-foreground mb-1">الجنس</div>
+                      <div className="text-2xl font-bold text-foreground">{gender === "male" ? "ذكر" : "أنثى"}</div>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                      <div className="text-2xl font-bold text-green-500">
+                        {getColleges().filter(college => college.minScore <= finalScore).length}
                       </div>
+                      <div className="text-xs text-green-600">كلية متاحة</div>
+                    </div>
+                    <div className="text-center p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                      <div className="text-2xl font-bold text-red-500">
+                        {getColleges().filter(college => college.minScore > finalScore).length}
+                      </div>
+                      <div className="text-xs text-red-600">كلية غير متاحة</div>
+                    </div>
+                    <div className="text-center p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                      <div className="text-2xl font-bold text-blue-500">
+                        {Math.round((getColleges().filter(college => college.minScore <= finalScore).length / getColleges().length) * 100)}%
+                      </div>
+                      <div className="text-xs text-blue-600">نسبة النجاح</div>
+                    </div>
+                    <div className="text-center p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                      <div className="text-2xl font-bold text-purple-500">
+                        {getColleges().length}
+                      </div>
+                      <div className="text-xs text-purple-600">إجمالي الكليات</div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Colleges List */}
+                <Card className="p-6 bg-gradient-to-br from-card/80 to-card/40 border border-primary/20 rounded-3xl backdrop-blur-sm">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground mb-2">الكليات المتاحة</h3>
+                      <p className="text-muted-foreground">قائمة بجميع الكليات وحالة القبول</p>
                     </div>
 
-                    <Button type="submit" className="w-full">
-                      احسب المعدل التقديري
-                    </Button>
-                  </form>
-                </CardContent>
-                <CardFooter className="bg-muted/20 border-t border-border/20 flex justify-center">
-                  <Button variant="outline" size="sm" onClick={resetCalculator} className="text-sm">
-                    إعادة ضبط
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-
-            {/* Results Card - Improved responsiveness */}
-            <div className="lg:col-span-2">
-              {finalScore !== null && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Card className="shadow-lg border border-primary/20 overflow-hidden h-full">
-                    <CardHeader className="bg-primary/10 border-b border-primary/10">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                        <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <BarChart4 className="h-5 w-5 text-primary" />
-                            نتيجة المعادلة التقديرية
-                          </CardTitle>
-                          <CardDescription>النتيجة بناء على البيانات المدخلة</CardDescription>
-                        </div>
-                        <div className="text-center sm:text-right">
-                          <div className="text-sm text-muted-foreground">المعدل النهائي</div>
-                          <div className="text-3xl font-bold text-primary">{finalScore}</div>
-                        </div>
+                    {/* Filters */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="relative">
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          placeholder="البحث عن كلية..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pr-10 w-full sm:w-[200px] bg-background/50 border-primary/20 rounded-xl"
+                        />
                       </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <div className="p-6 grid gap-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-                          <div className="bg-muted/20 rounded-lg p-4">
-                            <div className="text-sm text-muted-foreground mb-1">نسبة الثانوية</div>
-                            <div className="text-2xl font-semibold">{highSchoolPercentage}%</div>
-                          </div>
-                          <div className="bg-muted/20 rounded-lg p-4">
-                            <div className="text-sm text-muted-foreground mb-1">درجة اختبار القدرات</div>
-                            <div className="text-2xl font-semibold">{qiyasScore}</div>
-                          </div>
-                        </div>
 
-                        <Separator />
-                        
-                        <div>
-                          <Tabs defaultValue="suitable">
-                            <TabsList className="grid w-full grid-cols-2">
-                              <TabsTrigger value="suitable">الكليات المناسبة</TabsTrigger>
-                              <TabsTrigger value="all">جميع الكليات</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="suitable" className="mt-4">
-                              <div className="max-h-[300px] overflow-y-auto px-1 py-2">
-                                {(gender === "male" ? collegesMale : collegesFemale)
-                                  .filter(college => college.minScore <= finalScore)
-                                  .sort((a, b) => b.minScore - a.minScore)
-                                  .map((college, idx) => (
-                                    <div key={idx} className="flex justify-between items-center py-2 border-b border-border/10 hover:bg-muted/10 rounded-md px-2">
-                                      <div className="flex items-center gap-2">
-                                        <Badge variant="outline" className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700">
-                                          متاح
-                                        </Badge>
-                                        <span>{college.name}</span>
-                                      </div>
-                                      <span className="text-sm text-muted-foreground">{college.minScore}</span>
-                                    </div>
-                                  ))}
-                              </div>
-                            </TabsContent>
-                            <TabsContent value="all" className="mt-4">
-                              <div className="max-h-[300px] overflow-y-auto px-1 py-2">
-                                {(gender === "male" ? collegesMale : collegesFemale)
-                                  .sort((a, b) => b.minScore - a.minScore)
-                                  .map((college, idx) => (
-                                    <div key={idx} className="flex justify-between items-center py-2 border-b border-border/10 hover:bg-muted/10 rounded-md px-2">
-                                      <div className="flex items-center gap-2">
-                                        {college.minScore <= finalScore ? (
-                                          <Badge variant="outline" className="bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700">
-                                            متاح
-                                          </Badge>
-                                        ) : (
-                                          <Badge variant="outline" className="bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700">
-                                            غير متاح
-                                          </Badge>
-                                        )}
-                                        <span>{college.name}</span>
-                                      </div>
-                                      <span className="text-sm text-muted-foreground">{college.minScore}</span>
-                                    </div>
-                                  ))}
-                              </div>
-                            </TabsContent>
-                          </Tabs>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-
-              {!finalScore && (
-                <Card className="shadow-lg border border-border/50 h-full flex flex-col justify-center items-center p-8 text-center bg-muted/10">
-                  <div className="mb-6 bg-primary/10 p-4 rounded-full">
-                    <Calculator className="h-8 w-8 text-primary" />
+                      <Select value={collegeFilter} onValueChange={(value) => setCollegeFilter(value as "all" | "available" | "unavailable")}>
+                        <SelectTrigger className="w-full sm:w-[150px] bg-background/50 border-primary/20 rounded-xl">
+                          <Filter className="w-4 h-4 mr-2" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">جميع الكليات</SelectItem>
+                          <SelectItem value="available">المتاحة فقط</SelectItem>
+                          <SelectItem value="unavailable">غير المتاحة</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">قم بإدخال بياناتك</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    أدخل نسبة الثانوية العامة ودرجة اختبار القدرات في النموذج المجاور للحصول على المعدل التقديري والكليات المتاحة.
-                  </p>
+
+                  {/* Colleges Grid */}
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <div className="space-y-2">
+                      {filteredColleges.length > 0 ? (
+                        filteredColleges.map((college, idx) => {
+                          const isAvailable = college.minScore <= finalScore;
+                          return (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.3, delay: idx * 0.02 }}
+                              className={`flex justify-between items-center p-4 rounded-xl border transition-all duration-300 hover:scale-[1.02] ${
+                                isAvailable
+                                  ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10"
+                                  : "bg-red-500/5 border-red-500/20 hover:bg-red-500/10"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Badge
+                                  variant="outline"
+                                  className={`${
+                                    isAvailable
+                                      ? "bg-green-500/10 text-green-600 border-green-500/30"
+                                      : "bg-red-500/10 text-red-600 border-red-500/30"
+                                  }`}
+                                >
+                                  {isAvailable ? (
+                                    <>
+                                      <Check className="w-3 h-3 mr-1" />
+                                      متاح
+                                    </>
+                                  ) : (
+                                    "غير متاح"
+                                  )}
+                                </Badge>
+                                <span className="font-medium text-foreground">{college.name}</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm text-muted-foreground">الحد الأدنى</div>
+                                <div className="font-bold text-foreground">{college.minScore}</div>
+                              </div>
+                            </motion.div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-center py-12">
+                          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search className="h-8 w-8 text-primary" />
+                          </div>
+                          <h4 className="text-lg font-medium text-foreground mb-2">لا توجد نتائج</h4>
+                          <p className="text-muted-foreground">لم يتم العثور على كليات تطابق معايير البحث</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </Card>
-              )}
-            </div>
-          </div>
+                  </motion.div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Calculator className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground mb-2">لا توجد نتائج</h3>
+                    <p className="text-muted-foreground mb-6">قم بحساب معدلك التقديري أولاً لعرض النتائج</p>
+                    <Button onClick={() => setActiveTab("calculator")} variant="outline">
+                      العودة للحاسبة
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </motion.div>
         </div>
-      </div>
+      </section>
     </Layout>
   );
 };

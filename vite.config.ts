@@ -20,4 +20,40 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // تحسين الضغط والتقسيم
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // تقسيم المكتبات الكبيرة
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-tabs'],
+          motion: ['framer-motion'],
+          icons: ['lucide-react'],
+          supabase: ['@supabase/supabase-js'],
+          router: ['react-router-dom'],
+          query: ['@tanstack/react-query']
+        }
+      }
+    },
+    // ضغط أفضل
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : []
+      }
+    },
+    // تحسين حجم الملفات
+    chunkSizeWarningLimit: 1000,
+    // ضغط CSS
+    cssMinify: true
+  },
+  // ضغط الخادم التطويري
+  preview: {
+    headers: {
+      'Cache-Control': 'public, max-age=31536000'
+    }
+  }
 }));

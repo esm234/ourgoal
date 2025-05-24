@@ -110,8 +110,8 @@ const Login = () => {
           description: "سيتم توجيهك لإكمال الملف الشخصي",
         });
 
-        // Navigate to profile setup instead of setting login form values
-        navigate("/profile-setup");
+        // Navigate to welcome page instead of profile-setup
+        navigate("/welcome");
       }
     } catch (error: any) {
       toast({

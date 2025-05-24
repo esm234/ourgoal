@@ -1,15 +1,15 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, BookOpen, CheckCircle, TrendingUp, ArrowUp, Clock } from "lucide-react";
+import { Users, FileText, Download, TrendingUp, HelpCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface AdminStatsProps {
   stats: {
     totalUsers: number;
-    totalTests: number;
-    totalTestsTaken: number;
+    totalFiles: number;
+    totalExams: number;
     recentUsers: number;
-    recentTests: number;
+    totalDownloads: number;
   };
   loading: boolean;
 }
@@ -56,8 +56,8 @@ const AdminStats = ({ stats, loading }: AdminStatsProps) => {
                     <span className="font-medium text-green-500">{stats.totalUsers > 0 ? ((stats.recentUsers / stats.totalUsers) * 100).toFixed(1) + "%" : "0%"}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>متوسط الاختبارات لكل مستخدم:</span>
-                    <span className="font-medium">{stats.totalUsers > 0 ? (stats.totalTestsTaken / stats.totalUsers).toFixed(1) : "0"}</span>
+                    <span>متوسط التحميلات لكل مستخدم:</span>
+                    <span className="font-medium">{stats.totalUsers > 0 ? (stats.totalDownloads / stats.totalUsers).toFixed(1) : "0"}</span>
                   </div>
                 </div>
               </div>
@@ -65,23 +65,23 @@ const AdminStats = ({ stats, loading }: AdminStatsProps) => {
               <div className="bg-purple-500/10 border border-purple-500/20 p-6 rounded-lg shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-3 rounded-full bg-purple-500/20">
-                    <BookOpen className="h-6 w-6 text-purple-500" />
+                    <FileText className="h-6 w-6 text-purple-500" />
                   </div>
-                  <h3 className="text-base font-medium">إحصائيات الاختبارات</h3>
+                  <h3 className="text-base font-medium">إحصائيات الملفات</h3>
                 </div>
                 {loading ? (
                   <Skeleton className="h-10 w-24 mb-3" />
                 ) : (
-                  <p className="text-3xl font-bold mb-3">{stats.totalTests.toLocaleString('en-US')}</p>
+                  <p className="text-3xl font-bold mb-3">{stats.totalFiles.toLocaleString('en-US')}</p>
                 )}
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center justify-between">
-                    <span>اختبارات جديدة (30 يوم):</span>
-                    <span className="font-medium text-green-500">+{stats.recentTests.toString()}</span>
+                    <span>إجمالي الاختبارات:</span>
+                    <span className="font-medium text-green-500">{stats.totalExams.toString()}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>نسبة النمو:</span>
-                    <span className="font-medium text-green-500">{stats.totalTests > 0 ? ((stats.recentTests / stats.totalTests) * 100).toFixed(1) + "%" : "0%"}</span>
+                    <span>متوسط الاختبارات لكل ملف:</span>
+                    <span className="font-medium text-green-500">{stats.totalFiles > 0 ? (stats.totalExams / stats.totalFiles).toFixed(1) : "0"}</span>
                   </div>
                 </div>
               </div>
@@ -89,26 +89,26 @@ const AdminStats = ({ stats, loading }: AdminStatsProps) => {
               <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-lg shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-3 rounded-full bg-green-500/20">
-                    <CheckCircle className="h-6 w-6 text-green-500" />
+                    <Download className="h-6 w-6 text-green-500" />
                   </div>
-                  <h3 className="text-base font-medium">الاختبارات المكتملة</h3>
+                  <h3 className="text-base font-medium">إحصائيات التحميلات</h3>
                 </div>
                 {loading ? (
                   <Skeleton className="h-10 w-24 mb-3" />
                 ) : (
-                  <p className="text-3xl font-bold mb-3">{stats.totalTestsTaken.toLocaleString('en-US')}</p>
+                  <p className="text-3xl font-bold mb-3">{stats.totalDownloads.toLocaleString('en-US')}</p>
                 )}
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center justify-between">
-                    <span>نسبة الإكمال:</span>
+                    <span>متوسط التحميلات لكل ملف:</span>
                     <span className="font-medium text-green-500">
-                      {stats.totalTests > 0 ? ((stats.totalTestsTaken / stats.totalTests) * 100).toFixed(0) + "%" : "0%"}
+                      {stats.totalFiles > 0 ? (stats.totalDownloads / stats.totalFiles).toFixed(1) : "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>معدل النمو الشهري:</span>
+                    <span>معدل النشاط:</span>
                     <span className="font-medium">
-                      {stats.totalUsers > 0 ? ((stats.recentUsers / stats.totalUsers) * 100).toFixed(0) + "%" : "0%"}
+                      {stats.totalUsers > 0 ? ((stats.totalDownloads / stats.totalUsers) * 100).toFixed(0) + "%" : "0%"}
                     </span>
                   </div>
                 </div>
@@ -123,8 +123,8 @@ const AdminStats = ({ stats, loading }: AdminStatsProps) => {
                 <h3 className="text-base font-medium">ملاحظات</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                يمكنك إدارة المستخدمين والاختبارات من خلال التبويبات أعلاه.
-                لإضافة اختبار جديد، انتقل إلى تبويب "الاختبارات" واضغط على زر "إضافة اختبار".
+                يمكنك إدارة المستخدمين والملفات التعليمية من خلال التبويبات أعلاه.
+                لإضافة ملف جديد، انتقل إلى تبويب "الملفات" أو اضغط على زر "إدارة الملفات".
               </p>
             </div>
           </div>

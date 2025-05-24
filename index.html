@@ -2,20 +2,32 @@
 <html lang="ar" dir="rtl" oncontextmenu="return false">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/new-favicon.jpg" />
+    <link rel="shortcut icon" type="image/jpeg" href="/new-favicon.jpg" />
+    <link rel="apple-touch-icon" href="/new-favicon.jpg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/new-favicon.jpg" />
+    <link rel="icon" type="image/jpeg" sizes="32x32" href="/new-favicon.jpg" />
+    <link rel="icon" type="image/jpeg" sizes="16x16" href="/new-favicon.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>اسرار للتفوق - Asrar group</title>
+    <title>اور جول - Our Goal</title>
     <meta name="description" content="منصة تعليمية تساعد الطلاب على التدرب لاختبار القدرات" />
-    <meta name="author" content="منصة اسرار التفوق" />
+    <meta name="author" content="منصة اور جول" />
 
-    <meta property="og:title" content="منصة اسرار التفوق - Asrar Platform" />
-    <meta property="og:description" content="منصة تعليمية تساعد الطلاب على التدرب لاختبار القدرات " />
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="منصة اور جول - Our Goal Platform" />
+    <meta property="og:description" content="منصة تعليمية تساعد الطلاب على التدرب لاختبار القدرات" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ" />
+    <meta property="og:image" content="/new-favicon.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="اور جول - Our Goal" />
 
+    <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lh7-us.googleusercontent.com/ZgZiKixuHmh0Qw-bVQVoSL9X1sLPf7vemSMdW_aF8F2o2UBdLemgghmaM_FHnmII7VMOEHswtMgD9GEW1RwfU9bNlZ4Qp6kjVfqvVgW18RqByz0ASipHRicpd6d0CjbWlFAL0kXSsRs6vztFruNKixK76zNpmzbqri-4eJrAY476rGC_o26FVijRGlTeFYNHaFOhrYpW?key=-6GPA2o9SRVVzzH5bmoicQ" />
+    <meta name="twitter:title" content="منصة اور جول - Our Goal Platform" />
+    <meta name="twitter:description" content="منصة تعليمية تساعد الطلاب على التدرب لاختبار القدرات" />
+    <meta name="twitter:image" content="/new-favicon.jpg" />
   </head>
 
   <body>
@@ -23,7 +35,7 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
-    
+
     <script>
       // Prevent inspect element by various methods
       document.addEventListener('keydown', function(e) {
@@ -32,13 +44,13 @@
           e.preventDefault();
           return false;
         }
-        
+
         // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
         if(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
           e.preventDefault();
           return false;
         }
-        
+
         // Prevent Ctrl+U (View Source)
         if(e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
           e.preventDefault();
@@ -57,16 +69,16 @@
         if (isMobileDevice()) {
           return;
         }
-        
+
         // تطبيق الكشف فقط على أجهزة سطح المكتب
         const widthThreshold = window.outerWidth - window.innerWidth > 160;
         const heightThreshold = window.outerHeight - window.innerHeight > 160;
-        
+
         if(widthThreshold || heightThreshold) {
           document.body.innerHTML = '<div style="text-align:center;padding:50px;direction:rtl"><h1>تم اكتشاف محاولة للوصول إلى أدوات المطورين</h1><p>يرجى إغلاق أدوات المطورين وتحديث الصفحة للمتابعة.</p></div>';
         }
       }
-      
+
       // تشغيل الكشف بشكل دوري فقط على أجهزة سطح المكتب
       if (!isMobileDevice()) {
         setInterval(detectDevTools, 1000);
@@ -79,7 +91,7 @@
         const originalConsoleWarn = console.warn;
         const originalConsoleInfo = console.info;
         const originalConsoleDebug = console.debug;
-        
+
         console.log = console.error = console.warn = console.info = console.debug = () => {
           return false;
         };
