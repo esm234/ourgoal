@@ -21,6 +21,8 @@ import {
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useFastFiles } from '@/hooks/useFastFiles';
+import { CustomPagination } from '@/components/ui/custom-pagination';
 
 interface FileData {
   id: number;
@@ -35,12 +37,25 @@ interface FileData {
 
 const AdminFiles = () => {
   const navigate = useNavigate();
-  const [files, setFiles] = useState<FileData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingFile, setEditingFile] = useState<FileData | null>(null);
+
+  // استخدام الـ hook السريع للملفات
+  const {
+    data: files,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPrevPage,
+    nextPage,
+    prevPage,
+    refresh
+  } = useFastFiles(selectedCategory, searchTerm);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -58,26 +73,7 @@ const AdminFiles = () => {
     { value: 'general', label: 'عام', color: 'bg-gray-500' }
   ];
 
-  useEffect(() => {
-    fetchFiles();
-  }, []);
-
-  const fetchFiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('files')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setFiles(data || []);
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      toast.error('خطأ في تحميل الملفات');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // No need for useEffect or fetchFiles - handled by the hook
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,7 +104,7 @@ const AdminFiles = () => {
       }
 
       resetForm();
-      fetchFiles();
+      refresh();
     } catch (error) {
       console.error('Error saving file:', error);
       toast.error('خطأ في حفظ الملف');
@@ -128,7 +124,7 @@ const AdminFiles = () => {
 
       if (error) throw error;
       toast.success('تم حذف الملف بنجاح');
-      fetchFiles();
+      refresh();
     } catch (error) {
       console.error('Error deleting file:', error);
       toast.error('خطأ في حذف الملف');
@@ -159,12 +155,7 @@ const AdminFiles = () => {
     setShowAddForm(true);
   };
 
-  const filteredFiles = files.filter(file => {
-    const matchesSearch = file.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         file.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || file.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+
 
   const getCategoryLabel = (category: string) => {
     return categories.find(cat => cat.value === category)?.label || category;
@@ -371,7 +362,7 @@ const AdminFiles = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            {filteredFiles.length === 0 ? (
+            {files.length === 0 ? (
               <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
                 <CardContent className="p-12 text-center">
                   <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -384,8 +375,9 @@ const AdminFiles = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredFiles.map((file, index) => (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {files.map((file, index) => (
                   <motion.div
                     key={file.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -470,8 +462,24 @@ const AdminFiles = () => {
                       </CardContent>
                     </Card>
                   </motion.div>
-                ))}
-              </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalCount={totalCount}
+                    pageSize={20}
+                    hasNextPage={hasNextPage}
+                    hasPrevPage={hasPrevPage}
+                    onNextPage={nextPage}
+                    onPrevPage={prevPage}
+                    loading={loading}
+                  />
+                )}
+              </>
             )}
           </motion.div>
         </div>

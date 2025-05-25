@@ -19,6 +19,11 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useStudyPlans } from '@/hooks/useStudyPlans';
+import { useCompletedDays } from '@/hooks/useCompletedDays';
+import { useAuth } from '@/contexts/AuthContext';
+import CompletionCertificate from '@/components/CompletionCertificate';
+import { supabase } from '@/integrations/supabase/client';
 
 
 interface StudyDay {
@@ -49,40 +54,80 @@ interface SavedStudyPlan {
 const PlanDetails: React.FC = () => {
   const navigate = useNavigate();
   const { planId } = useParams();
-  const [plan, setPlan] = useState<SavedStudyPlan | null>(null);
-  const [completedDays, setCompletedDays] = useState<Set<number>>(new Set());
+  const { user } = useAuth();
+  const { getPlan } = useStudyPlans();
+  const {
+    completedDays,
+    loading: completedLoading,
+    toggleDayCompletion
+  } = useCompletedDays(planId);
+
+  const [plan, setPlan] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userName, setUserName] = useState<string>('');
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [wasJustCompleted, setWasJustCompleted] = useState(false);
 
   useEffect(() => {
     loadPlanDetails();
+    loadUserData();
   }, [planId]);
 
-  const loadPlanDetails = () => {
+  // فحص الإتمام عند تغيير الأيام المكتملة
+  useEffect(() => {
+    checkPlanCompletion();
+  }, [completedDays, plan]);
+
+  const loadUserData = async () => {
+    if (!user) return;
+
     try {
-      // Try to get from localStorage first
-      const currentPlan = localStorage.getItem('currentPlanDetails');
-      if (currentPlan) {
-        const planData = JSON.parse(currentPlan);
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else if (profile?.username) {
+        setUserName(profile.username);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
+
+  const checkPlanCompletion = () => {
+    if (!plan || completedLoading) return;
+
+    const totalDays = plan.study_days.length + 1; // +1 for final review day
+    const isNowCompleted = completedDays.size === totalDays;
+
+    // إذا تم إكمال الخطة للتو (لم تكن مكتملة من قبل)
+    if (isNowCompleted && !wasJustCompleted) {
+      setWasJustCompleted(true);
+      setShowCertificate(true);
+    }
+  };
+
+  const loadPlanDetails = async () => {
+    if (!planId) {
+      navigate('/profile');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Get plan from Supabase
+      const planData = await getPlan(planId);
+
+      if (planData) {
         setPlan(planData);
-
-        // Load completed days for this plan
-        const completedKey = `completed_days_${planData.id}`;
-        const completed = JSON.parse(localStorage.getItem(completedKey) || '[]');
-        setCompletedDays(new Set(completed));
       } else {
-        // Fallback: get from saved plans
-        const savedPlans = JSON.parse(localStorage.getItem('savedStudyPlans') || '[]');
-        const foundPlan = savedPlans.find((p: SavedStudyPlan) => p.id === planId);
-
-        if (foundPlan) {
-          setPlan(foundPlan);
-          const completedKey = `completed_days_${foundPlan.id}`;
-          const completed = JSON.parse(localStorage.getItem(completedKey) || '[]');
-          setCompletedDays(new Set(completed));
-        } else {
-          toast.error('لم يتم العثور على الخطة');
-          navigate('/profile');
-        }
+        toast.error('لم يتم العثور على الخطة');
+        navigate('/profile');
       }
     } catch (error) {
       console.error('Error loading plan details:', error);
@@ -93,36 +138,20 @@ const PlanDetails: React.FC = () => {
     }
   };
 
-  const toggleDayCompletion = (dayNumber: number) => {
-    if (!plan) return;
-
-    const newCompletedDays = new Set(completedDays);
-
-    if (completedDays.has(dayNumber)) {
-      newCompletedDays.delete(dayNumber);
-      toast.success('تم إلغاء تحديد اليوم');
-    } else {
-      newCompletedDays.add(dayNumber);
-      toast.success('🎉 أحسنت! تم تحديد اليوم كمكتمل');
-    }
-
-    setCompletedDays(newCompletedDays);
-
-    // Save to localStorage
-    const completedKey = `completed_days_${plan.id}`;
-    localStorage.setItem(completedKey, JSON.stringify(Array.from(newCompletedDays)));
+  const handleToggleDay = async (dayNumber: number) => {
+    await toggleDayCompletion(dayNumber, planId);
   };
 
   const getProgressPercentage = () => {
     if (!plan) return 0;
-    const totalDays = plan.studyDays.length + 1; // +1 for final review day
+    const totalDays = plan.study_days.length + 1; // +1 for final review day
     return Math.round((completedDays.size / totalDays) * 100);
   };
 
   const getCompletedDaysInRound = (roundNumber: number) => {
     if (!plan) return 0;
-    const roundDays = plan.studyDays.filter(day => day.roundNumber === roundNumber);
-    return roundDays.filter(day => completedDays.has(day.dayNumber)).length;
+    const roundDays = plan.study_days.filter((day: any) => day.roundNumber === roundNumber);
+    return roundDays.filter((day: any) => completedDays.has(day.dayNumber)).length;
   };
 
 
@@ -214,13 +243,13 @@ const PlanDetails: React.FC = () => {
                   </div>
                   <Progress value={progressPercentage} className="h-3" />
                   <p className="text-sm text-muted-foreground">
-                    {completedDays.size} من {plan.studyDays.length + 1} أيام مكتملة
+                    {completedDays.size} من {plan.study_days.length + 1} أيام مكتملة
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-2xl font-bold text-blue-500">{plan.totalDays}</div>
+                    <div className="text-2xl font-bold text-blue-500">{plan.total_days}</div>
                     <div className="text-sm text-muted-foreground">إجمالي الأيام</div>
                   </div>
                   <div className="text-center p-4 bg-background/50 rounded-xl">
@@ -228,12 +257,12 @@ const PlanDetails: React.FC = () => {
                     <div className="text-sm text-muted-foreground">أيام مكتملة</div>
                   </div>
                   <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-2xl font-bold text-purple-500">{plan.reviewRounds}</div>
+                    <div className="text-2xl font-bold text-purple-500">{plan.review_rounds}</div>
                     <div className="text-sm text-muted-foreground">جولات المراجعة</div>
                   </div>
                   <div className="text-center p-4 bg-background/50 rounded-xl">
                     <div className="text-2xl font-bold text-orange-500">
-                      {format(new Date(plan.testDate), 'dd/MM', { locale: ar })}
+                      {format(new Date(plan.test_date), 'dd/MM', { locale: ar })}
                     </div>
                     <div className="text-sm text-muted-foreground">تاريخ الاختبار</div>
                   </div>
@@ -244,9 +273,9 @@ const PlanDetails: React.FC = () => {
 
           {/* Study Days by Round */}
           <div className="space-y-8">
-            {Array.from({ length: plan.reviewRounds }, (_, roundIndex) => {
+            {Array.from({ length: plan.review_rounds }, (_, roundIndex) => {
               const roundNumber = roundIndex + 1;
-              const roundDays = plan.studyDays.filter(day => day.roundNumber === roundNumber);
+              const roundDays = plan.study_days.filter((day: any) => day.roundNumber === roundNumber);
               const completedInRound = getCompletedDaysInRound(roundNumber);
               const roundProgress = Math.round((completedInRound / roundDays.length) * 100);
 
@@ -296,13 +325,13 @@ const PlanDetails: React.FC = () => {
                                 ? 'bg-green-500/10 border-green-500/30 shadow-lg'
                                 : 'bg-background/50 border-primary/10 hover:border-primary/30'
                             }`}
-                            onClick={() => toggleDayCompletion(day.dayNumber)}
+                            onClick={() => handleToggleDay(day.dayNumber)}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-6">
                                 <Checkbox
                                   checked={isCompleted}
-                                  onChange={() => toggleDayCompletion(day.dayNumber)}
+                                  onChange={() => handleToggleDay(day.dayNumber)}
                                   className="w-6 h-6"
                                 />
                                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 ${
@@ -389,34 +418,34 @@ const PlanDetails: React.FC = () => {
                 <CardContent className="relative z-10">
                   <div
                     className={`p-8 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                      completedDays.has(plan.finalReviewDay.dayNumber)
+                      completedDays.has(plan.final_review_day.dayNumber)
                         ? 'bg-amber-500/20 border-amber-500/40 shadow-lg'
                         : 'bg-background/60 border-amber-500/20 hover:border-amber-500/40'
                     }`}
-                    onClick={() => toggleDayCompletion(plan.finalReviewDay.dayNumber)}
+                    onClick={() => handleToggleDay(plan.final_review_day.dayNumber)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-6">
                         <Checkbox
-                          checked={completedDays.has(plan.finalReviewDay.dayNumber)}
-                          onChange={() => toggleDayCompletion(plan.finalReviewDay.dayNumber)}
+                          checked={completedDays.has(plan.final_review_day.dayNumber)}
+                          onChange={() => handleToggleDay(plan.final_review_day.dayNumber)}
                           className="w-6 h-6"
                         />
                         <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${
-                          completedDays.has(plan.finalReviewDay.dayNumber)
+                          completedDays.has(plan.final_review_day.dayNumber)
                             ? 'bg-amber-500/30 scale-110'
                             : 'bg-amber-500/20'
                         }`}>
-                          <span className="text-3xl font-bold text-amber-600">{plan.finalReviewDay.dayNumber}</span>
+                          <span className="text-3xl font-bold text-amber-600">{plan.final_review_day.dayNumber}</span>
                         </div>
                         <div>
                           <div className="text-2xl font-bold text-foreground mb-2">
-                            {format(new Date(plan.finalReviewDay.date), "EEEE، dd MMMM yyyy", { locale: ar })}
+                            {format(new Date(plan.final_review_day.date), "EEEE، dd MMMM yyyy", { locale: ar })}
                           </div>
                           <div className="text-amber-600 font-medium text-lg">
                             مراجعة الأخطاء والنقاط المهمة فقط
                           </div>
-                          {completedDays.has(plan.finalReviewDay.dayNumber) && (
+                          {completedDays.has(plan.final_review_day.dayNumber) && (
                             <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 mt-2">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               مكتمل - أحسنت!
@@ -436,6 +465,16 @@ const PlanDetails: React.FC = () => {
             </motion.div>
           </div>
         </div>
+
+        {/* شهادة الإتمام */}
+        <CompletionCertificate
+          isOpen={showCertificate}
+          onClose={() => setShowCertificate(false)}
+          userName={userName || 'الطالب'}
+          planName={plan?.name || 'خطة الدراسة'}
+          completionDate={new Date()}
+          totalDays={plan ? plan.study_days.length + 1 : 0}
+        />
       </section>
     </Layout>
   );

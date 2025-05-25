@@ -1,0 +1,21 @@
+# Cloudflare Pages redirects for React Router SPA
+# This file will be copied to the build output
+
+# Handle all routes for React Router
+/*    /index.html   200
+
+# Specific routes that need special handling
+/admin    /index.html   200
+/admin/*  /index.html   200
+/profile  /index.html   200
+/profile/*  /index.html   200
+/files    /index.html   200
+/files/*  /index.html   200
+/study-plan  /index.html   200
+/study-plan/*  /index.html   200
+/plan-details/*  /index.html   200
+/login    /index.html   200
+/welcome  /index.html   200
+/equivalency-calculator  /index.html   200
+/forgot-password  /index.html   200
+/reset-password  /index.html   200

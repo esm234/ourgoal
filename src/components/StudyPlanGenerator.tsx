@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useStudyPlans } from '@/hooks/useStudyPlans';
 
 interface StudyDay {
   dayNumber: number;
@@ -52,11 +53,13 @@ interface StudyPlan {
 const StudyPlanGenerator: React.FC = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const { savePlan } = useStudyPlans();
   const [testDate, setTestDate] = useState<Date | undefined>(undefined);
   const [reviewRounds, setReviewRounds] = useState<string>('2');
   const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Constants for test counts
   const VERBAL_TESTS = 108;
@@ -215,7 +218,7 @@ const StudyPlanGenerator: React.FC = () => {
     setIsGenerating(false);
   };
 
-  const savePlanToProfile = (): void => {
+  const savePlanToProfile = async (): Promise<void> => {
     if (!studyPlan) return;
 
     // Check if user is authenticated
@@ -231,41 +234,35 @@ const StudyPlanGenerator: React.FC = () => {
       return;
     }
 
-    const planName = `خطة ${format(studyPlan.finalReviewDay.date, 'dd/MM/yyyy')}`;
-    const savedPlan = {
-      id: Date.now().toString(),
-      name: planName,
-      totalDays: studyPlan.totalDays,
-      reviewRounds: studyPlan.reviewRounds,
-      testDate: studyPlan.finalReviewDay.date.toISOString(),
-      createdAt: new Date().toISOString(),
-      studyDays: studyPlan.studyDays,
-      finalReviewDay: studyPlan.finalReviewDay
-    };
+    setIsSaving(true);
 
     try {
-      const existingPlans = JSON.parse(localStorage.getItem('savedStudyPlans') || '[]');
-      const updatedPlans = [...existingPlans, savedPlan];
-      localStorage.setItem('savedStudyPlans', JSON.stringify(updatedPlans));
+      const planName = `خطة ${format(studyPlan.finalReviewDay.date, 'dd/MM/yyyy')}`;
 
-      // Update user stats
-      const existingStats = JSON.parse(localStorage.getItem('userStats') || '{}');
-      const updatedStats = {
-        ...existingStats,
-        totalPlansCreated: (existingStats.totalPlansCreated || 0) + 1,
-        totalStudyDays: (existingStats.totalStudyDays || 0) + studyPlan.totalDays
+      const planData = {
+        name: planName,
+        total_days: studyPlan.totalDays,
+        review_rounds: studyPlan.reviewRounds,
+        test_date: studyPlan.finalReviewDay.date.toISOString().split('T')[0],
+        study_days: studyPlan.studyDays,
+        final_review_day: studyPlan.finalReviewDay
       };
-      localStorage.setItem('userStats', JSON.stringify(updatedStats));
 
-      toast.success('تم حفظ الخطة في ملفك الشخصي بنجاح! 🎉', {
-        description: 'يمكنك الآن الوصول إليها من صفحة الملف الشخصي',
-        duration: 4000,
-      });
+      const savedPlan = await savePlan(planData);
+
+      if (savedPlan) {
+        toast.success('تم حفظ الخطة في ملفك الشخصي بنجاح! 🎉', {
+          description: 'يمكنك الآن الوصول إليها من صفحة الملف الشخصي',
+          duration: 4000,
+        });
+      }
     } catch (error) {
       console.error('Error saving plan:', error);
       toast.error('حدث خطأ أثناء حفظ الخطة', {
         description: 'يرجى المحاولة مرة أخرى',
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -520,16 +517,27 @@ const StudyPlanGenerator: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               onClick={savePlanToProfile}
+              disabled={isSaving}
               size="lg"
-              className={`flex items-center justify-center gap-3 w-full sm:w-auto px-6 sm:px-8 py-4 text-base sm:text-lg font-bold rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg ${
+              className={`flex items-center justify-center gap-3 w-full sm:w-auto px-6 sm:px-8 py-4 text-base sm:text-lg font-bold rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
                 isLoggedIn
                   ? 'bg-gradient-to-r from-primary to-accent text-black'
                   : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white hover:from-primary hover:to-accent hover:text-black'
               }`}
             >
-              <Save className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">{isLoggedIn ? 'حفظ في الملف الشخصي' : 'تسجيل الدخول للحفظ'}</span>
-              <span className="sm:hidden">{isLoggedIn ? 'حفظ الخطة' : 'تسجيل الدخول'}</span>
+              {isSaving ? (
+                <>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                  <span className="hidden sm:inline">جاري الحفظ...</span>
+                  <span className="sm:hidden">جاري الحفظ...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">{isLoggedIn ? 'حفظ في الملف الشخصي' : 'تسجيل الدخول للحفظ'}</span>
+                  <span className="sm:hidden">{isLoggedIn ? 'حفظ الخطة' : 'تسجيل الدخول'}</span>
+                </>
+              )}
             </Button>
 
             <Button

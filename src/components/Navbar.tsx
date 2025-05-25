@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, ShieldAlert, FileText, Target, User } from "lucide-react";
+import { Home, Calculator, LogIn, Menu, X, FileText, Target, User } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
 const Navbar = () => {
-  const { isLoggedIn, role } = useAuth();
+  const { isLoggedIn } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleToggleMenu = () => {
@@ -104,19 +104,7 @@ const Navbar = () => {
 
             <div className="flex items-center">
               {isLoggedIn ? (
-                <>
-                  {role === 'admin' && (
-                    <Link
-                      to="/admin"
-                      className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                      onClick={handleLinkClick}
-                    >
-                      <ShieldAlert size={20} className="ml-2" />
-                      <span>لوحة التحكم</span>
-                    </Link>
-                  )}
-                  <LogoutButton className="px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors" />
-                </>
+                <LogoutButton className="px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors" />
               ) : (
                 <Link to="/login" onClick={handleLinkClick}>
                   <Button
@@ -181,23 +169,11 @@ const Navbar = () => {
             )}
 
             {isLoggedIn ? (
-              <>
-                {role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                    onClick={handleMobileLinkClick}
-                  >
-                    <ShieldAlert size={20} className="ml-2" />
-                    <span>لوحة التحكم</span>
-                  </Link>
-                )}
-                <LogoutButton
-                  fullWidth
-                  className="px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                  onLogoutSuccess={() => setIsMobileMenuOpen(false)}
-                />
-              </>
+              <LogoutButton
+                fullWidth
+                className="px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                onLogoutSuccess={() => setIsMobileMenuOpen(false)}
+              />
             ) : (
               <Link
                 to="/login"

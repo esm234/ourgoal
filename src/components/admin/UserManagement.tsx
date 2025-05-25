@@ -34,6 +34,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash, Search, UserCog, Shield, User as UserIcon, ShieldAlert, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFastUsers } from "@/hooks/useFastFiles";
+import { CustomPagination } from "@/components/ui/custom-pagination";
 
 interface User {
   id: string;
@@ -46,8 +48,6 @@ interface User {
 const UserManagement = () => {
   const { toast } = useToast();
   const { isAdmin, isVerifying, error: adminCheckError } = useAdminCheck();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -57,13 +57,23 @@ const UserManagement = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    // Only fetch users if we're confirmed as an admin
-    if (isAdmin && !isVerifying) {
-      fetchUsers();
-    }
+  // استخدام الـ hook السريع للمستخدمين
+  const {
+    data: users,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPrevPage,
+    nextPage,
+    prevPage,
+    refresh
+  } = useFastUsers(searchTerm);
 
-    // Show error if admin check failed
+  // Show error if admin check failed
+  useEffect(() => {
     if (adminCheckError) {
       toast({
         title: "خطأ في التحقق من الصلاحيات",
@@ -71,85 +81,9 @@ const UserManagement = () => {
         variant: "destructive",
       });
     }
-  }, [isAdmin, isVerifying, adminCheckError]);
+  }, [adminCheckError]);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      // Get all profiles with user data
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          username,
-          role,
-          created_at
-        `)
-        .order('created_at', { ascending: false });
 
-      if (profilesError) throw profilesError;
-
-      // Get user emails from auth.users (this requires RLS policies to be set up properly)
-      const userIds = profilesData.map(profile => profile.id);
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-
-      let emailMap: Record<string, string> = {};
-
-      if (!authError && authData?.users) {
-        // Create a map of user IDs to emails
-        authData.users.forEach(user => {
-          if (userIds.includes(user.id)) {
-            emailMap[user.id] = user.email || `user-${user.id.substring(0, 8)}@example.com`;
-          }
-        });
-      }
-
-      // Format the data to match our User interface
-      const formattedUsers = profilesData.map(user => ({
-        id: user.id,
-        email: emailMap[user.id] || `user-${user.id.substring(0, 8)}@example.com`,
-        username: user.username,
-        role: user.role,
-        created_at: user.created_at,
-      }));
-
-      setUsers(formattedUsers);
-    } catch (error: any) {
-      // If auth.admin fails (which it will in frontend), fall back to profiles only
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            username,
-            role,
-            created_at
-          `)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        // Format with placeholder emails
-        const formattedUsers = data.map(user => ({
-          id: user.id,
-          email: `user-${user.id.substring(0, 8)}@example.com`,
-          username: user.username,
-          role: user.role,
-          created_at: user.created_at,
-        }));
-
-        setUsers(formattedUsers);
-      } catch (fallbackError: any) {
-        toast({
-          title: "خطأ في جلب المستخدمين",
-          description: fallbackError.message,
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEditUser = (user: User) => {
     setEditingUser(user);
@@ -179,10 +113,8 @@ const UserManagement = () => {
         description: `تم تغيير دور المستخدم إلى ${newRole === 'admin' ? 'مشرف' : 'مستخدم عادي'}`,
       });
 
-      // Update the user in the local state
-      setUsers(users.map(user =>
-        user.id === editingUser.id ? { ...user, role: newRole } : user
-      ));
+      // Refresh the user list
+      refresh();
     } catch (error: any) {
       toast({
         title: "خطأ في تحديث المستخدم",
@@ -214,8 +146,8 @@ const UserManagement = () => {
         description: "تم حذف ملف المستخدم بنجاح",
       });
 
-      // Remove the user from the local state
-      setUsers(users.filter(user => user.id !== userToDelete.id));
+      // Refresh the user list
+      refresh();
     } catch (error: any) {
       toast({
         title: "خطأ في حذف المستخدم",
@@ -229,10 +161,7 @@ const UserManagement = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // No need for filteredUsers - handled by the hook with search
 
   const getRoleBadge = (role: string | null) => {
     if (role === "admin") {
@@ -282,7 +211,7 @@ const UserManagement = () => {
               عرض وإدارة جميع المستخدمين في النظام
               {!loading && (
                 <span className="text-primary font-medium">
-                  {" "}• {filteredUsers.length} من أصل {users.length} مستخدم
+                  {" "}• {users.length} من أصل {totalCount} مستخدم
                 </span>
               )}
             </CardDescription>
@@ -291,7 +220,7 @@ const UserManagement = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchUsers}
+              onClick={refresh}
               disabled={loading}
               className="flex items-center gap-2"
             >
@@ -324,64 +253,81 @@ const UserManagement = () => {
             ))}
           </div>
         ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-right">المستخدم</TableHead>
-                  <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                  <TableHead className="text-right">الدور</TableHead>
-                  <TableHead className="text-right">تاريخ التسجيل</TableHead>
-                  <TableHead className="text-right">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <div className="bg-primary/10 text-primary p-2 rounded-full">
-                            <UserIcon size={16} />
+          <>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">المستخدم</TableHead>
+                    <TableHead className="text-right">البريد الإلكتروني</TableHead>
+                    <TableHead className="text-right">الدور</TableHead>
+                    <TableHead className="text-right">تاريخ التسجيل</TableHead>
+                    <TableHead className="text-right">الإجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-primary/10 text-primary p-2 rounded-full">
+                              <UserIcon size={16} />
+                            </div>
+                            {user.username || "لم يتم تعيين اسم"}
                           </div>
-                          {user.username || "لم يتم تعيين اسم"}
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell>{new Date(user.created_at).toLocaleDateString('ar-EG')}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditUser(user)}
-                            className="text-muted-foreground hover:text-primary"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteUser(user)}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{getRoleBadge(user.role)}</TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString('ar-EG')}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              className="text-muted-foreground hover:text-primary"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        لا يوجد مستخدمين مطابقين لبحثك
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      لا يوجد مستخدمين مطابقين لبحثك
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <CustomPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={50}
+                hasNextPage={hasNextPage}
+                hasPrevPage={hasPrevPage}
+                onNextPage={nextPage}
+                onPrevPage={prevPage}
+                loading={loading}
+              />
+            )}
+          </>
         )}
 
         {/* Edit User Dialog */}

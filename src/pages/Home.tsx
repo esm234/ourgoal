@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import EventsSection from "@/components/EventsSection";
 import {
   ArrowRight,
   Calculator,
@@ -357,6 +358,9 @@ const Home = () => {
           </Link>
         </div>
       </section>
+
+      {/* Events Section */}
+      <EventsSection />
 
       {/* Success Stories & CTA Section */}
       <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">

@@ -1,0 +1,19 @@
+# Cloudflare Pages redirects for React Router
+# This file handles client-side routing for SPA
+
+# Redirect all routes to index.html for React Router
+/*    /index.html   200
+
+# API routes (if any) - keep these as they are
+/api/*  /api/:splat  200
+
+# Static assets - serve directly
+/assets/*  /assets/:splat  200
+/public/*  /public/:splat  200
+
+# Specific redirects for common routes
+/admin/*  /index.html  200
+/profile/*  /index.html  200
+/files/*  /index.html  200
+/study-plan/*  /index.html  200
+/plan-details/*  /index.html  200

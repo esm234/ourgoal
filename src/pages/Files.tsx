@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFastFiles } from "@/hooks/useFastFiles";
+import { CustomPagination } from "@/components/ui/custom-pagination";
 
 interface FileData {
   id: number;
@@ -27,12 +29,25 @@ const Files = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [files, setFiles] = useState<FileData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("verbal");
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // استخدام الـ hook السريع للملفات
+  const {
+    data: files,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPrevPage,
+    nextPage,
+    prevPage,
+    refresh
+  } = useFastFiles(activeTab, searchTerm);
+
   useEffect(() => {
-    fetchFiles();
     checkAdminStatus();
   }, [user]);
 
@@ -57,56 +72,21 @@ const Files = () => {
     }
   };
 
-  const fetchFiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('files')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setFiles(data || []);
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      toast.error('خطأ في تحميل الملفات');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDownload = async (file: FileData) => {
     try {
-      // Increment download counter
-      const { error } = await supabase
-        .from('files')
-        .update({ downloads: file.downloads + 1 })
-        .eq('id', file.id);
-
-      if (error) throw error;
-
-      // Open file in new tab
+      // For now, just open the file URL since files table doesn't exist yet
+      // TODO: Implement download counter after running SQL schema
       window.open(file.file_url, '_blank');
 
-      // Update local state
-      setFiles(files.map(f =>
-        f.id === file.id ? { ...f, downloads: f.downloads + 1 } : f
-      ));
+      // Show success message
+      toast.success('تم فتح الملف');
     } catch (error) {
-      console.error('Error updating download count:', error);
-      // Still open the file even if counter update fails
-      window.open(file.file_url, '_blank');
+      console.error('Error opening file:', error);
+      toast.error('خطأ في فتح الملف');
     }
   };
 
-  const getFilesByCategory = (category: string) => {
-    return files.filter(file => {
-      const matchesCategory = file.category === category;
-      const matchesSearch = searchTerm === '' ||
-        file.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        file.description.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  };
+
 
   const getCategoryLabel = (category: string) => {
     const labels = {
@@ -306,7 +286,7 @@ const Files = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Tabs defaultValue="verbal" dir="rtl" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl" className="w-full">
               {/* Modern Tab Navigation */}
               <div className="flex justify-center mb-8">
                 <TabsList className="grid grid-cols-4 w-full max-w-2xl bg-transparent p-2">
@@ -349,65 +329,173 @@ const Files = () => {
                 </TabsList>
               </div>
 
-              {/* Tab Contents */}
+              {/* Tab Contents - All categories use the same optimized data */}
               <TabsContent value="verbal" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
-                  {getFilesByCategory('verbal').map((file) => (
-                    <FileCard key={file.id} file={file} />
-                  ))}
-                  {getFilesByCategory('verbal').length === 0 && (
-                    <div className="col-span-full text-center py-12">
-                      <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات لفظية</h3>
-                      <p className="text-muted-foreground">لم يتم إضافة أي ملفات لفظية بعد</p>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-muted rounded-2xl h-64"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
+                      {files.map((file) => (
+                        <FileCard key={file.id} file={file} />
+                      ))}
+                      {files.length === 0 && (
+                        <div className="col-span-full text-center py-12">
+                          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات لفظية</h3>
+                          <p className="text-muted-foreground">لم يتم إضافة أي ملفات لفظية بعد</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <CustomPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalCount={totalCount}
+                        pageSize={20}
+                        hasNextPage={hasNextPage}
+                        hasPrevPage={hasPrevPage}
+                        onNextPage={nextPage}
+                        onPrevPage={prevPage}
+                        loading={loading}
+                      />
+                    )}
+                  </>
+                )}
               </TabsContent>
 
               <TabsContent value="quantitative" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
-                  {getFilesByCategory('quantitative').map((file) => (
-                    <FileCard key={file.id} file={file} />
-                  ))}
-                  {getFilesByCategory('quantitative').length === 0 && (
-                    <div className="col-span-full text-center py-12">
-                      <Calculator className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات كمية</h3>
-                      <p className="text-muted-foreground">لم يتم إضافة أي ملفات كمية بعد</p>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-muted rounded-2xl h-64"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
+                      {files.map((file) => (
+                        <FileCard key={file.id} file={file} />
+                      ))}
+                      {files.length === 0 && (
+                        <div className="col-span-full text-center py-12">
+                          <Calculator className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات كمية</h3>
+                          <p className="text-muted-foreground">لم يتم إضافة أي ملفات كمية بعد</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <CustomPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalCount={totalCount}
+                        pageSize={20}
+                        hasNextPage={hasNextPage}
+                        hasPrevPage={hasPrevPage}
+                        onNextPage={nextPage}
+                        onPrevPage={prevPage}
+                        loading={loading}
+                      />
+                    )}
+                  </>
+                )}
               </TabsContent>
 
               <TabsContent value="mixed" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
-                  {getFilesByCategory('mixed').map((file) => (
-                    <FileCard key={file.id} file={file} />
-                  ))}
-                  {getFilesByCategory('mixed').length === 0 && (
-                    <div className="col-span-full text-center py-12">
-                      <Filter className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات منوعة</h3>
-                      <p className="text-muted-foreground">لم يتم إضافة أي ملفات منوعة بعد</p>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-muted rounded-2xl h-64"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
+                      {files.map((file) => (
+                        <FileCard key={file.id} file={file} />
+                      ))}
+                      {files.length === 0 && (
+                        <div className="col-span-full text-center py-12">
+                          <Filter className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات منوعة</h3>
+                          <p className="text-muted-foreground">لم يتم إضافة أي ملفات منوعة بعد</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <CustomPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalCount={totalCount}
+                        pageSize={20}
+                        hasNextPage={hasNextPage}
+                        hasPrevPage={hasPrevPage}
+                        onNextPage={nextPage}
+                        onPrevPage={prevPage}
+                        loading={loading}
+                      />
+                    )}
+                  </>
+                )}
               </TabsContent>
 
               <TabsContent value="general" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
-                  {getFilesByCategory('general').map((file) => (
-                    <FileCard key={file.id} file={file} />
-                  ))}
-                  {getFilesByCategory('general').length === 0 && (
-                    <div className="col-span-full text-center py-12">
-                      <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات عامة</h3>
-                      <p className="text-muted-foreground">لم يتم إضافة أي ملفات عامة بعد</p>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="bg-muted rounded-2xl h-64"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 auto-rows-fr">
+                      {files.map((file) => (
+                        <FileCard key={file.id} file={file} />
+                      ))}
+                      {files.length === 0 && (
+                        <div className="col-span-full text-center py-12">
+                          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-bold text-foreground mb-2">لا توجد ملفات عامة</h3>
+                          <p className="text-muted-foreground">لم يتم إضافة أي ملفات عامة بعد</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <CustomPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalCount={totalCount}
+                        pageSize={20}
+                        hasNextPage={hasNextPage}
+                        hasPrevPage={hasPrevPage}
+                        onNextPage={nextPage}
+                        onPrevPage={prevPage}
+                        loading={loading}
+                      />
+                    )}
+                  </>
+                )}
               </TabsContent>
             </Tabs>
           </motion.div>

@@ -48,7 +48,13 @@ export default defineConfig(({ mode }) => ({
     // تحسين حجم الملفات
     chunkSizeWarningLimit: 1000,
     // ضغط CSS
-    cssMinify: true
+    cssMinify: true,
+    // تحسين للـ Cloudflare Pages
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    // تحسين الأداء
+    target: 'es2020'
   },
   // ضغط الخادم التطويري
   preview: {

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   User,
@@ -19,10 +18,9 @@ import {
   Clock,
   Star,
   TrendingUp,
-  Edit3,
-  Save,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Trophy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -31,49 +29,34 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
-interface SavedStudyPlan {
-  id: string;
-  name: string;
-  totalDays: number;
-  reviewRounds: number;
-  testDate: string;
-  createdAt: string;
-  studyDays: any[];
-  finalReviewDay: any;
-}
-
-interface DailyTask {
-  id: string;
-  text: string;
-  completed: boolean;
-  date: string;
-  category: 'verbal' | 'quantitative' | 'general';
-}
-
-interface UserStats {
-  totalPlansCreated: number;
-  completedTasks: number;
-  currentStreak: number;
-  totalStudyDays: number;
-}
+import { useStudyPlans } from '@/hooks/useStudyPlans';
+import { useUserStats } from '@/hooks/useUserStats';
+import { useDailyTasks } from '@/hooks/useDailyTasks';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import XPLeaderboard from '@/components/XPLeaderboard';
 
 const Profile: React.FC = () => {
   const { user, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  const [savedPlans, setSavedPlans] = useState<SavedStudyPlan[]>([]);
-  const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([]);
-  const [userStats, setUserStats] = useState<UserStats>({
-    totalPlansCreated: 0,
-    completedTasks: 0,
-    currentStreak: 0,
-    totalStudyDays: 0
-  });
+  // Use custom hooks
+  const { plans: savedPlans, loading: plansLoading, deletePlan } = useStudyPlans();
+  const { stats, loading: statsLoading, getFormattedStats } = useUserStats();
+  const {
+    tasks: dailyTasks,
+    loading: tasksLoading,
+    addTask,
+    toggleTask,
+    deleteTask
+  } = useDailyTasks();
+
   const [newTaskText, setNewTaskText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'verbal' | 'quantitative' | 'general'>('general');
   const [userName, setUserName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Get formatted stats
+  const userStats = getFormattedStats();
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -120,20 +103,6 @@ const Profile: React.FC = () => {
         }
         setUserName(profile.username);
       }
-
-      // Load local data
-      const plans = JSON.parse(localStorage.getItem('savedStudyPlans') || '[]');
-      const tasks = JSON.parse(localStorage.getItem('dailyTasks') || '[]');
-      const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
-
-      setSavedPlans(plans);
-      setDailyTasks(tasks);
-      setUserStats({
-        totalPlansCreated: stats.totalPlansCreated || plans.length,
-        completedTasks: stats.completedTasks || tasks.filter((t: DailyTask) => t.completed).length,
-        currentStreak: calculateStreak(tasks),
-        totalStudyDays: stats.totalStudyDays || 0
-      });
     } catch (error) {
       console.error('Error loading user data:', error);
       toast.error('حدث خطأ في تحميل البيانات');
@@ -142,108 +111,31 @@ const Profile: React.FC = () => {
     }
   };
 
-  const calculateStreak = (tasks: DailyTask[]): number => {
-    const sortedDates = [...new Set(tasks.filter(t => t.completed).map(t => t.date))].sort().reverse();
-    let streak = 0;
-    let currentDate = new Date();
 
-    for (const dateStr of sortedDates) {
-      const taskDate = new Date(dateStr);
-      const diffDays = Math.floor((currentDate.getTime() - taskDate.getTime()) / (1000 * 60 * 60 * 24));
 
-      if (diffDays === streak) {
-        streak++;
-        currentDate = taskDate;
-      } else {
-        break;
-      }
-    }
-
-    return streak;
-  };
-
-  const saveLocalData = () => {
-    try {
-      localStorage.setItem('savedStudyPlans', JSON.stringify(savedPlans));
-      localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
-      localStorage.setItem('userStats', JSON.stringify(userStats));
-    } catch (error) {
-      console.error('Error saving local data:', error);
-    }
-  };
-
-  // Save local data whenever state changes
-  useEffect(() => {
-    if (!isLoading) {
-      saveLocalData();
-    }
-  }, [savedPlans, dailyTasks, userStats, isLoading]);
-
-  const addDailyTask = () => {
+  const addDailyTask = async () => {
     if (!newTaskText.trim()) return;
 
-    const newTask: DailyTask = {
-      id: Date.now().toString(),
-      text: newTaskText,
-      completed: false,
-      date: today,
-      category: selectedCategory
-    };
-
-    setDailyTasks(prev => [...prev, newTask]);
-    setNewTaskText('');
-  };
-
-  const toggleTask = (taskId: string) => {
-    setDailyTasks(prev =>
-      prev.map(task => {
-        if (task.id === taskId) {
-          const updatedTask = { ...task, completed: !task.completed };
-
-          // Update stats
-          if (updatedTask.completed && !task.completed) {
-            setUserStats(prevStats => ({
-              ...prevStats,
-              completedTasks: prevStats.completedTasks + 1,
-              currentStreak: calculateStreak([...prev.filter(t => t.id !== taskId), updatedTask])
-            }));
-          } else if (!updatedTask.completed && task.completed) {
-            setUserStats(prevStats => ({
-              ...prevStats,
-              completedTasks: Math.max(0, prevStats.completedTasks - 1),
-              currentStreak: calculateStreak([...prev.filter(t => t.id !== taskId), updatedTask])
-            }));
-          }
-
-          return updatedTask;
-        }
-        return task;
-      })
-    );
-  };
-
-  const deleteTask = (taskId: string) => {
-    const taskToDelete = dailyTasks.find(t => t.id === taskId);
-    setDailyTasks(prev => prev.filter(task => task.id !== taskId));
-
-    if (taskToDelete?.completed) {
-      setUserStats(prevStats => ({
-        ...prevStats,
-        completedTasks: Math.max(0, prevStats.completedTasks - 1)
-      }));
+    const success = await addTask(newTaskText, selectedCategory, today);
+    if (success) {
+      setNewTaskText('');
     }
   };
 
-  const deletePlan = (planId: string) => {
-    setSavedPlans(prev => prev.filter(plan => plan.id !== planId));
-    setUserStats(prevStats => ({
-      ...prevStats,
-      totalPlansCreated: Math.max(0, prevStats.totalPlansCreated - 1)
-    }));
+  const handleToggleTask = async (taskId: string) => {
+    await toggleTask(taskId);
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask(taskId);
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    await deletePlan(planId);
   };
 
   const getTodayTasks = () => {
-    return dailyTasks.filter(task => task.date === today);
+    return dailyTasks.filter(task => task.task_date === today);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -262,13 +154,11 @@ const Profile: React.FC = () => {
     }
   };
 
-  const viewPlanDetails = (plan: SavedStudyPlan) => {
-    // Store plan in localStorage for the detail page
-    localStorage.setItem('currentPlanDetails', JSON.stringify(plan));
+  const viewPlanDetails = (plan: any) => {
     navigate(`/plan-details/${plan.id}`);
   };
 
-  if (isLoading) {
+  if (isLoading || plansLoading || statsLoading || tasksLoading) {
     return (
       <Layout>
         <section className="min-h-screen py-16 px-4 bg-gradient-to-br from-background via-secondary/30 to-background relative overflow-hidden flex items-center justify-center">
@@ -355,20 +245,27 @@ const Profile: React.FC = () => {
           >
             <Tabs defaultValue="tasks" dir="rtl" className="w-full">
               <div className="flex justify-center mb-8">
-                <TabsList className="grid grid-cols-2 w-full max-w-md bg-transparent p-2">
+                <TabsList className="grid grid-cols-3 w-full max-w-2xl bg-transparent p-2">
                   <TabsTrigger
                     value="tasks"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-6 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-4 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     المهام اليومية
                   </TabsTrigger>
                   <TabsTrigger
                     value="plans"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-6 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-4 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
                   >
                     <Calendar className="w-4 h-4 mr-2" />
                     خطط الدراسة
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="leaderboard"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-4 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                  >
+                    <Trophy className="w-4 h-4 mr-2" />
+                    المتصدرون
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -458,7 +355,7 @@ const Profile: React.FC = () => {
                                 <div className="flex items-center gap-3">
                                   <Checkbox
                                     checked={task.completed}
-                                    onCheckedChange={() => toggleTask(task.id)}
+                                    onCheckedChange={() => handleToggleTask(task.id)}
                                     className="w-5 h-5"
                                   />
                                   <span className={`${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
@@ -475,7 +372,7 @@ const Profile: React.FC = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => deleteTask(task.id)}
+                                  onClick={() => handleDeleteTask(task.id)}
                                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -528,7 +425,7 @@ const Profile: React.FC = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => deletePlan(plan.id)}
+                                  onClick={() => handleDeletePlan(plan.id)}
                                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -538,11 +435,11 @@ const Profile: React.FC = () => {
                             <CardContent className="space-y-4">
                               <div className="grid grid-cols-2 gap-4 text-center">
                                 <div className="p-3 bg-background/50 rounded-xl">
-                                  <div className="text-xl font-bold text-primary">{plan.totalDays}</div>
+                                  <div className="text-xl font-bold text-primary">{plan.total_days}</div>
                                   <div className="text-xs text-muted-foreground">أيام</div>
                                 </div>
                                 <div className="p-3 bg-background/50 rounded-xl">
-                                  <div className="text-xl font-bold text-accent">{plan.reviewRounds}</div>
+                                  <div className="text-xl font-bold text-accent">{plan.review_rounds}</div>
                                   <div className="text-xs text-muted-foreground">جولات</div>
                                 </div>
                               </div>
@@ -550,13 +447,13 @@ const Profile: React.FC = () => {
                               <div className="text-center">
                                 <div className="text-sm text-muted-foreground mb-1">تاريخ الاختبار</div>
                                 <div className="font-bold text-foreground">
-                                  {format(new Date(plan.testDate), 'dd MMMM yyyy', { locale: ar })}
+                                  {format(new Date(plan.test_date), 'dd MMMM yyyy', { locale: ar })}
                                 </div>
                               </div>
 
                               <div className="text-center">
                                 <div className="text-xs text-muted-foreground mb-4">
-                                  تم الإنشاء: {format(new Date(plan.createdAt), 'dd/MM/yyyy', { locale: ar })}
+                                  تم الإنشاء: {format(new Date(plan.created_at), 'dd/MM/yyyy', { locale: ar })}
                                 </div>
                                 <Button
                                   onClick={() => viewPlanDetails(plan)}
@@ -574,6 +471,11 @@ const Profile: React.FC = () => {
                     </div>
                   )}
                 </div>
+              </TabsContent>
+
+              {/* XP Leaderboard Tab */}
+              <TabsContent value="leaderboard" className="mt-0">
+                <XPLeaderboard />
               </TabsContent>
             </Tabs>
           </motion.div>
