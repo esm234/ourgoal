@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useStudyPlans, StudyDay } from '@/hooks/useStudyPlans';
+import { useStudyPlans } from '@/hooks/useStudyPlans';
 import { useCompletedDays } from '@/hooks/useCompletedDays';
 import { useAuth } from '@/contexts/AuthContext';
 import CompletionCertificate from '@/components/CompletionCertificate';
@@ -36,7 +36,7 @@ const PlanDetails: React.FC = () => {
     completedDays,
     loading: completedLoading,
     toggleDayCompletion
-  } = useCompletedDays(planId);
+  } = useCompletedDays();
 
   const [plan, setPlan] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,7 +115,7 @@ const PlanDetails: React.FC = () => {
   };
 
   const handleToggleDay = async (dayNumber: number) => {
-    await toggleDayCompletion(dayNumber, planId);
+    await toggleDayCompletion(dayNumber);
   };
 
   const getProgressPercentage = () => {

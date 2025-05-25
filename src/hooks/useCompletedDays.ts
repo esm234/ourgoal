@@ -3,17 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export const useCompletedDays = (planId?: string) => {
+export const useCompletedDays = () => {
   const { user } = useAuth();
   const [completedDays, setCompletedDays] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load completed days for a specific plan
+  // Load completed days from user's profile
   const loadCompletedDays = async (targetPlanId?: string) => {
-    const currentPlanId = targetPlanId || planId;
-
-    if (!user || !currentPlanId) {
+    if (!user) {
       setCompletedDays(new Set());
       setLoading(false);
       return;
@@ -24,17 +22,18 @@ export const useCompletedDays = (planId?: string) => {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('study_plans')
-        .select('completed_days')
-        .eq('id', currentPlanId)
-        .eq('user_id', user.id)
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
         .single();
 
       if (fetchError) {
         throw fetchError;
       }
 
-      const dayNumbers = data?.completed_days || [];
+      // Get completed days from the study plan stored in profile
+      const studyPlan = data?.study_plan as any;
+      const dayNumbers = studyPlan?.completed_days || [];
       setCompletedDays(new Set(dayNumbers));
     } catch (err) {
       console.error('Error loading completed days:', err);
@@ -46,14 +45,29 @@ export const useCompletedDays = (planId?: string) => {
 
   // Toggle day completion
   const toggleDayCompletion = async (dayNumber: number, targetPlanId?: string) => {
-    const currentPlanId = targetPlanId || planId;
-
-    if (!user || !currentPlanId) {
+    if (!user) {
       toast.error('يجب تسجيل الدخول أولاً');
       return false;
     }
 
     try {
+      // First, get the current study plan from profile
+      const { data: profileData, error: fetchError } = await supabase
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
+        .single();
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      const currentStudyPlan = profileData?.study_plan as any;
+      if (!currentStudyPlan) {
+        toast.error('لم يتم العثور على خطة دراسة');
+        return false;
+      }
+
       const isCompleted = completedDays.has(dayNumber);
       let newCompletedArray: number[];
 
@@ -67,15 +81,20 @@ export const useCompletedDays = (planId?: string) => {
         toast.success('🎉 أحسنت! تم تحديد اليوم كمكتمل');
       }
 
+      // Update the study plan with new completed days
+      const updatedStudyPlan = {
+        ...currentStudyPlan,
+        completed_days: newCompletedArray
+      };
+
       // Update in database
       const { error: updateError } = await supabase
-        .from('study_plans')
+        .from('profiles')
         .update({
-          completed_days: newCompletedArray,
+          study_plan: updatedStudyPlan,
           updated_at: new Date().toISOString()
         })
-        .eq('id', currentPlanId)
-        .eq('user_id', user.id);
+        .eq('id', user.id);
 
       if (updateError) {
         throw updateError;
@@ -95,27 +114,26 @@ export const useCompletedDays = (planId?: string) => {
     }
   };
 
-  // Get total completed days for user (across all plans)
+  // Get total completed days for user (from profile)
   const getTotalCompletedDays = async (): Promise<number> => {
     if (!user) return 0;
 
     try {
       const { data, error: fetchError } = await supabase
-        .from('study_plans')
-        .select('completed_days')
-        .eq('user_id', user.id);
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
+        .single();
 
       if (fetchError) {
         throw fetchError;
       }
 
-      // Sum all completed days from all plans
-      const totalCompleted = data?.reduce((total, plan) => {
-        const completedDays = plan.completed_days || [];
-        return total + completedDays.length;
-      }, 0) || 0;
+      // Get completed days from the study plan stored in profile
+      const studyPlan = data?.study_plan as any;
+      const completedDays = studyPlan?.completed_days || [];
 
-      return totalCompleted;
+      return completedDays.length;
     } catch (err) {
       console.error('Error getting total completed days:', err);
       return 0;
@@ -149,10 +167,10 @@ export const useCompletedDays = (planId?: string) => {
     }
   };
 
-  // Load completed days when planId or user changes
+  // Load completed days when user changes
   useEffect(() => {
     loadCompletedDays();
-  }, [planId, user]);
+  }, [user]);
 
   return {
     completedDays,
