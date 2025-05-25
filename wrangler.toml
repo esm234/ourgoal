@@ -1,19 +1,12 @@
 # Cloudflare Pages configuration
-name = "our-goal-platform"
+name = "ourgoal"
 compatibility_date = "2024-01-15"
+
+# Pages build configuration
+pages_build_output_dir = "dist"
 
 [env.production]
 # Production environment variables will be set in Cloudflare dashboard
 
 [env.preview]
 # Preview environment variables will be set in Cloudflare dashboard
-
-# Build configuration
-[build]
-command = "npm run build:cf"
-cwd = "."
-watch_dir = "src"
-
-# Pages configuration
-[pages]
-# Cloudflare Pages will handle this automatically
