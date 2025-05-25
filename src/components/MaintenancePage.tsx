@@ -195,7 +195,7 @@ const MaintenancePage: React.FC = () => {
             className="mt-8 text-center"
           >
             <p className="text-sm text-muted-foreground">
-              © 2024 Our Goal - منصة التحضير لاختبار القدرات
+              © 2025 Our Goal - منصة التحضير لاختبار القدرات
             </p>
           </motion.div>
         </motion.div>
