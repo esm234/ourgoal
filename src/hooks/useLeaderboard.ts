@@ -181,9 +181,7 @@ export const useLeaderboard = () => {
 
       console.log('XP calculation result:', data);
 
-      // Refresh leaderboard automatically after calculation
-      await loadLeaderboard();
-
+      // Note: Leaderboard refresh is now manual only to save API calls
       return data;
     } catch (err) {
       console.error('Error calculating user XP:', err);
@@ -216,7 +214,7 @@ export const useLeaderboard = () => {
 
       // Calculate XP components
       const planXP = studyPlan ? 500 : 0; // 500 XP for having a plan
-      const studyDaysXP = completedDays.length * 50; // 50 XP per completed day
+      const studyDaysXP = completedDays.length * 100; // 100 XP per completed day
 
       // Get completed tasks
       const { data: tasksData, error: tasksError } = await supabase
@@ -264,9 +262,7 @@ export const useLeaderboard = () => {
         throw upsertError;
       }
 
-      // Refresh leaderboard
-      await loadLeaderboard();
-
+      // Note: Leaderboard refresh is now manual only to save API calls
       return totalXP;
     } catch (err) {
       console.error('Error in manual XP calculation:', err);
@@ -283,9 +279,7 @@ export const useLeaderboard = () => {
         throw error;
       }
 
-      // Refresh leaderboard after calculation
-      await loadLeaderboard();
-
+      // Note: Leaderboard refresh is now manual only to save API calls
       return data;
     } catch (err) {
       console.error('Error refreshing all XP:', err);

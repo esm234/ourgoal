@@ -103,12 +103,10 @@ export const useCompletedDays = () => {
       // Update local state
       setCompletedDays(new Set(newCompletedArray));
 
-      // Update user stats automatically
-      await updateUserStats();
-
-      // Update XP calculation automatically
+      // Update XP calculation automatically (this will also update study_days via trigger)
       await updateUserXP();
 
+      toast.success('تم تحديث حالة اليوم بنجاح! استخدم زر "تحديث" في المتصدرين لرؤية التغييرات.');
       return true;
     } catch (err) {
       console.error('Error toggling day completion:', err);
@@ -143,23 +141,7 @@ export const useCompletedDays = () => {
     }
   };
 
-  // Update user stats
-  const updateUserStats = async () => {
-    if (!user) return;
-
-    try {
-      // Update basic user stats
-      const { error: statsError } = await supabase.rpc('update_user_stats', {
-        user_uuid: user.id
-      });
-
-      if (statsError) {
-        console.error('Error updating user stats:', statsError);
-      }
-    } catch (err) {
-      console.error('Error updating user stats:', err);
-    }
-  };
+  // Note: User stats are now updated automatically via database triggers
 
   // Update user XP
   const updateUserXP = async () => {
@@ -205,27 +187,18 @@ export const useCompletedDays = () => {
 
       // Calculate XP components
       const planXP = studyPlan ? 500 : 0;
-      const studyDaysXP = completedDays.length * 50;
+      const studyDaysXP = completedDays.length * 100;
 
-      // Get completed tasks
-      const { data: tasksData } = await supabase
-        .from('daily_tasks')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('completed', true);
-
-      const tasksXP = (tasksData?.length || 0) * 25;
-
-      // Get current streak
-      const { data: statsData } = await supabase
-        .from('user_stats')
+      // Get current streak from profiles
+      const { data: profileStreakData } = await supabase
+        .from('profiles')
         .select('current_streak')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single();
 
-      const currentStreak = statsData?.current_streak || 0;
+      const currentStreak = profileStreakData?.current_streak || 0;
       const streakXP = currentStreak * 100;
-      const totalXP = planXP + studyDaysXP + tasksXP + streakXP;
+      const totalXP = planXP + studyDaysXP + streakXP;
 
       // Update user XP (using minimal columns)
       await supabase
@@ -236,7 +209,7 @@ export const useCompletedDays = () => {
           updated_at: new Date().toISOString()
         });
 
-      console.log('XP updated manually:', { totalXP, studyDaysXP, tasksXP, streakXP, planXP });
+      console.log('XP updated manually:', { totalXP, studyDaysXP, streakXP, planXP });
     } catch (err) {
       console.error('Error in manual XP calculation:', err);
     }

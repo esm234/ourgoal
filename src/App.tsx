@@ -22,12 +22,20 @@ import AdminExams from "@/pages/AdminExams";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import FAQ from "@/pages/FAQ";
+import WeeklyEvents from "@/pages/WeeklyEvents";
+import AdminWeeklyEvents from "@/pages/AdminWeeklyEvents";
+import AdminCreateEvent from "@/pages/AdminCreateEvent";
+import AdminEditEvent from "@/pages/AdminEditEvent";
+import AdminEventQuestions from "@/pages/AdminEventQuestions";
+import EventTest from "@/pages/EventTest";
+import EventResults from "@/pages/EventResults";
+import AdminCreateQuestion from "@/pages/AdminCreateQuestion";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
 
 // Set this to true to enable maintenance mode
-const MAINTENANCE_MODE =  true;
+const MAINTENANCE_MODE =  false;
 
 const queryClient = new QueryClient();
 
@@ -59,6 +67,17 @@ const App = () => {
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/plan-details/:planId" element={<PlanDetails />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/weekly-events" element={
+                <ProtectedRoute>
+                  <WeeklyEvents />
+                </ProtectedRoute>
+              } />
+              <Route path="/weekly-events/:eventId/test" element={<EventTest />} />
+              <Route path="/weekly-events/:eventId/results" element={
+                <ProtectedRoute>
+                  <EventResults />
+                </ProtectedRoute>
+              } />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -78,6 +97,31 @@ const App = () => {
               <Route path="/admin/files/:fileId/exams" element={
                 <ProtectedRoute adminOnly={true}>
                   <AdminExams />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/weekly-events" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminWeeklyEvents />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/weekly-events/create" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminCreateEvent />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/weekly-events/:eventId/edit" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminEditEvent />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/weekly-events/:eventId/questions" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminEventQuestions />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/weekly-events/:eventId/questions/create" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminCreateQuestion />
                 </ProtectedRoute>
               } />
 

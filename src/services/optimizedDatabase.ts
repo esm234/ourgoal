@@ -240,7 +240,7 @@ export class OptimizedProfileService {
 
 // خدمة محسّنة للليدربورد
 export class OptimizedLeaderboardService {
-  private static CACHE_TTL = 5 * 60 * 1000; // 5 دقائق
+  private static CACHE_TTL = 15 * 60 * 1000; // 15 دقيقة (توفير في استهلاك API)
 
   static async getLeaderboard(category?: string, limit = 20) {
     const cacheKey = `leaderboard_${category || 'all'}_${limit}`;

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, ChevronDown, LogOut } from "lucide-react";
+import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, LogOut, Trophy } from "lucide-react";
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -107,17 +107,27 @@ const Navbar = () => {
               <span>الأسئلة الشائعة</span>
             </Link>
 
+            {isLoggedIn && (
+              <Link
+                to="/weekly-events"
+                className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={handleLinkClick}
+              >
+                <Trophy size={20} className="ml-2" />
+                <span>الفعاليات الأسبوعية</span>
+              </Link>
+            )}
+
             {isLoggedIn ? (
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                      size="icon"
+                      className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
                     >
-                      <User size={20} className="ml-2" />
-                      <span>الملف الشخصي</span>
-                      <ChevronDown size={16} className="mr-2" />
+                      <User size={20} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 bg-background/95 backdrop-blur-xl border-primary/20">
@@ -204,6 +214,17 @@ const Navbar = () => {
               <HelpCircle size={20} className="ml-2" />
               <span>الأسئلة الشائعة</span>
             </Link>
+
+            {isLoggedIn && (
+              <Link
+                to="/weekly-events"
+                className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={handleMobileLinkClick}
+              >
+                <Trophy size={20} className="ml-2" />
+                <span>الفعاليات الأسبوعية</span>
+              </Link>
+            )}
 
             {isLoggedIn && (
               <>

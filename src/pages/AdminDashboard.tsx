@@ -13,7 +13,8 @@ import {
   Home,
   LogOut,
   ShieldAlert,
-  FileText
+  FileText,
+  Trophy
 } from "lucide-react";
 import UserManagement from "@/components/admin/UserManagement";
 import AdminStats from "@/components/admin/AdminStats";
@@ -195,6 +196,10 @@ const AdminDashboard = () => {
             <Button variant="outline" onClick={() => navigate("/admin/files")} className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               <span>إدارة الملفات</span>
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/weekly-events")} className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              <span>الفعاليات الأسبوعية</span>
             </Button>
             <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
               <LogOut className="h-4 w-4" />

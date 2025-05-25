@@ -53,7 +53,7 @@ const Footer = () => {
               {/* Community Stats */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-3 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl border border-primary/20">
-                  <div className="text-2xl font-bold text-primary">+3000</div>
+                  <div className="text-2xl font-bold text-primary">+23.7k</div>
                   <div className="text-xs text-muted-foreground">عضو في المجتمع</div>
                 </div>
                 <div className="text-center p-3 bg-gradient-to-br from-accent/10 to-primary/10 rounded-xl border border-accent/20">

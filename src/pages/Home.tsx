@@ -134,7 +134,7 @@ const Home = () => {
             {/* Community Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">+3000</div>
+                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">+23.7k</div>
                 <div className="text-muted-foreground">عضو في المجتمع</div>
               </div>
               <div className="text-center">
@@ -347,7 +347,7 @@ const Home = () => {
                   {/* Feature Stats */}
                   <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">+3000</div>
+                      <div className="text-2xl font-bold text-primary">+23.7k</div>
                       <div className="text-xs text-muted-foreground">عضو</div>
                     </div>
                     <div className="text-center">
@@ -445,7 +445,7 @@ const Home = () => {
               <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Users className="w-6 h-6 text-primary" />
               </div>
-              <div className="text-3xl font-bold text-primary mb-2">+3000</div>
+              <div className="text-3xl font-bold text-primary mb-2">+23.7k</div>
               <div className="text-muted-foreground">طالب في المجتمع</div>
             </Card>
 

@@ -121,8 +121,7 @@ export const useStudyPlans = () => {
       // Update local state
       setPlans([newPlan]);
 
-      // Update user stats automatically
-      await updateUserStats();
+      // User stats will be updated automatically via database triggers
 
       toast.success('تم حفظ خطة الدراسة بنجاح');
       return newPlan;
@@ -150,8 +149,7 @@ export const useStudyPlans = () => {
       // Update local state
       setPlans([]);
 
-      // Update user stats
-      await updateUserStats();
+      // User stats will be updated automatically via database triggers
 
       toast.success('تم حذف خطة الدراسة');
       return true;
@@ -184,22 +182,7 @@ export const useStudyPlans = () => {
     }
   };
 
-  // Update user stats
-  const updateUserStats = async () => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.rpc('update_user_stats', {
-        user_uuid: user.id
-      });
-
-      if (error) {
-        console.error('Error updating user stats:', error);
-      }
-    } catch (err) {
-      console.error('Error calling update_user_stats:', err);
-    }
-  };
+  // Note: User stats are now updated automatically via database triggers
 
   // Load plans when user changes
   useEffect(() => {
@@ -236,8 +219,7 @@ export const useStudyPlans = () => {
       // Update local state
       setPlans([planWithTimestamp]);
 
-      // Update user stats
-      await updateUserStats();
+      // User stats will be updated automatically via database triggers
 
       toast.success('تم تحديث خطة الدراسة بنجاح');
       return true;

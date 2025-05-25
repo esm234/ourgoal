@@ -35,6 +35,8 @@ import { useDailyTasks } from '@/hooks/useDailyTasks';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import XPLeaderboard from '@/components/XPLeaderboard';
 import SingleStudyPlanManager from '@/components/SingleStudyPlanManager';
+import { useUserEventHistory } from '@/hooks/useWeeklyEvents';
+import { formatTimeRemaining, getCategoryLabel } from '@/types/weeklyEvents';
 
 const Profile: React.FC = () => {
   const { user, isLoggedIn } = useAuth();
@@ -50,6 +52,9 @@ const Profile: React.FC = () => {
     toggleTask,
     deleteTask
   } = useDailyTasks();
+
+  // Event history hook
+  const { history: eventHistory, totalXpEarned, loading: historyLoading } = useUserEventHistory();
 
   const [newTaskText, setNewTaskText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'verbal' | 'quantitative' | 'general'>('general');
@@ -221,18 +226,18 @@ const Profile: React.FC = () => {
 
             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6 text-center">
               <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-6 h-6 text-green-500" />
+                <Trophy className="w-6 h-6 text-green-500" />
               </div>
-              <div className="text-3xl font-bold text-green-500 mb-2">{userStats.completedTasks}</div>
-              <div className="text-muted-foreground font-medium">مهمة مكتملة</div>
+              <div className="text-3xl font-bold text-green-500 mb-2">{eventHistory.length}</div>
+              <div className="text-muted-foreground font-medium">فعاليات مكتملة</div>
             </Card>
 
             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-2xl p-6 text-center">
               <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-6 h-6 text-orange-500" />
+                <Star className="w-6 h-6 text-orange-500" />
               </div>
-              <div className="text-3xl font-bold text-orange-500 mb-2">{userStats.currentStreak}</div>
-              <div className="text-muted-foreground font-medium">أيام متتالية</div>
+              <div className="text-3xl font-bold text-orange-500 mb-2">{totalXpEarned}</div>
+              <div className="text-muted-foreground font-medium">نقاط خبرة</div>
             </Card>
 
             <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-2xl p-6 text-center">
@@ -250,15 +255,15 @@ const Profile: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Tabs defaultValue="tasks" dir="rtl" className="w-full">
+            <Tabs defaultValue="history" dir="rtl" className="w-full">
               <div className="flex justify-center mb-8">
                 <TabsList className="grid grid-cols-3 w-full max-w-2xl bg-transparent p-2">
                   <TabsTrigger
-                    value="tasks"
+                    value="history"
                     className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-4 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    المهام اليومية
+                    <Trophy className="w-4 h-4 mr-2" />
+                    سجل الأنشطة
                   </TabsTrigger>
                   <TabsTrigger
                     value="plans"
@@ -277,118 +282,118 @@ const Profile: React.FC = () => {
                 </TabsList>
               </div>
 
-              {/* Daily Tasks Tab */}
-              <TabsContent value="tasks" className="mt-0">
-                <div className="grid lg:grid-cols-2 gap-8">
-                  {/* Add New Task */}
+              {/* Activity History Tab */}
+              <TabsContent value="history" className="mt-0">
+                <div className="space-y-6">
+                  {/* XP Summary Card */}
                   <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl">
                     <CardHeader>
                       <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                        <Plus className="w-6 h-6 text-primary" />
-                        إضافة مهمة جديدة
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-4">
-                        <Input
-                          value={newTaskText}
-                          onChange={(e) => setNewTaskText(e.target.value)}
-                          placeholder="اكتب مهمتك هنا..."
-                          className="text-lg p-4 bg-background/50 border-primary/20 rounded-xl"
-                          onKeyPress={(e) => e.key === 'Enter' && addDailyTask()}
-                        />
-
-                        <div className="flex gap-2">
-                          {[
-                            { value: 'verbal', label: 'لفظي', icon: BookOpen },
-                            { value: 'quantitative', label: 'كمي', icon: Calculator },
-                            { value: 'general', label: 'عام', icon: Target }
-                          ].map((category) => (
-                            <Button
-                              key={category.value}
-                              variant={selectedCategory === category.value ? "default" : "outline"}
-                              onClick={() => setSelectedCategory(category.value as any)}
-                              className={`flex items-center gap-2 ${
-                                selectedCategory === category.value
-                                  ? 'bg-gradient-to-r from-primary to-accent text-black'
-                                  : 'bg-background/50 border-primary/20'
-                              }`}
-                            >
-                              <category.icon className="w-4 h-4" />
-                              {category.label}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={addDailyTask}
-                        disabled={!newTaskText.trim()}
-                        className="w-full bg-gradient-to-r from-primary to-accent text-black font-bold py-3 rounded-xl"
-                      >
-                        <Plus className="w-5 h-5 mr-2" />
-                        إضافة المهمة
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Today's Tasks */}
-                  <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl">
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                        <Clock className="w-6 h-6 text-primary" />
-                        مهام اليوم ({format(new Date(), 'dd MMMM', { locale: ar })})
+                        <Trophy className="w-6 h-6 text-primary" />
+                        ملخص نقاط الخبرة من الفعاليات
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4 max-h-96 overflow-y-auto">
-                        {getTodayTasks().length === 0 ? (
-                          <div className="text-center py-8 text-muted-foreground">
-                            <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>لا توجد مهام لليوم</p>
-                            <p className="text-sm">أضف مهمة جديدة للبدء</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl">
+                          <div className="text-2xl font-bold text-primary">{eventHistory.length}</div>
+                          <div className="text-sm text-muted-foreground">فعاليات مكتملة</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl">
+                          <div className="text-2xl font-bold text-green-600">{totalXpEarned}</div>
+                          <div className="text-sm text-muted-foreground">نقاط خبرة مكتسبة</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-xl">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {eventHistory.length > 0 ? Math.round(eventHistory.reduce((sum, event) => sum + event.percentage, 0) / eventHistory.length) : 0}%
                           </div>
-                        ) : (
-                          getTodayTasks().map((task) => (
+                          <div className="text-sm text-muted-foreground">متوسط النتائج</div>
+                        </div>
+                        <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-xl">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {eventHistory.filter(event => event.rank_position <= 3).length}
+                          </div>
+                          <div className="text-sm text-muted-foreground">مراكز متقدمة</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Event History List */}
+                  <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <Calendar className="w-6 h-6 text-primary" />
+                        سجل الفعاليات المشاركة
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {historyLoading ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                          <p className="text-muted-foreground">جاري تحميل السجل...</p>
+                        </div>
+                      ) : eventHistory.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg font-medium mb-2">لم تشارك في أي فعالية بعد</p>
+                          <p className="text-sm">شارك في الفعاليات الأسبوعية لتظهر هنا</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4 max-h-96 overflow-y-auto">
+                          {eventHistory.map((event, index) => (
                             <div
-                              key={task.id}
-                              className={`p-4 rounded-xl border transition-all duration-300 ${
-                                task.completed
-                                  ? 'bg-green-500/10 border-green-500/20'
-                                  : 'bg-background/50 border-primary/20 hover:border-primary/40'
-                              }`}
+                              key={`${event.event_id}-${index}`}
+                              className="p-4 rounded-xl border bg-background/50 border-primary/20 hover:border-primary/40 transition-all duration-300"
                             >
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
-                                  <Checkbox
-                                    checked={task.completed}
-                                    onCheckedChange={() => handleToggleTask(task.id)}
-                                    className="w-5 h-5"
-                                  />
-                                  <span className={`${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                                    {task.text}
-                                  </span>
-                                  <Badge className={`${getCategoryColor(task.category)} text-xs`}>
-                                    {getCategoryIcon(task.category)}
-                                    <span className="mr-1">
-                                      {task.category === 'verbal' ? 'لفظي' :
-                                       task.category === 'quantitative' ? 'كمي' : 'عام'}
-                                    </span>
+                                  <div className="p-2 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
+                                    {event.event_category === 'verbal' ? (
+                                      <BookOpen className="w-5 h-5 text-primary" />
+                                    ) : event.event_category === 'quantitative' ? (
+                                      <Calculator className="w-5 h-5 text-primary" />
+                                    ) : (
+                                      <Target className="w-5 h-5 text-primary" />
+                                    )}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-bold text-lg">{event.event_title}</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      {getCategoryLabel(event.event_category)} • {format(new Date(event.completed_at), 'dd MMMM yyyy', { locale: ar })}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-left">
+                                  <Badge className={`${
+                                    event.rank_position === 1 ? 'bg-yellow-500' :
+                                    event.rank_position === 2 ? 'bg-gray-400' :
+                                    event.rank_position === 3 ? 'bg-amber-600' :
+                                    'bg-primary'
+                                  } text-white`}>
+                                    المركز #{event.rank_position}
                                   </Badge>
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteTask(task.id)}
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div className="text-center p-3 bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-lg">
+                                  <div className="font-bold text-green-600">{event.score}/{event.total_questions}</div>
+                                  <div className="text-muted-foreground">النتيجة</div>
+                                </div>
+                                <div className="text-center p-3 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-lg">
+                                  <div className="font-bold text-blue-600">{event.percentage}%</div>
+                                  <div className="text-muted-foreground">النسبة المئوية</div>
+                                </div>
+                                <div className="text-center p-3 bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-lg">
+                                  <div className="font-bold text-purple-600">+{event.xp_earned}</div>
+                                  <div className="text-muted-foreground">نقاط خبرة</div>
+                                </div>
                               </div>
                             </div>
-                          ))
-                        )}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>

@@ -142,11 +142,8 @@ export const useDashboardData = () => {
 
       console.log('Fetching dashboard data for user:', user.id);
 
-      const { data, error: fetchError } = await supabase.rpc('get_user_dashboard_data', {
-        user_uuid: user.id,
-        include_stats: true,
-        include_plans: true,
-        include_leaderboard: true
+      const { data, error: fetchError } = await supabase.rpc('get_user_dashboard_stats', {
+        target_user_id: user.id
       });
 
       if (fetchError) {
@@ -155,15 +152,34 @@ export const useDashboardData = () => {
 
       console.log('Dashboard data received:', data);
 
+      // Transform the data to match expected format
+      const transformedData = {
+        user_stats: data && data.length > 0 ? {
+          username: data[0].username,
+          role: data[0].role,
+          total_xp: data[0].total_xp,
+          study_days: data[0].study_days,
+          current_streak: data[0].current_streak,
+          max_streak: data[0].max_streak,
+          activity_count: data[0].activity_count,
+          isAdmin: data[0].isadmin
+        } : null,
+        user_plans: [], // Will be loaded separately if needed
+        user_xp: data && data.length > 0 ? {
+          total_xp: data[0].total_xp
+        } : null,
+        leaderboard: [] // Will be loaded separately if needed
+      };
+
       // حفظ في التخزين المؤقت
-      setCachedData(CACHE_KEYS.DASHBOARD_DATA, data);
-      
-      setDashboardData(data);
+      setCachedData(CACHE_KEYS.DASHBOARD_DATA, transformedData);
+
+      setDashboardData(transformedData);
       setLastFetch(Date.now());
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('حدث خطأ في تحميل البيانات');
-      
+
       // محاولة استخدام البيانات المخزنة مؤقتاً حتى لو انتهت صلاحيتها
       const cachedData = getCachedData(CACHE_KEYS.DASHBOARD_DATA);
       if (cachedData) {
@@ -191,49 +207,38 @@ export const useDashboardData = () => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('get_user_dashboard_data', {
-        user_uuid: user.id,
-        include_stats: false,
-        include_plans: false,
-        include_leaderboard: true
+      const { data, error } = await supabase.rpc('get_user_dashboard_stats', {
+        target_user_id: user.id
       });
 
       if (error) throw error;
 
-      // حفظ المتصدرين في التخزين المؤقت
-      setCachedData(CACHE_KEYS.LEADERBOARD, data.leaderboard);
-
-      if (dashboardData) {
-        setDashboardData({
-          ...dashboardData,
-          leaderboard: data.leaderboard
-        });
-      }
+      // Since our function doesn't return leaderboard, we'll skip this for now
+      // TODO: Implement separate leaderboard function if needed
+      console.log('Leaderboard fetch skipped - function returns user stats only');
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
     }
   }, [user, dashboardData]);
 
-  // تحديث XP المستخدم
+  // تحديث XP المستخدم (بدون مسح التخزين المؤقت أو التحديث التلقائي)
   const updateUserXP = useCallback(async () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase.rpc('calculate_user_xp', {
-        user_uuid: user.id
+      const { error } = await supabase.rpc('calculate_user_xp_basic', {
+        target_user_id: user.id
       });
 
       if (error) throw error;
 
-      // مسح التخزين المؤقت وإعادة جلب البيانات
-      localStorage.removeItem(CACHE_KEYS.DASHBOARD_DATA);
-      localStorage.removeItem(CACHE_KEYS.LEADERBOARD);
-      
-      await fetchDashboardData(true);
+      // XP updated in database only - cache remains unchanged
+      // User must manually click refresh to see updated leaderboard
+      console.log('XP updated in database - use refresh button to see changes');
     } catch (err) {
       console.error('Error updating user XP:', err);
     }
-  }, [user, fetchDashboardData]);
+  }, [user]);
 
   // مسح التخزين المؤقت
   const clearCache = useCallback(() => {
@@ -247,32 +252,41 @@ export const useDashboardData = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // تحديث تلقائي كل 10 دقائق
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Date.now() - lastFetch > 10 * 60 * 1000) { // 10 دقائق
-        fetchDashboardData();
-      }
-    }, 60 * 1000); // فحص كل دقيقة
+  // تحديث تلقائي معطل لتوفير استهلاك API
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (Date.now() - lastFetch > 10 * 60 * 1000) { // 10 دقائق
+  //       fetchDashboardData();
+  //     }
+  //   }, 60 * 1000); // فحص كل دقيقة
 
-    return () => clearInterval(interval);
-  }, [lastFetch, fetchDashboardData]);
+  //   return () => clearInterval(interval);
+  // }, [lastFetch, fetchDashboardData]);
 
   return {
     dashboardData,
     loading,
     error,
-    refreshData: () => fetchDashboardData(true),
-    refreshLeaderboard: fetchLeaderboardOnly,
+    refreshData: () => {
+      // Clear cache and force refresh
+      localStorage.removeItem(CACHE_KEYS.DASHBOARD_DATA);
+      localStorage.removeItem(CACHE_KEYS.LEADERBOARD);
+      return fetchDashboardData(true);
+    },
+    refreshLeaderboard: () => {
+      // Clear cache and force refresh
+      localStorage.removeItem(CACHE_KEYS.LEADERBOARD);
+      return fetchLeaderboardOnly();
+    },
     updateUserXP,
     clearCache,
-    
+
     // بيانات منفصلة للسهولة
     userStats: dashboardData?.user_stats,
     userPlans: dashboardData?.user_plans || [],
     userXP: dashboardData?.user_xp,
     leaderboard: dashboardData?.leaderboard || [],
-    
+
     // معلومات التخزين المؤقت
     isCached: isCacheValid(CACHE_KEYS.DASHBOARD_DATA, CACHE_DURATIONS.DASHBOARD_DATA),
     lastFetch: new Date(lastFetch)
