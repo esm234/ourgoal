@@ -1,0 +1,8 @@
+# This file helps Cloudflare Pages understand the build configuration
+[build]
+  command = "npm install && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18.17.1"
+  NPM_VERSION = "9.6.7"
