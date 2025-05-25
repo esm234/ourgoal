@@ -27,7 +27,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
 
 // Set this to true to enable maintenance mode
-const MAINTENANCE_MODE =  true;
+const MAINTENANCE_MODE =  false;
 
 const queryClient = new QueryClient();
 
