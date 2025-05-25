@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle } from "lucide-react";
-import LogoutButton from "./LogoutButton";
+import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, ChevronDown, LogOut } from "lucide-react";
 
 const Navbar = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleToggleMenu = () => {
@@ -26,6 +26,16 @@ const Navbar = () => {
     // Close mobile menu and scroll to top
     setIsMobileMenuOpen(false);
     handleLinkClick();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsMobileMenuOpen(false);
+      handleLinkClick();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (
@@ -99,21 +109,43 @@ const Navbar = () => {
 
             {isLoggedIn ? (
               <>
-                <Link
-                  to="/profile"
-                  className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                  onClick={handleLinkClick}
-                >
-                  <User size={20} className="ml-2" />
-                  <span>الملف الشخصي</span>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <User size={20} className="ml-2" />
+                      <span>الملف الشخصي</span>
+                      <ChevronDown size={16} className="mr-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-background/95 backdrop-blur-xl border-primary/20">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/profile"
+                        className="flex items-center cursor-pointer hover:bg-primary/10 transition-colors"
+                        onClick={handleLinkClick}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        <span>عرض الملف الشخصي</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-primary/20" />
+                    <DropdownMenuItem
+                      className="cursor-pointer hover:bg-destructive/10 text-destructive hover:text-destructive transition-colors"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      <span>تسجيل الخروج</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : null}
 
             <div className="flex items-center">
-              {isLoggedIn ? (
-                <LogoutButton className="px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors" />
-              ) : (
+              {!isLoggedIn && (
                 <Link to="/login" onClick={handleLinkClick}>
                   <Button
                     variant="ghost"
@@ -174,23 +206,27 @@ const Navbar = () => {
             </Link>
 
             {isLoggedIn && (
-              <Link
-                to="/profile"
-                className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                onClick={handleMobileLinkClick}
-              >
-                <User size={20} className="ml-2" />
-                <span>الملف الشخصي</span>
-              </Link>
+              <>
+                <Link
+                  to="/profile"
+                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  onClick={handleMobileLinkClick}
+                >
+                  <User size={20} className="ml-2" />
+                  <span>الملف الشخصي</span>
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive hover:text-destructive transition-colors w-full text-right"
+                >
+                  <LogOut size={20} className="ml-2" />
+                  <span>تسجيل الخروج</span>
+                </button>
+              </>
             )}
 
-            {isLoggedIn ? (
-              <LogoutButton
-                fullWidth
-                className="px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                onLogoutSuccess={() => setIsMobileMenuOpen(false)}
-              />
-            ) : (
+            {!isLoggedIn && (
               <Link
                 to="/login"
                 className="w-full"
