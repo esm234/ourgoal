@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Clock, Wrench, Sparkles, RefreshCw, ArrowRight } from 'lucide-react';
+import { Settings, Clock, Wrench, Sparkles, RefreshCw, MessageCircle } from 'lucide-react';
 
 const MaintenancePage: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -170,17 +170,20 @@ const MaintenancePage: React.FC = () => {
               className="text-center"
             >
               <p className="text-muted-foreground mb-4">
-                للاستفسارات أو المساعدة، يمكنك التواصل معنا
+                للاستفسارات أو المساعدة، انضم إلى مجتمعنا على تليجرام
               </p>
 
-              <motion.button
+              <motion.a
+                href="https://t.me/ourgoul1"
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
               >
-                <span>تحديث الصفحة</span>
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
+                <MessageCircle className="w-5 h-5" />
+                <span>انضم للمجتمع</span>
+              </motion.a>
             </motion.div>
           </motion.div>
 
