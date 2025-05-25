@@ -25,7 +25,7 @@ import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 
 // Set this to true to enable maintenance mode
-const MAINTENANCE_MODE =  false;
+const MAINTENANCE_MODE =  true;
 
 const queryClient = new QueryClient();
 
