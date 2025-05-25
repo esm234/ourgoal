@@ -24,9 +24,10 @@ import ResetPassword from "@/pages/ResetPassword";
 import FAQ from "@/pages/FAQ";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
+import SEOPerformance from "@/components/SEOPerformance";
 
 // Set this to true to enable maintenance mode
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE =  true;
 
 const queryClient = new QueryClient();
 
@@ -42,9 +43,13 @@ const App = () => {
           <AuthProvider>
             <Toaster />
             <Sonner />
+            <SEOPerformance
+              preloadImages={['/new-favicon.jpg', '/photo_2025-05-24_16-53-22.jpg']}
+              preloadFonts={['https://fonts.gstatic.com/s/tajawal/v9/Iura6YBj_oCad4k1l_6gLg.woff2']}
+            />
             <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
+              <ScrollToTop />
+              <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />

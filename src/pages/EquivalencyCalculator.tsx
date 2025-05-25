@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -674,8 +675,42 @@ const EquivalencyCalculator = () => {
 
   const filteredColleges = getFilteredColleges();
 
+  const calculatorStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "حاسبة المعادلة التقديرية - اور جول",
+    "description": "احسب معدلك التقديري للمعادلة المصرية بناء على نسبة الثانوية العامة ودرجة اختبار القدرات",
+    "url": "https://ourgoal.pages.dev/equivalency-calculator",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "SAR"
+    },
+    "featureList": [
+      "حساب المعدل التقديري",
+      "عرض الكليات المتاحة",
+      "مقارنة الدرجات",
+      "نتائج فورية",
+      "واجهة سهلة الاستخدام"
+    ],
+    "creator": {
+      "@type": "Organization",
+      "name": "اور جول - Our Goal"
+    }
+  };
+
   return (
     <Layout>
+      <SEO
+        title="حاسبة المعادلة التقديرية | اور جول - Our Goal"
+        description="احسب معدلك التقديري للمعادلة المصرية بناء على نسبة الثانوية العامة ودرجة اختبار القدرات. أداة مجانية وسهلة الاستخدام مع عرض الكليات المتاحة."
+        keywords="حاسبة المعادلة, المعدل التقديري, اختبار القدرات, الثانوية العامة, الكليات المتاحة, حساب المعدل, اور جول, قياس"
+        url="/equivalency-calculator"
+        type="website"
+        structuredData={calculatorStructuredData}
+      />
       <style>{hideSpinnerStyle}</style>
 
 

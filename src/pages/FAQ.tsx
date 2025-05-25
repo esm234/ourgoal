@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/Layout';
+import SEO from '@/components/SEO';
 import {
   Search,
   HelpCircle,
@@ -166,8 +167,32 @@ const FAQ: React.FC = () => {
 
   const popularFAQs = faqData.filter(faq => faq.isPopular);
 
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "name": "الأسئلة الشائعة - اور جول",
+    "description": "إجابات شاملة لأكثر الأسئلة والمشاكل شيوعاً التي تواجه الطلاب في التحضير لاختبار القدرات",
+    "url": "https://ourgoal.pages.dev/faq",
+    "mainEntity": faqData.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <Layout>
+      <SEO
+        title="الأسئلة الشائعة | اور جول - Our Goal"
+        description="إجابات شاملة لأكثر الأسئلة والمشاكل شيوعاً التي تواجه الطلاب في التحضير لاختبار القدرات. نصائح ومساعدة في الدراسة والتحضير."
+        keywords="أسئلة شائعة, اختبار القدرات, مساعدة, نصائح, تحضير, دراسة, مشاكل, حلول, اور جول"
+        url="/faq"
+        type="website"
+        structuredData={faqStructuredData}
+      />
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
         <div className="container mx-auto px-4 py-8">
         {/* Header */}

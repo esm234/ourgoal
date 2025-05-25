@@ -17,13 +17,64 @@ import {
 } from "lucide-react";
 
 const Home = () => {
+  const homeStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "اور جول - Our Goal",
+    "alternateName": "Our Goal",
+    "description": "منصة تعليمية متخصصة في مساعدة الطلاب على التحضير لاختبار القدرات العامة",
+    "url": "https://ourgoal.pages.dev",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://ourgoal.pages.dev/files?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "mainEntity": {
+      "@type": "EducationalOrganization",
+      "name": "اور جول - Our Goal",
+      "description": "مجتمع تعليمي متعاون لمساعدة الطلاب في التحضير لاختبار القدرات",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "خدمات التدريب على اختبار القدرات",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Course",
+              "name": "حاسبة المعادلة",
+              "description": "حاسبة لتحويل درجات اختبار القدرات إلى معدل تقديري"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Course",
+              "name": "خطة دراسية مخصصة",
+              "description": "مولد خطط دراسية ذكية لاختبار القدرات"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Course",
+              "name": "ملفات تدريبية",
+              "description": "مواد تعليمية شاملة للقسمين الكمي واللفظي"
+            }
+          }
+        ]
+      }
+    }
+  };
+
   return (
     <Layout>
       <SEO
-        title="Our Goal - منصة التحضير لاختبار القدرات"
-        description="منصة شاملة للتحضير لاختبار القدرات العامة. مولد خطط دراسة مخصصة، اختبارات تجريبية، ملفات تدريبية، ونصائح من الخبراء لضمان نجاحك في الاختبار."
-        keywords="اختبار القدرات, قياس, التحضير للقدرات, اختبارات تجريبية, خطة دراسة, الجزء اللفظي, الجزء الكمي, نصائح القدرات, مراجعة القدرات, تدريب القدرات, حاسبة المعادلة, مجتمع طلاب"
+        title="اور جول - Our Goal | منصة تعليمية لاختبار القدرات"
+        description="منصة تعليمية متخصصة في مساعدة الطلاب على التحضير لاختبار القدرات العامة. نوفر خطط دراسية مخصصة، ملفات تدريبية، وحاسبة المعادلة لضمان نجاحك."
+        keywords="اختبار القدرات, قدرات, تدريب, دراسة, منصة تعليمية, اور جول, Our Goal, قياس, اختبارات, تحضير, خطة دراسية, حاسبة المعادلة, ملفات تدريبية, مجتمع تعليمي"
         url="/"
+        type="website"
+        structuredData={homeStructuredData}
       />
       {/* Modern Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
