@@ -27,11 +27,13 @@ export const useLeaderboard = () => {
       setLoading(true);
       setError(null);
 
-      // Get top 5 users
+      // Get top 5 users with proper sorting
       const { data: topUsers, error: leaderboardError } = await supabase
         .from('user_xp')
         .select('*')
+        .gt('total_xp', 0) // Only users with XP > 0
         .order('total_xp', { ascending: false })
+        .order('updated_at', { ascending: true }) // Secondary sort by oldest update (tie breaker)
         .limit(5);
 
       if (leaderboardError) {
@@ -135,17 +137,20 @@ export const useLeaderboard = () => {
       }
 
       if (userData) {
-        // Calculate user's rank
+        // Calculate user's rank more accurately
         const { data: rankData, error: rankError } = await supabase
           .from('user_xp')
-          .select('user_id')
-          .gt('total_xp', userData.total_xp);
+          .select('user_id, total_xp')
+          .gt('total_xp', userData.total_xp)
+          .order('total_xp', { ascending: false });
 
         if (rankError) {
           throw rankError;
         }
 
+        // Count users with higher XP
         const rank = (rankData?.length || 0) + 1;
+
         setUserRank({ ...userData, rank });
       }
     } catch (err) {
@@ -163,23 +168,108 @@ export const useLeaderboard = () => {
     try {
       console.log('Calculating XP for user:', user.id);
 
-      const { data, error } = await supabase.rpc('calculate_user_xp', {
-        user_uuid: user.id
+      // Try the basic database function first
+      const { data, error } = await supabase.rpc('calculate_user_xp_basic', {
+        target_user_id: user.id
       });
 
       if (error) {
-        console.error('Supabase RPC error:', error);
-        throw error;
+        console.error('Database function error:', error);
+        // Fallback to manual calculation
+        return await calculateXPManually();
       }
 
       console.log('XP calculation result:', data);
 
-      // Refresh leaderboard after calculation
+      // Refresh leaderboard automatically after calculation
       await loadLeaderboard();
 
       return data;
     } catch (err) {
       console.error('Error calculating user XP:', err);
+      // Fallback to manual calculation
+      return await calculateXPManually();
+    }
+  };
+
+  // Manual XP calculation as fallback
+  const calculateXPManually = async () => {
+    if (!user) return null;
+
+    try {
+      console.log('Calculating XP manually for user:', user.id);
+
+      // Get user profile and username
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('username, study_plan')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const studyPlan = profileData?.study_plan as any;
+      const completedDays = studyPlan?.completed_days || [];
+      const username = profileData?.username || 'مستخدم';
+
+      // Calculate XP components
+      const planXP = studyPlan ? 500 : 0; // 500 XP for having a plan
+      const studyDaysXP = completedDays.length * 50; // 50 XP per completed day
+
+      // Get completed tasks
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('daily_tasks')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('completed', true);
+
+      if (tasksError) {
+        throw tasksError;
+      }
+
+      const tasksXP = (tasksData?.length || 0) * 25; // 25 XP per task
+
+      // Get current streak from user_stats
+      const { data: statsData, error: statsError } = await supabase
+        .from('user_stats')
+        .select('current_streak')
+        .eq('user_id', user.id)
+        .single();
+
+      const currentStreak = statsData?.current_streak || 0;
+      const streakXP = currentStreak * 100; // 100 XP per streak day
+
+      const totalXP = planXP + studyDaysXP + tasksXP + streakXP;
+
+      console.log('Manual XP calculation:', {
+        planXP,
+        studyDaysXP,
+        tasksXP,
+        streakXP,
+        totalXP
+      });
+
+      // Insert or update user XP (using minimal columns)
+      const { error: upsertError } = await supabase
+        .from('user_xp')
+        .upsert({
+          user_id: user.id,
+          total_xp: totalXP,
+          updated_at: new Date().toISOString()
+        });
+
+      if (upsertError) {
+        throw upsertError;
+      }
+
+      // Refresh leaderboard
+      await loadLeaderboard();
+
+      return totalXP;
+    } catch (err) {
+      console.error('Error in manual XP calculation:', err);
       return null;
     }
   };

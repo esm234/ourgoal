@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, FileText, Target, User } from "lucide-react";
+import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
 const Navbar = () => {
@@ -88,6 +88,14 @@ const Navbar = () => {
               <Target size={20} className="ml-2" />
               <span>خطة الدراسة</span>
             </Link>
+            <Link
+              to="/faq"
+              className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+              onClick={handleLinkClick}
+            >
+              <HelpCircle size={20} className="ml-2" />
+              <span>الأسئلة الشائعة</span>
+            </Link>
 
             {isLoggedIn ? (
               <>
@@ -155,6 +163,14 @@ const Navbar = () => {
             >
               <Target size={20} className="ml-2" />
               <span>خطة الدراسة</span>
+            </Link>
+            <Link
+              to="/faq"
+              className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+              onClick={handleMobileLinkClick}
+            >
+              <HelpCircle size={20} className="ml-2" />
+              <span>الأسئلة الشائعة</span>
             </Link>
 
             {isLoggedIn && (

@@ -86,18 +86,94 @@ export const useUserStats = () => {
     if (!user) return;
 
     try {
+      console.log('Updating user stats for:', user.id);
+
       const { error } = await supabase.rpc('update_user_stats', {
         user_uuid: user.id
       });
 
       if (error) {
+        console.error('Database function error:', error);
         throw error;
       }
+
+      console.log('User stats updated successfully');
 
       // Reload stats after update
       await loadStats();
     } catch (err) {
       console.error('Error updating user stats:', err);
+      // Try to calculate stats manually if database function fails
+      await calculateStatsManually();
+    }
+  };
+
+  // Manual stats calculation as fallback
+  const calculateStatsManually = async () => {
+    if (!user) return;
+
+    try {
+      console.log('Calculating stats manually for:', user.id);
+
+      // Get study plan from profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const studyPlan = profileData?.study_plan as any;
+      const completedDays = studyPlan?.completed_days || [];
+      const totalPlansCreated = studyPlan ? 1 : 0;
+      const totalStudyDays = completedDays.length;
+
+      // Get completed tasks count
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('daily_tasks')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('completed', true);
+
+      if (tasksError) {
+        throw tasksError;
+      }
+
+      const completedTasks = tasksData?.length || 0;
+
+      // Calculate streak (simplified)
+      const currentStreak = await calculateStreak();
+
+      // Update or insert stats manually
+      const { error: upsertError } = await supabase
+        .from('user_stats')
+        .upsert({
+          user_id: user.id,
+          total_plans_created: totalPlansCreated,
+          total_study_days: totalStudyDays,
+          completed_tasks: completedTasks,
+          current_streak: currentStreak,
+          updated_at: new Date().toISOString()
+        });
+
+      if (upsertError) {
+        throw upsertError;
+      }
+
+      console.log('Manual stats calculation completed:', {
+        totalPlansCreated,
+        totalStudyDays,
+        completedTasks,
+        currentStreak
+      });
+
+      // Reload stats
+      await loadStats();
+    } catch (err) {
+      console.error('Error in manual stats calculation:', err);
     }
   };
 
@@ -129,7 +205,7 @@ export const useUserStats = () => {
       for (const dateStr of uniqueDates) {
         const taskDate = new Date(dateStr);
         taskDate.setHours(0, 0, 0, 0);
-        
+
         const diffDays = Math.floor((currentDate.getTime() - taskDate.getTime()) / (1000 * 60 * 60 * 24));
 
         if (diffDays === streak) {
@@ -153,10 +229,10 @@ export const useUserStats = () => {
 
     try {
       const newStreak = await calculateStreak();
-      
+
       const { error } = await supabase
         .from('user_stats')
-        .update({ 
+        .update({
           current_streak: newStreak,
           updated_at: new Date().toISOString()
         })

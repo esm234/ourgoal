@@ -20,6 +20,7 @@ import AdminFiles from "@/pages/AdminFiles";
 import AdminExams from "@/pages/AdminExams";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import FAQ from "@/pages/FAQ";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -50,6 +51,7 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/plan-details/:planId" element={<PlanDetails />} />
+              <Route path="/faq" element={<FAQ />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />

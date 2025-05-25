@@ -1,29 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, Calendar, Clock, RotateCcw } from 'lucide-react';
+import { Trash2, Calendar, Clock, RotateCcw, Edit, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { StudyPlan } from '@/hooks/useStudyPlans';
 import { toast } from 'sonner';
+import EditStudyPlanDialog from './EditStudyPlanDialog';
 
 interface SingleStudyPlanManagerProps {
   studyPlan: StudyPlan | null;
   onDelete: () => Promise<boolean>;
+  onUpdate: (updatedPlan: StudyPlan) => Promise<boolean>;
   onViewDetails: (plan: StudyPlan) => void;
 }
 
 const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
   studyPlan,
   onDelete,
+  onUpdate,
   onViewDetails
 }) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const handleDelete = async () => {
     const success = await onDelete();
     if (success) {
       toast.success('تم حذف خطة الدراسة بنجاح');
     }
+  };
+
+  const handleUpdate = async (updatedPlan: StudyPlan) => {
+    const success = await onUpdate(updatedPlan);
+    return success;
   };
 
   if (!studyPlan) {
@@ -66,7 +76,17 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
               variant="outline"
               size="sm"
             >
+              <Eye className="h-4 w-4 ml-2" />
               عرض التفاصيل
+            </Button>
+            <Button
+              onClick={() => setIsEditDialogOpen(true)}
+              variant="outline"
+              size="sm"
+              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+            >
+              <Edit className="h-4 w-4 ml-2" />
+              تعديل
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -79,7 +99,7 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
                 <AlertDialogHeader>
                   <AlertDialogTitle>تأكيد حذف خطة الدراسة</AlertDialogTitle>
                   <AlertDialogDescription>
-                    هل أنت متأكد من حذف خطة الدراسة "{studyPlan.name}"؟ 
+                    هل أنت متأكد من حذف خطة الدراسة "{studyPlan.name}"؟
                     هذا الإجراء لا يمكن التراجع عنه.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -100,11 +120,21 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
         </div>
         <div className="mt-4 p-4 bg-muted rounded-lg">
           <p className="text-sm">
-            💡 <strong>ملاحظة:</strong> يمكنك حفظ خطة دراسة واحدة فقط في ملفك الشخصي. 
+            💡 <strong>ملاحظة:</strong> يمكنك حفظ خطة دراسة واحدة فقط في ملفك الشخصي.
             لحفظ خطة جديدة، يجب حذف الخطة الحالية أولاً.
           </p>
         </div>
       </CardContent>
+
+      {/* Edit Dialog */}
+      {studyPlan && (
+        <EditStudyPlanDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          studyPlan={studyPlan}
+          onSave={handleUpdate}
+        />
+      )}
     </Card>
   );
 };

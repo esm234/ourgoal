@@ -25,6 +25,7 @@ export interface StudyPlan {
   study_days: StudyDay[];
   final_review_day: StudyDay;
   created_at: string;
+  updated_at?: string;
 }
 
 export const useStudyPlans = () => {
@@ -120,7 +121,7 @@ export const useStudyPlans = () => {
       // Update local state
       setPlans([newPlan]);
 
-      // Update user stats
+      // Update user stats automatically
       await updateUserStats();
 
       toast.success('تم حفظ خطة الدراسة بنجاح');
@@ -205,11 +206,54 @@ export const useStudyPlans = () => {
     loadPlans();
   }, [user]);
 
+  // Update existing study plan
+  const updatePlan = async (updatedPlan: StudyPlan) => {
+    if (!user) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return false;
+    }
+
+    try {
+      // Add updated timestamp
+      const planWithTimestamp = {
+        ...updatedPlan,
+        updated_at: new Date().toISOString()
+      };
+
+      // Update plan in profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          study_plan: planWithTimestamp,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Update local state
+      setPlans([planWithTimestamp]);
+
+      // Update user stats
+      await updateUserStats();
+
+      toast.success('تم تحديث خطة الدراسة بنجاح');
+      return true;
+    } catch (err) {
+      console.error('Error updating study plan:', err);
+      toast.error('حدث خطأ في تحديث خطة الدراسة');
+      return false;
+    }
+  };
+
   return {
     plans,
     loading,
     error,
     savePlan,
+    updatePlan,
     deletePlan,
     getPlan,
     refreshPlans: loadPlans

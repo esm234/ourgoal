@@ -41,7 +41,7 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
 
   // Use custom hooks
-  const { plans: savedPlans, loading: plansLoading, deletePlan } = useStudyPlans();
+  const { plans: savedPlans, loading: plansLoading, deletePlan, updatePlan } = useStudyPlans();
   const { stats, loading: statsLoading, getFormattedStats } = useUserStats();
   const {
     tasks: dailyTasks,
@@ -133,6 +133,10 @@ const Profile: React.FC = () => {
 
   const handleDeletePlan = async () => {
     await deletePlan();
+  };
+
+  const handleUpdatePlan = async (updatedPlan: any) => {
+    return await updatePlan(updatedPlan);
   };
 
   const getTodayTasks = () => {
@@ -396,6 +400,7 @@ const Profile: React.FC = () => {
                   <SingleStudyPlanManager
                     studyPlan={savedPlans.length > 0 ? savedPlans[0] : null}
                     onDelete={handleDeletePlan}
+                    onUpdate={handleUpdatePlan}
                     onViewDetails={viewPlanDetails}
                   />
 
