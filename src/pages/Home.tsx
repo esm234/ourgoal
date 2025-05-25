@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,12 @@ import {
 const Home = () => {
   return (
     <Layout>
+      <SEO
+        title="Our Goal - منصة التحضير لاختبار القدرات"
+        description="منصة شاملة للتحضير لاختبار القدرات العامة. مولد خطط دراسة مخصصة، اختبارات تجريبية، ملفات تدريبية، ونصائح من الخبراء لضمان نجاحك في الاختبار."
+        keywords="اختبار القدرات, قياس, التحضير للقدرات, اختبارات تجريبية, خطة دراسة, الجزء اللفظي, الجزء الكمي, نصائح القدرات, مراجعة القدرات, تدريب القدرات, حاسبة المعادلة, مجتمع طلاب"
+        url="/"
+      />
       {/* Modern Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
         {/* Animated Background Elements */}

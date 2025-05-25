@@ -1,14 +1,22 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Important pages
+Allow: /equivalency-calculator
+Allow: /study-plan
+Allow: /files
+Allow: /faq
+
+# Disallow admin and private pages
+Disallow: /admin
+Disallow: /profile
+Disallow: /welcome
+Disallow: /plan-details
+Disallow: /reset-password
+Disallow: /forgot-password
+
+# Sitemap location
+Sitemap: https://ourgoal.pages.dev/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
