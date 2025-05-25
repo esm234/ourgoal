@@ -18,8 +18,6 @@ export interface StudyDay {
 }
 
 export interface StudyPlan {
-  id: string;
-  user_id: string;
   name: string;
   total_days: number;
   review_rounds: number;
@@ -27,7 +25,6 @@ export interface StudyPlan {
   study_days: StudyDay[];
   final_review_day: StudyDay;
   created_at: string;
-  updated_at: string;
 }
 
 export const useStudyPlans = () => {
@@ -36,7 +33,7 @@ export const useStudyPlans = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user's study plans
+  // Load user's study plan from profile
   const loadPlans = async () => {
     if (!user) {
       setPlans([]);
@@ -49,59 +46,85 @@ export const useStudyPlans = () => {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('study_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
+        .single();
 
       if (fetchError) {
         throw fetchError;
       }
 
-      setPlans(data || []);
+      // If user has a study plan, set it as the only plan
+      if (data?.study_plan) {
+        setPlans([data.study_plan as StudyPlan]);
+      } else {
+        setPlans([]);
+      }
     } catch (err) {
-      console.error('Error loading study plans:', err);
-      setError('حدث خطأ في تحميل خطط الدراسة');
-      toast.error('حدث خطأ في تحميل خطط الدراسة');
+      console.error('Error loading study plan:', err);
+      setError('حدث خطأ في تحميل خطة الدراسة');
+      toast.error('حدث خطأ في تحميل خطة الدراسة');
     } finally {
       setLoading(false);
     }
   };
 
   // Save a new study plan
-  const savePlan = async (planData: Omit<StudyPlan, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  const savePlan = async (planData: Omit<StudyPlan, 'created_at'>) => {
     if (!user) {
       toast.error('يجب تسجيل الدخول أولاً');
       return null;
     }
 
     try {
-      const { data, error: insertError } = await supabase
-        .from('study_plans')
-        .insert({
-          user_id: user.id,
-          name: planData.name,
-          total_days: planData.total_days,
-          review_rounds: planData.review_rounds,
-          test_date: planData.test_date,
-          study_days: planData.study_days,
-          final_review_day: planData.final_review_day
-        })
-        .select()
+      // Check if user already has a study plan
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
         .single();
 
-      if (insertError) {
-        throw insertError;
+      if (profileError) {
+        throw profileError;
+      }
+
+      // If user already has a plan, show confirmation dialog
+      if (profileData?.study_plan) {
+        const existingPlan = profileData.study_plan as StudyPlan;
+        toast.error('لديك خطة دراسة محفوظة بالفعل!', {
+          description: `الخطة الحالية: ${existingPlan.name}. يجب حذف الخطة الحالية أولاً لحفظ خطة جديدة.`,
+          duration: 6000,
+        });
+        return null;
+      }
+
+      // Create new plan with timestamp
+      const newPlan: StudyPlan = {
+        ...planData,
+        created_at: new Date().toISOString()
+      };
+
+      // Save plan to profile
+      const { data, error: updateError } = await supabase
+        .from('profiles')
+        .update({ study_plan: newPlan })
+        .eq('id', user.id)
+        .select('study_plan')
+        .single();
+
+      if (updateError) {
+        throw updateError;
       }
 
       // Update local state
-      setPlans(prev => [data, ...prev]);
-      
+      setPlans([newPlan]);
+
       // Update user stats
       await updateUserStats();
-      
+
       toast.success('تم حفظ خطة الدراسة بنجاح');
-      return data;
+      return newPlan;
     } catch (err) {
       console.error('Error saving study plan:', err);
       toast.error('حدث خطأ في حفظ خطة الدراسة');
@@ -109,27 +132,26 @@ export const useStudyPlans = () => {
     }
   };
 
-  // Delete a study plan
-  const deletePlan = async (planId: string) => {
+  // Delete the user's study plan
+  const deletePlan = async () => {
     if (!user) return false;
 
     try {
-      const { error: deleteError } = await supabase
-        .from('study_plans')
-        .delete()
-        .eq('id', planId)
-        .eq('user_id', user.id);
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ study_plan: null })
+        .eq('id', user.id);
 
-      if (deleteError) {
-        throw deleteError;
+      if (updateError) {
+        throw updateError;
       }
 
       // Update local state
-      setPlans(prev => prev.filter(plan => plan.id !== planId));
-      
+      setPlans([]);
+
       // Update user stats
       await updateUserStats();
-      
+
       toast.success('تم حذف خطة الدراسة');
       return true;
     } catch (err) {
@@ -139,23 +161,22 @@ export const useStudyPlans = () => {
     }
   };
 
-  // Get a specific plan
-  const getPlan = async (planId: string): Promise<StudyPlan | null> => {
+  // Get the user's study plan
+  const getPlan = async (): Promise<StudyPlan | null> => {
     if (!user) return null;
 
     try {
       const { data, error: fetchError } = await supabase
-        .from('study_plans')
-        .select('*')
-        .eq('id', planId)
-        .eq('user_id', user.id)
+        .from('profiles')
+        .select('study_plan')
+        .eq('id', user.id)
         .single();
 
       if (fetchError) {
         throw fetchError;
       }
 
-      return data;
+      return data?.study_plan as StudyPlan || null;
     } catch (err) {
       console.error('Error fetching study plan:', err);
       return null;

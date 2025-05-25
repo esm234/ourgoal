@@ -19,37 +19,13 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useStudyPlans } from '@/hooks/useStudyPlans';
+import { useStudyPlans, StudyDay } from '@/hooks/useStudyPlans';
 import { useCompletedDays } from '@/hooks/useCompletedDays';
 import { useAuth } from '@/contexts/AuthContext';
 import CompletionCertificate from '@/components/CompletionCertificate';
 import { supabase } from '@/integrations/supabase/client';
 
 
-interface StudyDay {
-  dayNumber: number;
-  date: Date;
-  verbalTests: number;
-  quantitativeTests: number;
-  totalTests: number;
-  verbalRange: { start: number; end: number };
-  quantitativeRange: { start: number; end: number };
-  isReviewDay: boolean;
-  isFinalReview: boolean;
-  roundNumber?: number;
-  completed?: boolean;
-}
-
-interface SavedStudyPlan {
-  id: string;
-  name: string;
-  totalDays: number;
-  reviewRounds: number;
-  testDate: string;
-  createdAt: string;
-  studyDays: StudyDay[];
-  finalReviewDay: StudyDay;
-}
 
 const PlanDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -120,8 +96,8 @@ const PlanDetails: React.FC = () => {
     try {
       setIsLoading(true);
 
-      // Get plan from Supabase
-      const planData = await getPlan(planId);
+      // Get plan from user's profile
+      const planData = await getPlan();
 
       if (planData) {
         setPlan(planData);
@@ -311,7 +287,7 @@ const PlanDetails: React.FC = () => {
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                      {roundDays.map((day, dayIndex) => {
+                      {roundDays.map((day: any, dayIndex: number) => {
                         const isCompleted = completedDays.has(day.dayNumber);
 
                         return (

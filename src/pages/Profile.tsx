@@ -34,6 +34,7 @@ import { useUserStats } from '@/hooks/useUserStats';
 import { useDailyTasks } from '@/hooks/useDailyTasks';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import XPLeaderboard from '@/components/XPLeaderboard';
+import SingleStudyPlanManager from '@/components/SingleStudyPlanManager';
 
 const Profile: React.FC = () => {
   const { user, isLoggedIn } = useAuth();
@@ -130,8 +131,8 @@ const Profile: React.FC = () => {
     await deleteTask(taskId);
   };
 
-  const handleDeletePlan = async (planId: string) => {
-    await deletePlan(planId);
+  const handleDeletePlan = async () => {
+    await deletePlan();
   };
 
   const getTodayTasks = () => {
@@ -155,7 +156,9 @@ const Profile: React.FC = () => {
   };
 
   const viewPlanDetails = (plan: any) => {
-    navigate(`/plan-details/${plan.id}`);
+    // Since we're storing plan in profile, we don't have an ID
+    // We'll navigate to a special route for the user's plan
+    navigate('/plan-details/current');
   };
 
   if (isLoading || plansLoading || statsLoading || tasksLoading) {
@@ -390,86 +393,22 @@ const Profile: React.FC = () => {
               {/* Study Plans Tab */}
               <TabsContent value="plans" className="mt-0">
                 <div className="space-y-6">
-                  {savedPlans.length === 0 ? (
-                    <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl">
-                      <CardContent className="text-center py-16">
-                        <Calendar className="w-16 h-16 mx-auto mb-6 text-muted-foreground opacity-50" />
-                        <h3 className="text-2xl font-bold text-foreground mb-4">لا توجد خطط دراسية محفوظة</h3>
-                        <p className="text-muted-foreground mb-6">
-                          ابدأ بإنشاء خطة دراسية جديدة من مولد خطة الدراسة
-                        </p>
-                        <Button
-                          onClick={() => window.location.href = '/study-plan'}
-                          className="bg-gradient-to-r from-primary to-accent text-black font-bold px-8 py-3 rounded-xl"
-                        >
-                          <Target className="w-5 h-5 mr-2" />
-                          إنشاء خطة جديدة
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {savedPlans.map((plan) => (
-                        <motion.div
-                          key={plan.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300">
-                            <CardHeader>
-                              <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg font-bold text-foreground">
-                                  {plan.name}
-                                </CardTitle>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeletePlan(plan.id)}
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4 text-center">
-                                <div className="p-3 bg-background/50 rounded-xl">
-                                  <div className="text-xl font-bold text-primary">{plan.total_days}</div>
-                                  <div className="text-xs text-muted-foreground">أيام</div>
-                                </div>
-                                <div className="p-3 bg-background/50 rounded-xl">
-                                  <div className="text-xl font-bold text-accent">{plan.review_rounds}</div>
-                                  <div className="text-xs text-muted-foreground">جولات</div>
-                                </div>
-                              </div>
+                  <SingleStudyPlanManager
+                    studyPlan={savedPlans.length > 0 ? savedPlans[0] : null}
+                    onDelete={handleDeletePlan}
+                    onViewDetails={viewPlanDetails}
+                  />
 
-                              <div className="text-center">
-                                <div className="text-sm text-muted-foreground mb-1">تاريخ الاختبار</div>
-                                <div className="font-bold text-foreground">
-                                  {format(new Date(plan.test_date), 'dd MMMM yyyy', { locale: ar })}
-                                </div>
-                              </div>
-
-                              <div className="text-center">
-                                <div className="text-xs text-muted-foreground mb-4">
-                                  تم الإنشاء: {format(new Date(plan.created_at), 'dd/MM/yyyy', { locale: ar })}
-                                </div>
-                                <Button
-                                  onClick={() => viewPlanDetails(plan)}
-                                  className="w-full bg-gradient-to-r from-primary to-accent text-black font-bold py-2 rounded-xl hover:scale-105 transition-transform duration-300"
-                                >
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  عرض التفاصيل
-                                  <ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
+                  {/* Quick Action Button */}
+                  <div className="text-center">
+                    <Button
+                      onClick={() => navigate('/study-plan')}
+                      className="bg-gradient-to-r from-primary to-accent text-black font-bold px-8 py-3 rounded-xl"
+                    >
+                      <Target className="w-5 h-5 mr-2" />
+                      {savedPlans.length > 0 ? 'إنشاء خطة جديدة' : 'إنشاء أول خطة'}
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
 

@@ -92,6 +92,7 @@ export type Database = {
           updated_at: string
           username: string | null
           role: string | null
+          study_plan: Json | null
         }
         Insert: {
           created_at?: string
@@ -99,6 +100,7 @@ export type Database = {
           updated_at?: string
           username?: string | null
           role?: string | null
+          study_plan?: Json | null
         }
         Update: {
           created_at?: string
@@ -106,6 +108,7 @@ export type Database = {
           updated_at?: string
           username?: string | null
           role?: string | null
+          study_plan?: Json | null
         }
         Relationships: []
       }
