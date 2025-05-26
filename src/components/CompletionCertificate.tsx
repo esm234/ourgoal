@@ -178,10 +178,11 @@ const CompletionCertificate: React.FC<CompletionCertificateProps> = ({
                         <Sparkles className="w-5 h-5 text-purple-500" />
                         <span className="font-semibold text-gray-700">تاريخ الإتمام:</span>
                         <span className="text-gray-800">
-                          {completionDate.toLocaleDateString('ar-SA', {
+                          {completionDate.toLocaleDateString('ar-EG', {
                             year: 'numeric',
                             month: 'long',
-                            day: 'numeric'
+                            day: 'numeric',
+                            calendar: 'gregory'
                           })}
                         </span>
                       </div>

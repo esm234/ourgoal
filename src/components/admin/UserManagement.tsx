@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+
 } from "@/components/ui/alert-dialog";
 import {
   Select,
@@ -32,9 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash, Search, UserCog, Shield, User as UserIcon, ShieldAlert, RefreshCw } from "lucide-react";
+import { Pencil, Trash, Search, Shield, User as UserIcon, ShieldAlert, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFastUsers } from "@/hooks/useFastFiles";
+import { useFastUsers } from "@/hooks/useFastUsers";
 import { CustomPagination } from "@/components/ui/custom-pagination";
 
 interface User {
@@ -279,7 +279,12 @@ const UserManagement = () => {
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{getRoleBadge(user.role)}</TableCell>
-                        <TableCell>{new Date(user.created_at).toLocaleDateString('ar-EG')}</TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString('ar-EG', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          calendar: 'gregory'
+                        })}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button

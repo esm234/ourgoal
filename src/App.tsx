@@ -10,6 +10,7 @@ import Home from "@/pages/Home";
 import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
 import Files from "@/pages/Files";
 import FileDetails from "@/pages/FileDetails";
+import LocalFileDetails from "@/pages/LocalFileDetails";
 import StudyPlan from "@/pages/StudyPlan";
 import Profile from "@/pages/Profile";
 import Welcome from "@/pages/Welcome";
@@ -17,8 +18,6 @@ import PlanDetails from "@/pages/PlanDetails";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import AdminDashboard from "@/pages/AdminDashboard";
-import AdminFiles from "@/pages/AdminFiles";
-import AdminExams from "@/pages/AdminExams";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import FAQ from "@/pages/FAQ";
@@ -63,6 +62,7 @@ const App = () => {
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
+              <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
               <Route path="/study-plan" element={
                 <ProtectedRoute>
                   <StudyPlan />
@@ -114,17 +114,9 @@ const App = () => {
                 </ProtectedRoute>
               } />
 
-              <Route path="/admin/files" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminFiles />
-                </ProtectedRoute>
-              } />
 
-              <Route path="/admin/files/:fileId/exams" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminExams />
-                </ProtectedRoute>
-              } />
+
+
               <Route path="/admin/weekly-events" element={
                 <ProtectedRoute adminOnly={true}>
                   <AdminWeeklyEvents />

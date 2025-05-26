@@ -1,10 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Search,
@@ -15,97 +10,35 @@ import {
   Calculator,
   FileText,
   Play,
-  Target,
-  Download,
-  Calendar,
-  HelpCircle
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+  Target
+} from "lucide-react";
+import Layout from "@/components/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { useLocalFileDetails } from "@/hooks/useLocalFiles";
+import { incrementDownloads, convertToDirectDownload } from "@/data/localFiles";
 
-interface FileData {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  file_url: string;
-  file_size: string;
-  downloads: number;
-  created_at: string;
-}
-
-interface ExamData {
-  id: number;
-  file_id: number;
-  title: string;
-  google_form_url: string;
-  duration: number;
-  questions: number;
-  attempts: number;
-  created_at: string;
-}
-
-const FileDetails = () => {
-  const { id } = useParams();
+const LocalFileDetails = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [file, setFile] = useState<FileData | null>(null);
-  const [exams, setExams] = useState<ExamData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const fileId = parseInt(id || "0");
 
-  useEffect(() => {
-    if (id) {
-      fetchFileAndExams();
-    }
-  }, [id]);
-
-  const fetchFileAndExams = async () => {
-    try {
-      // Fetch file details
-      const { data: fileData, error: fileError } = await supabase
-        .from('files')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (fileError) throw fileError;
-      setFile(fileData);
-
-      // Fetch exams for this file
-      const { data: examsData, error: examsError } = await supabase
-        .from('exams')
-        .select('*')
-        .eq('file_id', id)
-        .order('created_at', { ascending: true });
-
-      if (examsError) throw examsError;
-      setExams(examsData || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('خطأ في تحميل البيانات');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { file, exams, loading, error } = useLocalFileDetails(fileId);
 
   const handleDownload = async () => {
     if (!file) return;
 
     try {
       // Increment download counter
-      const { error } = await supabase
-        .from('files')
-        .update({ downloads: file.downloads + 1 })
-        .eq('id', file.id);
-
-      if (error) throw error;
+      incrementDownloads(file.id);
 
       // Open file in new tab
       window.open(file.file_url, '_blank');
-
-      // Update local state
-      setFile({ ...file, downloads: file.downloads + 1 });
     } catch (error) {
       console.error('Error updating download count:', error);
       // Still open the file even if counter update fails
@@ -113,26 +46,13 @@ const FileDetails = () => {
     }
   };
 
-  const handleExamClick = async (exam: ExamData) => {
+  const handleExamClick = async (exam: any) => {
     try {
-      // Increment exam attempts counter
-      const { error } = await supabase
-        .from('exams')
-        .update({ attempts: exam.attempts + 1 })
-        .eq('id', exam.id);
-
-      if (error) throw error;
-
       // Open Google Form in new tab
       window.open(exam.google_form_url, '_blank');
-
-      // Update local state
-      setExams(exams.map(e =>
-        e.id === exam.id ? { ...e, attempts: e.attempts + 1 } : e
-      ));
     } catch (error) {
-      console.error('Error updating exam attempts:', error);
-      // Still open the exam even if counter update fails
+      console.error('Error opening exam:', error);
+      // Still open the exam even if there's an error
       window.open(exam.google_form_url, '_blank');
     }
   };
@@ -140,8 +60,6 @@ const FileDetails = () => {
   const filteredExams = exams.filter(exam =>
     exam.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -174,7 +92,7 @@ const FileDetails = () => {
     );
   }
 
-  if (!file) {
+  if (error || !file) {
     return (
       <Layout>
         <section className="min-h-screen py-16 px-4 bg-gradient-to-br from-background via-secondary/30 to-background relative overflow-hidden flex items-center justify-center">
@@ -293,21 +211,21 @@ const FileDetails = () => {
 
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 mb-4">
-                      {exam.duration && (
+                      {exam.estimated_time && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="w-4 h-4" />
-                          <span>{exam.duration} دقيقة</span>
+                          <span>{exam.estimated_time} دقيقة</span>
                         </div>
                       )}
-                      {exam.questions && (
+                      {exam.questions_count && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <FileText className="w-4 h-4" />
-                          <span>{exam.questions} سؤال</span>
+                          <span>{exam.questions_count} سؤال</span>
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Users className="w-4 h-4" />
-                        <span>{exam.attempts}</span>
+                        <span>0</span>
                       </div>
                     </div>
 
@@ -346,4 +264,4 @@ const FileDetails = () => {
   );
 };
 
-export default FileDetails;
+export default LocalFileDetails;

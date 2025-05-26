@@ -14,20 +14,22 @@ const MaintenancePage: React.FC = () => {
   }, []);
 
   const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat("ar-SA", {
+    return new Intl.DateTimeFormat("ar-EG", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
       hour12: true,
+      calendar: "gregory"
     }).format(date);
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("ar-SA", {
+    return new Intl.DateTimeFormat("ar-EG", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
+      calendar: "gregory"
     }).format(date);
   };
 

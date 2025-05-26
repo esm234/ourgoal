@@ -44,7 +44,12 @@ const ArabicCertificate: React.FC<CertificateProps> = ({
       pdf.addImage(imgData, 'PNG', 0, 0, 1123, 794);
 
       // Generate filename
-      const dateString = completionDate.toLocaleDateString('ar-SA').replace(/\//g, '-');
+      const dateString = completionDate.toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        calendar: 'gregory'
+      }).replace(/\//g, '-');
       const cleanUserName = userName.replace(/\s+/g, '_');
       const fileName = `شهادة_إتمام_${cleanUserName}_${dateString}.pdf`;
 
@@ -57,10 +62,11 @@ const ArabicCertificate: React.FC<CertificateProps> = ({
     }
   };
 
-  const formattedDate = completionDate.toLocaleDateString('ar-SA', {
+  const formattedDate = completionDate.toLocaleDateString('ar-EG', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    calendar: 'gregory'
   });
 
   return (

@@ -11,19 +11,10 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFastFiles } from "@/hooks/useFastFiles";
+import { useLocalFiles } from "@/hooks/useLocalFiles";
 import { CustomPagination } from "@/components/ui/custom-pagination";
-
-interface FileData {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  file_url: string;
-  file_size: string;
-  downloads: number;
-  created_at: string;
-}
+import { LocalFile, incrementDownloads } from "@/data/localFiles";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const Files = () => {
   const navigate = useNavigate();
@@ -32,20 +23,22 @@ const Files = () => {
   const [activeTab, setActiveTab] = useState("verbal");
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Debounce search term to avoid searching on every keystroke
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
   // استخدام الـ hook السريع للملفات
   const {
-    data: files,
+    files,
     loading,
-    error,
-    currentPage,
-    totalPages,
     totalCount,
-    hasNextPage,
-    hasPrevPage,
-    nextPage,
-    prevPage,
-    refresh
-  } = useFastFiles(activeTab, searchTerm);
+    totalPages,
+    currentPage,
+    setCurrentPage
+  } = useLocalFiles({
+    category: activeTab === 'all' ? undefined : activeTab,
+    searchQuery: debouncedSearchTerm,
+    pageSize: 12
+  });
 
   useEffect(() => {
     checkAdminStatus();
@@ -72,45 +65,19 @@ const Files = () => {
     }
   };
 
-  const handleDownload = async (file: FileData) => {
+  const handleDownload = async (file: LocalFile) => {
     try {
-      // Validate URL first
-      if (!file.file_url || file.file_url.trim() === '') {
-        toast.error('رابط الملف غير متوفر');
-        return;
-      }
+      // زيادة عداد التحميلات
+      incrementDownloads(file.id);
 
-      let downloadUrl = file.file_url.trim();
-
-      // Convert Google Drive view links to direct download links
-      if (downloadUrl.includes('drive.google.com') && downloadUrl.includes('/view')) {
-        downloadUrl = downloadUrl.replace('/view?usp=sharing', '/download?usp=sharing');
-        downloadUrl = downloadUrl.replace('/view', '/download');
-      }
-
-      // Ensure URL has protocol
-      if (!downloadUrl.startsWith('http://') && !downloadUrl.startsWith('https://')) {
-        downloadUrl = 'https://' + downloadUrl;
-      }
-
-      console.log('Opening URL:', downloadUrl);
-
-      // TODO: Update download counter when files table is available
-      // For now, skip counter update since files table doesn't exist yet
-
-      // Open the file
-      const newWindow = window.open(downloadUrl, '_blank');
-
-      if (!newWindow) {
-        // If popup was blocked, try direct navigation
-        window.location.href = downloadUrl;
-      }
+      // فتح الملف
+      window.open(file.file_url, '_blank');
 
       // Show success message
       toast.success('تم فتح الملف');
     } catch (error) {
       console.error('Error opening file:', error);
-      toast.error('خطأ في فتح الملف: ' + error.message);
+      toast.error('خطأ في فتح الملف');
     }
   };
 
@@ -128,14 +95,15 @@ const Files = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("ar-SA", {
+    return new Intl.DateTimeFormat("ar-EG", {
       year: "numeric",
       month: "long",
       day: "numeric",
+      calendar: "gregory"
     }).format(date);
   };
 
-  const FileCard = ({ file }: { file: FileData }) => (
+  const FileCard = ({ file }: { file: LocalFile }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -211,7 +179,7 @@ const Files = () => {
           <div className="flex flex-col gap-3">
             <Button
               className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              onClick={() => navigate(`/files/${file.id}`)}
+              onClick={() => navigate(`/local-file-details/${file.id}`)}
             >
               <Eye className="h-4 w-4 mr-2" />
               عرض الاختبارات
@@ -388,11 +356,11 @@ const Files = () => {
                         currentPage={currentPage}
                         totalPages={totalPages}
                         totalCount={totalCount}
-                        pageSize={20}
-                        hasNextPage={hasNextPage}
-                        hasPrevPage={hasPrevPage}
-                        onNextPage={nextPage}
-                        onPrevPage={prevPage}
+                        pageSize={12}
+                        hasNextPage={currentPage < totalPages - 1}
+                        hasPrevPage={currentPage > 0}
+                        onNextPage={() => setCurrentPage(currentPage + 1)}
+                        onPrevPage={() => setCurrentPage(currentPage - 1)}
                         loading={loading}
                       />
                     )}
@@ -430,11 +398,11 @@ const Files = () => {
                         currentPage={currentPage}
                         totalPages={totalPages}
                         totalCount={totalCount}
-                        pageSize={20}
-                        hasNextPage={hasNextPage}
-                        hasPrevPage={hasPrevPage}
-                        onNextPage={nextPage}
-                        onPrevPage={prevPage}
+                        pageSize={12}
+                        hasNextPage={currentPage < totalPages - 1}
+                        hasPrevPage={currentPage > 0}
+                        onNextPage={() => setCurrentPage(currentPage + 1)}
+                        onPrevPage={() => setCurrentPage(currentPage - 1)}
                         loading={loading}
                       />
                     )}
@@ -472,11 +440,11 @@ const Files = () => {
                         currentPage={currentPage}
                         totalPages={totalPages}
                         totalCount={totalCount}
-                        pageSize={20}
-                        hasNextPage={hasNextPage}
-                        hasPrevPage={hasPrevPage}
-                        onNextPage={nextPage}
-                        onPrevPage={prevPage}
+                        pageSize={12}
+                        hasNextPage={currentPage < totalPages - 1}
+                        hasPrevPage={currentPage > 0}
+                        onNextPage={() => setCurrentPage(currentPage + 1)}
+                        onPrevPage={() => setCurrentPage(currentPage - 1)}
                         loading={loading}
                       />
                     )}
@@ -514,11 +482,11 @@ const Files = () => {
                         currentPage={currentPage}
                         totalPages={totalPages}
                         totalCount={totalCount}
-                        pageSize={20}
-                        hasNextPage={hasNextPage}
-                        hasPrevPage={hasPrevPage}
-                        onNextPage={nextPage}
-                        onPrevPage={prevPage}
+                        pageSize={12}
+                        hasNextPage={currentPage < totalPages - 1}
+                        hasPrevPage={currentPage > 0}
+                        onNextPage={() => setCurrentPage(currentPage + 1)}
+                        onPrevPage={() => setCurrentPage(currentPage - 1)}
                         loading={loading}
                       />
                     )}
