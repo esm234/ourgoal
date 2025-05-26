@@ -74,15 +74,43 @@ const Files = () => {
 
   const handleDownload = async (file: FileData) => {
     try {
-      // For now, just open the file URL since files table doesn't exist yet
-      // TODO: Implement download counter after running SQL schema
-      window.open(file.file_url, '_blank');
+      // Validate URL first
+      if (!file.file_url || file.file_url.trim() === '') {
+        toast.error('رابط الملف غير متوفر');
+        return;
+      }
+
+      let downloadUrl = file.file_url.trim();
+
+      // Convert Google Drive view links to direct download links
+      if (downloadUrl.includes('drive.google.com') && downloadUrl.includes('/view')) {
+        downloadUrl = downloadUrl.replace('/view?usp=sharing', '/download?usp=sharing');
+        downloadUrl = downloadUrl.replace('/view', '/download');
+      }
+
+      // Ensure URL has protocol
+      if (!downloadUrl.startsWith('http://') && !downloadUrl.startsWith('https://')) {
+        downloadUrl = 'https://' + downloadUrl;
+      }
+
+      console.log('Opening URL:', downloadUrl);
+
+      // TODO: Update download counter when files table is available
+      // For now, skip counter update since files table doesn't exist yet
+
+      // Open the file
+      const newWindow = window.open(downloadUrl, '_blank');
+
+      if (!newWindow) {
+        // If popup was blocked, try direct navigation
+        window.location.href = downloadUrl;
+      }
 
       // Show success message
       toast.success('تم فتح الملف');
     } catch (error) {
       console.error('Error opening file:', error);
-      toast.error('خطأ في فتح الملف');
+      toast.error('خطأ في فتح الملف: ' + error.message);
     }
   };
 

@@ -62,25 +62,67 @@ const FileDetails = () => {
 
   const fetchFileAndExams = async () => {
     try {
-      // Fetch file details
-      const { data: fileData, error: fileError } = await supabase
-        .from('files')
-        .select('*')
-        .eq('id', id)
-        .single();
+      // TODO: Replace with actual database calls when tables are created
+      // For now, use mock data based on file ID
+      const mockFiles = {
+        1: {
+          id: 1,
+          title: 'ملف تدريب لفظي - المستوى الأول',
+          description: 'مجموعة من التمارين اللفظية للمبتدئين',
+          category: 'verbal',
+          file_url: 'https://example.com/verbal1.pdf',
+          file_size: '2.5 MB',
+          downloads: 150,
+          created_at: new Date().toISOString()
+        },
+        2: {
+          id: 2,
+          title: 'ملف تدريب كمي - الأساسيات',
+          description: 'تمارين رياضية أساسية للقدرات',
+          category: 'quantitative',
+          file_url: 'https://example.com/quant1.pdf',
+          file_size: '3.2 MB',
+          downloads: 200,
+          created_at: new Date().toISOString()
+        }
+      };
 
-      if (fileError) throw fileError;
+      const mockExams = {
+        1: [
+          {
+            id: 1,
+            file_id: 1,
+            title: 'اختبار لفظي - المستوى الأول',
+            google_form_url: 'https://forms.google.com/verbal1',
+            duration: 60,
+            questions: 25,
+            attempts: 45,
+            created_at: new Date().toISOString()
+          }
+        ],
+        2: [
+          {
+            id: 2,
+            file_id: 2,
+            title: 'اختبار كمي - الأساسيات',
+            google_form_url: 'https://forms.google.com/quant1',
+            duration: 90,
+            questions: 30,
+            attempts: 60,
+            created_at: new Date().toISOString()
+          }
+        ]
+      };
+
+      const fileData = mockFiles[parseInt(id)];
+      const examsData = mockExams[parseInt(id)] || [];
+
+      if (!fileData) {
+        throw new Error('File not found');
+      }
+
       setFile(fileData);
-
-      // Fetch exams for this file
-      const { data: examsData, error: examsError } = await supabase
-        .from('exams')
-        .select('*')
-        .eq('file_id', id)
-        .order('created_at', { ascending: true });
-
-      if (examsError) throw examsError;
-      setExams(examsData || []);
+      setExams(examsData);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('خطأ في تحميل البيانات');
@@ -93,47 +135,82 @@ const FileDetails = () => {
     if (!file) return;
 
     try {
-      // Increment download counter
-      const { error } = await supabase
-        .from('files')
-        .update({ downloads: file.downloads + 1 })
-        .eq('id', file.id);
+      // Validate URL first
+      if (!file.file_url || file.file_url.trim() === '') {
+        toast.error('رابط الملف غير متوفر');
+        return;
+      }
 
-      if (error) throw error;
+      let downloadUrl = file.file_url.trim();
 
-      // Open file in new tab
-      window.open(file.file_url, '_blank');
+      // Convert Google Drive view links to direct download links
+      if (downloadUrl.includes('drive.google.com') && downloadUrl.includes('/view')) {
+        downloadUrl = downloadUrl.replace('/view?usp=sharing', '/download?usp=sharing');
+        downloadUrl = downloadUrl.replace('/view', '/download');
+      }
 
-      // Update local state
-      setFile({ ...file, downloads: file.downloads + 1 });
+      // Ensure URL has protocol
+      if (!downloadUrl.startsWith('http://') && !downloadUrl.startsWith('https://')) {
+        downloadUrl = 'https://' + downloadUrl;
+      }
+
+      console.log('Opening URL:', downloadUrl);
+
+      // TODO: Update download counter when files table is available
+      // For now, skip counter update since files table doesn't exist yet
+
+      // Open the file
+      const newWindow = window.open(downloadUrl, '_blank');
+
+      if (!newWindow) {
+        // If popup was blocked, try direct navigation
+        window.location.href = downloadUrl;
+      }
+
+      toast.success('تم فتح الملف');
     } catch (error) {
-      console.error('Error updating download count:', error);
-      // Still open the file even if counter update fails
-      window.open(file.file_url, '_blank');
+      console.error('Error opening file:', error);
+      toast.error('خطأ في فتح الملف: ' + error.message);
     }
   };
 
   const handleExamClick = async (exam: ExamData) => {
     try {
-      // Increment exam attempts counter
-      const { error } = await supabase
-        .from('exams')
-        .update({ attempts: exam.attempts + 1 })
-        .eq('id', exam.id);
+      // Validate URL first
+      if (!exam.google_form_url || exam.google_form_url.trim() === '') {
+        toast.error('رابط الاختبار غير متوفر');
+        return;
+      }
 
-      if (error) throw error;
+      let examUrl = exam.google_form_url.trim();
+
+      // Ensure URL has protocol
+      if (!examUrl.startsWith('http://') && !examUrl.startsWith('https://')) {
+        examUrl = 'https://' + examUrl;
+      }
+
+      console.log('Opening exam URL:', examUrl);
+
+      // TODO: Update exam attempts counter when exams table is available
+      // For now, skip counter update since exams table doesn't exist yet
 
       // Open Google Form in new tab
-      window.open(exam.google_form_url, '_blank');
+      const newWindow = window.open(examUrl, '_blank');
 
-      // Update local state
+      if (!newWindow) {
+        // If popup was blocked, try direct navigation
+        window.location.href = examUrl;
+      }
+
+      // Update local state (mock update)
       setExams(exams.map(e =>
         e.id === exam.id ? { ...e, attempts: e.attempts + 1 } : e
       ));
+
+      toast.success('تم فتح الاختبار');
     } catch (error) {
-      console.error('Error updating exam attempts:', error);
-      // Still open the exam even if counter update fails
-      window.open(exam.google_form_url, '_blank');
+      console.error('Error opening exam:', error);
+      toast.error('خطأ في فتح الاختبار: ' + error.message);
     }
   };
 
