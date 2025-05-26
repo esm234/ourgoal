@@ -5,18 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Clock, Trophy, AlertCircle, CheckCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, Clock, Trophy, AlertCircle, CheckCircle, BookOpen, FileText, Image, Brain, Calculator, Timer } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-// import { useWeeklyEvents, useEventTimer } from '@/hooks/useWeeklyEvents';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { WeeklyEvent, EventQuestion, getCategoryLabel } from '@/types/weeklyEvents';
 
 const EventTest: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { updateUserXPFromProfile } = useLeaderboard();
 
   console.log('EventTest component loaded - eventId:', eventId, 'user:', user?.id);
 
@@ -42,6 +43,7 @@ const EventTest: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [testStartTime] = useState(new Date());
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [accessDenied, setAccessDenied] = useState<string | null>(null);
 
   // Simple timer calculation
   useEffect(() => {
@@ -68,17 +70,59 @@ const EventTest: React.FC = () => {
       try {
         setLoading(true);
 
+        // Check if user has already taken this test
+        const { data: existingParticipation, error: participationError } = await supabase
+          .from('event_participations')
+          .select('id')
+          .eq('event_id', eventId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (existingParticipation) {
+          setAccessDenied('لقد قمت بأداء هذا الاختبار من قبل. يمكنك مراجعة نتائجك من صفحة النتائج.');
+          toast.error('لقد قمت بأداء هذا الاختبار من قبل');
+          setLoading(false);
+          return;
+        }
+
         // Load event details
         const { data: eventData, error: eventError } = await supabase
           .from('weekly_events')
           .select('*')
           .eq('id', eventId)
-          .eq('is_enabled', true)
           .single();
 
         if (eventError || !eventData) {
-          toast.error('الفعالية غير موجودة أو غير مفعلة');
-          navigate('/weekly-events');
+          setAccessDenied('الفعالية غير موجودة');
+          toast.error('الفعالية غير موجودة');
+          setLoading(false);
+          return;
+        }
+
+        // Check if event is enabled
+        if (!eventData.is_enabled) {
+          setAccessDenied('هذه الفعالية غير مفعلة حالياً');
+          toast.error('هذه الفعالية غير مفعلة حالياً');
+          setLoading(false);
+          return;
+        }
+
+        // Check event timing
+        const now = new Date();
+        const eventStart = new Date(eventData.start_time);
+        const eventEnd = new Date(eventStart.getTime() + eventData.duration_minutes * 60 * 1000);
+
+        if (now < eventStart) {
+          setAccessDenied(`لم تبدأ الفعالية بعد. ستبدأ في ${eventStart.toLocaleString('ar-SA')}`);
+          toast.error('لم تبدأ الفعالية بعد');
+          setLoading(false);
+          return;
+        }
+
+        if (now > eventEnd) {
+          setAccessDenied('انتهت مدة هذه الفعالية ولا يمكن المشاركة فيها');
+          toast.error('انتهت مدة هذه الفعالية');
+          setLoading(false);
           return;
         }
 
@@ -191,7 +235,44 @@ const EventTest: React.FC = () => {
         throw submitError;
       }
 
-      toast.success('تم إرسال الإجابات بنجاح!');
+      // Add XP to user's total using RPC function
+      try {
+        const { error: xpError } = await supabase.rpc('add_event_xp_to_user', {
+          target_user_id: user.id,
+          xp_amount: xpEarned
+        });
+
+        if (xpError) {
+          console.error('Error updating user XP:', xpError);
+          // Fallback to manual update if RPC fails
+          const { data: currentProfile } = await supabase
+            .from('profiles')
+            .select('xp')
+            .eq('id', user.id)
+            .single();
+
+          if (currentProfile) {
+            const newXP = (currentProfile.xp || 0) + xpEarned;
+            await supabase
+              .from('profiles')
+              .update({ xp: newXP })
+              .eq('id', user.id);
+          }
+        }
+      } catch (xpError) {
+        console.error('Error updating user XP:', xpError);
+        // Don't throw error here, participation was successful
+      }
+
+      // Update leaderboard with new XP
+      try {
+        await updateUserXPFromProfile();
+      } catch (leaderboardError) {
+        console.error('Error updating leaderboard:', leaderboardError);
+        // Don't throw error here, participation was successful
+      }
+
+      toast.success(`🎉 تم إكمال الاختبار! حصلت على ${xpEarned} نقطة خبرة`);
       navigate(`/weekly-events/${eventId}/results`);
     } catch (error) {
       console.error('Error submitting test:', error);
@@ -208,6 +289,45 @@ const EventTest: React.FC = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">جاري تحميل الاختبار...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show access denied message
+  if (accessDenied) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-8">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-4">غير مسموح بالدخول</h2>
+              <p className="text-muted-foreground mb-6 leading-relaxed">{accessDenied}</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={() => navigate('/weekly-events')}
+                  className="bg-gradient-to-r from-primary to-accent text-black font-bold"
+                >
+                  العودة للفعاليات
+                </Button>
+                {accessDenied.includes('قمت بأداء هذا الاختبار') && (
+                  <Button
+                    onClick={() => navigate(`/weekly-events/${eventId}/results`)}
+                    variant="outline"
+                  >
+                    مراجعة النتائج
+                  </Button>
+                )}
+              </div>
+            </motion.div>
           </div>
         </div>
       </Layout>
@@ -235,6 +355,24 @@ const EventTest: React.FC = () => {
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   const answeredQuestions = answers.filter(answer => answer !== -1).length;
 
+  // Debug logging for passage
+  console.log('Current question debug:', {
+    questionIndex: currentQuestionIndex,
+    questionType: currentQuestion?.question_type,
+    hasPassage: !!currentQuestion?.passage_text,
+    passageLength: currentQuestion?.passage_text?.length || 0,
+    passagePreview: currentQuestion?.passage_text?.substring(0, 50) + '...',
+    fullQuestion: currentQuestion
+  });
+
+  // Also log all questions to see their structure
+  console.log('All questions:', questions.map(q => ({
+    id: q.id,
+    question_type: q.question_type,
+    has_passage: !!q.passage_text,
+    passage_length: q.passage_text?.length || 0
+  })));
+
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -244,22 +382,22 @@ const EventTest: React.FC = () => {
           transition={{ duration: 0.6 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
               <Button
                 onClick={() => navigate('/weekly-events')}
                 variant="outline"
                 size="icon"
-                className="rounded-full"
+                className="rounded-full flex-shrink-0"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold">{event.title}</h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline">{getCategoryLabel(event.category)}</Badge>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Trophy className="w-4 h-4" />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-2xl font-bold break-words">{event.title}</h1>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs">{getCategoryLabel(event.category)}</Badge>
+                  <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                    <Trophy className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>{event.xp_reward} XP</span>
                   </div>
                 </div>
@@ -267,104 +405,224 @@ const EventTest: React.FC = () => {
             </div>
 
             {/* Timer */}
-            <div className="text-center">
-              <div className="flex items-center gap-2 text-lg font-bold text-primary">
-                <Clock className="w-5 h-5" />
+            <div className="text-center sm:text-right flex-shrink-0">
+              <div className="flex items-center justify-center sm:justify-end gap-2 text-base sm:text-lg font-bold text-primary">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
               </div>
-              <p className="text-sm text-muted-foreground">الوقت المتبقي</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">الوقت المتبقي</p>
             </div>
           </div>
 
           {/* Progress */}
           <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
               <span className="text-sm font-medium">
                 السؤال {currentQuestionIndex + 1} من {questions.length}
               </span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 تم الإجابة على {answeredQuestions} من {questions.length}
               </span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
 
-          {/* Question Card */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">
-                {currentQuestion.question_text}
-              </CardTitle>
-              {currentQuestion.image_url && (
-                <div className="mt-4">
-                  <img
-                    src={currentQuestion.image_url}
-                    alt="صورة السؤال"
-                    className="max-w-full h-auto rounded-lg"
-                  />
-                </div>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {currentQuestion.options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerSelect(index)}
-                    className={`w-full p-4 text-right rounded-lg border-2 transition-all duration-200 ${
-                      answers[currentQuestionIndex] === index
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border hover:border-primary/50 hover:bg-primary/5'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        answers[currentQuestionIndex] === index
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-border'
-                      }`}>
-                        {answers[currentQuestionIndex] === index && (
-                          <CheckCircle className="w-4 h-4" />
+          {/* Question Section */}
+          <div className="space-y-6 lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0 mb-6">
+            {/* Debug: Show passage condition result */}
+            {console.log('Passage condition check:', {
+              hasPassageText: !!currentQuestion.passage_text,
+              passageLength: currentQuestion.passage_text?.length || 0,
+              trimmedLength: currentQuestion.passage_text?.trim().length || 0,
+              conditionResult: currentQuestion.passage_text && currentQuestion.passage_text.trim().length > 0
+            })}
+
+            {/* Passage Section (for reading comprehension) */}
+            {currentQuestion.passage_text && currentQuestion.passage_text.trim().length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="lg:col-span-5"
+              >
+                <Card className="h-full bg-gradient-to-br from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 border-primary/20 dark:border-primary/30 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      <CardTitle className="text-base sm:text-lg text-primary dark:text-primary">النص المطلوب قراءته</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none text-right leading-relaxed text-foreground bg-background/80 dark:bg-background/60 p-4 sm:p-6 rounded-xl border border-border shadow-inner text-sm sm:text-base">
+                      {currentQuestion.passage_text}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Question Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className={currentQuestion.passage_text && currentQuestion.passage_text.trim().length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'}
+            >
+              <Card className="h-full bg-gradient-to-br from-background to-accent/5 dark:from-background dark:to-primary/5 shadow-lg border-2 border-primary/10 dark:border-primary/20">
+                <CardHeader className="pb-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        {currentQuestion.question_type === 'reading_comprehension' && <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+                        {currentQuestion.question_type === 'image' && <Image className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+                        {currentQuestion.question_type === 'text' && currentQuestion.category === 'verbal' && <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+                        {currentQuestion.question_type === 'text' && currentQuestion.category === 'quantitative' && <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />}
+                        <Badge variant="outline" className="text-xs">
+                          {currentQuestion.category === 'verbal' ? 'لفظي' : 'كمي'}
+                        </Badge>
+                        {currentQuestion.subcategory && (
+                          <Badge variant="secondary" className="text-xs">
+                            {currentQuestion.subcategory}
+                          </Badge>
                         )}
                       </div>
-                      <span className="flex-1">{option}</span>
+                      <CardTitle className="text-lg sm:text-xl leading-relaxed text-right break-words">
+                        {currentQuestion.question_text}
+                      </CardTitle>
                     </div>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  </div>
+
+                  {/* Image for image-type questions */}
+                  {currentQuestion.image_url && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="mt-4"
+                    >
+                      <div className="relative overflow-hidden rounded-xl border-2 border-gray-200 dark:border-gray-700">
+                        <img
+                          src={currentQuestion.image_url}
+                          alt="صورة السؤال"
+                          className="w-full h-auto max-h-96 object-contain bg-white"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </CardHeader>
+
+                <CardContent>
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-foreground mb-4">اختر الإجابة الصحيحة:</h4>
+                    <AnimatePresence mode="wait">
+                      {currentQuestion.options.map((option, index) => (
+                        <motion.button
+                          key={`${currentQuestionIndex}-${index}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          onClick={() => handleAnswerSelect(index)}
+                          className={`w-full p-3 sm:p-4 text-right rounded-xl border-2 transition-all duration-300 transform hover:scale-[1.02] ${
+                            answers[currentQuestionIndex] === index
+                              ? 'border-primary bg-gradient-to-r from-primary/20 to-accent/10 text-primary shadow-lg scale-[1.02]'
+                              : 'border-border hover:border-primary/50 hover:bg-primary/5 hover:shadow-md'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
+                              answers[currentQuestionIndex] === index
+                                ? 'border-primary bg-primary text-primary-foreground shadow-lg'
+                                : 'border-border bg-background'
+                            }`}>
+                              {answers[currentQuestionIndex] === index ? (
+                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                              ) : (
+                                <span className="text-xs sm:text-sm font-bold text-muted-foreground">
+                                  {String.fromCharCode(65 + index)}
+                                </span>
+                              )}
+                            </div>
+                            <span className="flex-1 text-base sm:text-lg leading-relaxed break-words">{option}</span>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
 
           {/* Navigation */}
-          <div className="flex justify-between items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg border"
+          >
             <Button
               onClick={handlePreviousQuestion}
               disabled={currentQuestionIndex === 0}
               variant="outline"
+              size="lg"
+              className="px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold w-full sm:w-auto"
             >
-              السؤال السابق
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">السؤال السابق</span>
+              <span className="sm:hidden">السابق</span>
             </Button>
 
-            <div className="flex gap-2">
+            {/* Question Navigator */}
+            <div className="hidden md:flex items-center gap-2 overflow-x-auto">
+              {questions.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentQuestionIndex(index)}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 font-bold text-xs sm:text-sm transition-all duration-200 flex-shrink-0 ${
+                    index === currentQuestionIndex
+                      ? 'border-primary bg-primary text-white shadow-lg'
+                      : answers[index] !== -1
+                      ? 'border-green-500 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-primary/50'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-2 sm:gap-3">
               {currentQuestionIndex === questions.length - 1 ? (
                 <Button
                   onClick={handleSubmitTest}
                   disabled={submitting || answeredQuestions < questions.length}
-                  className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold"
+                  size="lg"
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold px-4 sm:px-8 py-2 sm:py-3 rounded-xl shadow-lg w-full sm:w-auto"
                 >
-                  {submitting ? 'جاري الإرسال...' : 'إنهاء الاختبار'}
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <span className="hidden sm:inline">جاري الإرسال...</span>
+                      <span className="sm:hidden">إرسال...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <span className="hidden sm:inline">إنهاء الاختبار</span>
+                      <span className="sm:hidden">إنهاء</span>
+                    </>
+                  )}
                 </Button>
               ) : (
                 <Button
                   onClick={handleNextQuestion}
                   disabled={currentQuestionIndex === questions.length - 1}
-                  className="bg-gradient-to-r from-primary to-accent text-black font-bold"
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg w-full sm:w-auto"
                 >
-                  السؤال التالي
+                  <span className="hidden sm:inline">السؤال التالي</span>
+                  <span className="sm:hidden">التالي</span>
+                  <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
                 </Button>
               )}
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </Layout>

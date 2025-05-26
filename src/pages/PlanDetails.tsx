@@ -264,22 +264,22 @@ const PlanDetails: React.FC = () => {
                 >
                   <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl">
                     <CardHeader>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg">
-                            <span className="text-2xl font-bold text-black">{roundNumber}</span>
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                            <span className="text-lg sm:text-2xl font-bold text-black">{roundNumber}</span>
                           </div>
                           <div>
-                            <CardTitle className="text-2xl font-bold text-foreground">
+                            <CardTitle className="text-lg sm:text-2xl font-bold text-foreground">
                               الجولة {roundNumber}
                             </CardTitle>
-                            <p className="text-muted-foreground">
+                            <p className="text-sm sm:text-base text-muted-foreground">
                               {completedInRound} من {roundDays.length} أيام مكتملة
                             </p>
                           </div>
                         </div>
-                        <div className="text-center">
-                          <div className="text-3xl font-bold text-primary">{roundProgress}%</div>
+                        <div className="text-center sm:text-right">
+                          <div className="text-2xl sm:text-3xl font-bold text-primary">{roundProgress}%</div>
                           <div className="text-sm text-muted-foreground">مكتمل</div>
                         </div>
                       </div>
@@ -303,30 +303,30 @@ const PlanDetails: React.FC = () => {
                             }`}
                             onClick={() => handleToggleDay(day.dayNumber)}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-6">
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                              <div className="flex items-center gap-4 sm:gap-6">
                                 <Checkbox
                                   checked={isCompleted}
                                   onChange={() => handleToggleDay(day.dayNumber)}
-                                  className="w-6 h-6"
+                                  className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
                                 />
-                                <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
                                   isCompleted
                                     ? 'bg-green-500/20 scale-110'
                                     : 'bg-gradient-to-r from-primary/20 to-accent/20 group-hover:scale-110'
                                 }`}>
-                                  <span className={`text-xl font-bold ${
+                                  <span className={`text-lg sm:text-xl font-bold ${
                                     isCompleted ? 'text-green-500' : 'text-primary'
                                   }`}>
                                     {day.dayNumber}
                                   </span>
                                 </div>
-                                <div>
-                                  <div className="text-lg font-bold text-foreground mb-1">
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-sm sm:text-lg font-bold text-foreground mb-1 break-words">
                                     {format(new Date(day.date), "EEEE، dd MMMM yyyy", { locale: ar })}
                                   </div>
                                   {isCompleted && (
-                                    <Badge className="bg-green-500/20 text-green-500 border-green-500/30">
+                                    <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-xs">
                                       <CheckCircle className="w-3 h-3 mr-1" />
                                       مكتمل
                                     </Badge>
@@ -334,35 +334,35 @@ const PlanDetails: React.FC = () => {
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-8">
+                              <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:flex lg:items-center lg:gap-6 xl:gap-8">
                                 <div className="text-center">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <BookOpen className="w-5 h-5 text-blue-500" />
-                                    <span className="text-sm text-muted-foreground">لفظي</span>
+                                  <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                                    <span className="text-xs sm:text-sm text-muted-foreground">لفظي</span>
                                   </div>
-                                  <div className="text-2xl font-bold text-blue-500">
+                                  <div className="text-lg sm:text-2xl font-bold text-blue-500">
                                     {day.verbalRange?.start}-{day.verbalRange?.end}
                                   </div>
                                   <div className="text-xs text-muted-foreground">({day.verbalTests} اختبار)</div>
                                 </div>
 
                                 <div className="text-center">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Calculator className="w-5 h-5 text-green-500" />
-                                    <span className="text-sm text-muted-foreground">كمي</span>
+                                  <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
+                                    <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                                    <span className="text-xs sm:text-sm text-muted-foreground">كمي</span>
                                   </div>
-                                  <div className="text-2xl font-bold text-green-500">
+                                  <div className="text-lg sm:text-2xl font-bold text-green-500">
                                     {day.quantitativeRange?.start}-{day.quantitativeRange?.end}
                                   </div>
                                   <div className="text-xs text-muted-foreground">({day.quantitativeTests} اختبار)</div>
                                 </div>
 
                                 <div className="text-center">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <TrendingUp className="w-5 h-5 text-primary" />
-                                    <span className="text-sm text-muted-foreground">المجموع</span>
+                                  <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
+                                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                                    <span className="text-xs sm:text-sm text-muted-foreground">المجموع</span>
                                   </div>
-                                  <div className="text-2xl font-bold text-primary">{day.totalTests}</div>
+                                  <div className="text-lg sm:text-2xl font-bold text-primary">{day.totalTests}</div>
                                 </div>
                               </div>
                             </div>
@@ -400,29 +400,29 @@ const PlanDetails: React.FC = () => {
                     }`}
                     onClick={() => handleToggleDay(plan.final_review_day.dayNumber)}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                      <div className="flex items-center gap-4 sm:gap-6">
                         <Checkbox
                           checked={completedDays.has(plan.final_review_day.dayNumber)}
                           onChange={() => handleToggleDay(plan.final_review_day.dayNumber)}
-                          className="w-6 h-6"
+                          className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
                         />
-                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
                           completedDays.has(plan.final_review_day.dayNumber)
                             ? 'bg-amber-500/30 scale-110'
                             : 'bg-amber-500/20'
                         }`}>
-                          <span className="text-3xl font-bold text-amber-600">{plan.final_review_day.dayNumber}</span>
+                          <span className="text-2xl sm:text-3xl font-bold text-amber-600">{plan.final_review_day.dayNumber}</span>
                         </div>
-                        <div>
-                          <div className="text-2xl font-bold text-foreground mb-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-lg sm:text-2xl font-bold text-foreground mb-2 break-words">
                             {format(new Date(plan.final_review_day.date), "EEEE، dd MMMM yyyy", { locale: ar })}
                           </div>
-                          <div className="text-amber-600 font-medium text-lg">
+                          <div className="text-amber-600 font-medium text-sm sm:text-lg">
                             مراجعة الأخطاء والنقاط المهمة فقط
                           </div>
                           {completedDays.has(plan.final_review_day.dayNumber) && (
-                            <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 mt-2">
+                            <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 mt-2 text-xs">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               مكتمل - أحسنت!
                             </Badge>
@@ -430,9 +430,9 @@ const PlanDetails: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="text-center">
-                        <div className="text-6xl mb-2">🏆</div>
-                        <div className="text-lg font-bold text-amber-600">يوم النجاح</div>
+                      <div className="text-center lg:text-right">
+                        <div className="text-4xl sm:text-6xl mb-2">🏆</div>
+                        <div className="text-base sm:text-lg font-bold text-amber-600">يوم النجاح</div>
                       </div>
                     </div>
                   </div>

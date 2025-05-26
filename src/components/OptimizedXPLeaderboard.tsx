@@ -53,7 +53,7 @@ const OptimizedXPLeaderboard: React.FC = memo(() => {
     const currentLevelXP = (level - 1) * 1000;
     const nextLevelXP = level * 1000;
     const progress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-    
+
     return {
       level,
       progress: Math.min(progress, 100),
@@ -246,14 +246,10 @@ const OptimizedXPLeaderboard: React.FC = memo(() => {
                         {getRankIcon(leader.rank)}
                         <span className="text-2xl font-bold text-foreground">#{leader.rank}</span>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-bold text-foreground text-lg">{leader.username}</h4>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>{leader.completed_days} أيام مكتملة</span>
-                          </div>
                           <div className="flex items-center gap-1">
                             <Star className="w-4 h-4" />
                             <span>المستوى {xpLevel.level}</span>

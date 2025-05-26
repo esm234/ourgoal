@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, LogOut, Trophy } from "lucide-react";
+import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, LogOut, Trophy, Timer } from "lucide-react";
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -141,6 +141,16 @@ const Navbar = () => {
                         <span>عرض الملف الشخصي</span>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/pomodoro"
+                        className="flex items-center cursor-pointer hover:bg-primary/10 transition-colors"
+                        onClick={handleLinkClick}
+                      >
+                        <Timer className="w-4 h-4 mr-2" />
+                        <span>مؤقت البومودورو</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-primary/20" />
                     <DropdownMenuItem
                       className="cursor-pointer hover:bg-destructive/10 text-destructive hover:text-destructive transition-colors"
@@ -235,6 +245,15 @@ const Navbar = () => {
                 >
                   <User size={20} className="ml-2" />
                   <span>الملف الشخصي</span>
+                </Link>
+
+                <Link
+                  to="/pomodoro"
+                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  onClick={handleMobileLinkClick}
+                >
+                  <Timer size={20} className="ml-2" />
+                  <span>مؤقت البومودورو</span>
                 </Link>
 
                 <button

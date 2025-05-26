@@ -23,7 +23,7 @@ const upcomingEvents = [
     id: 1,
     title: "ايفينت اور جول",
     description: "لقاء سنوي مميز يجمع أعضاء مجتمع 'اور جول' في القاهرة للاحتفال بنهاية العام وتكوين صداقات جديدة. فرصة رائعة للتعارف وجهاً لوجه مع الأشخاص الذين تعرفت عليهم من خلال المجتمع الرقمي، وقضاء وقت ممتع مع الأصدقاء في أجواء احتفالية مليئة بالذكريات الجميلة. ⚠️ تم إغلاق التسجيل - اكتمل العدد المطلوب",
-    date: "2024-12-31",
+    date: "2025-8-06",
     time: "18:00",
     duration: "4 ساعات",
     type: "لقاء اجتماعي",
@@ -43,12 +43,23 @@ const upcomingEvents = [
 const EventsSection = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    try {
+      return date.toLocaleDateString('ar-EG', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        calendar: 'gregory'
+      });
+    } catch (error) {
+      // Fallback to English if Arabic fails
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
   };
 
   const getTimeUntilEvent = (dateString: string, timeString: string) => {

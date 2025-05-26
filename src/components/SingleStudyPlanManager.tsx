@@ -52,45 +52,47 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl">{studyPlan.name}</CardTitle>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex-1">
+            <CardTitle className="text-lg md:text-xl">{studyPlan.name}</CardTitle>
             <CardDescription className="mt-2 space-y-1">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>تاريخ الاختبار: {format(new Date(studyPlan.test_date), 'dd MMMM yyyy', { locale: ar })}</span>
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 flex-shrink-0" />
+                <span className="break-words">تاريخ الاختبار: {format(new Date(studyPlan.test_date), 'dd MMMM yyyy', { locale: ar })}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 flex-shrink-0" />
                 <span>مدة الدراسة: {studyPlan.total_days} يوم</span>
               </div>
-              <div className="flex items-center gap-2">
-                <RotateCcw className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm">
+                <RotateCcw className="h-4 w-4 flex-shrink-0" />
                 <span>جولات المراجعة: {studyPlan.review_rounds}</span>
               </div>
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 lg:flex-shrink-0">
             <Button
               onClick={() => onViewDetails(studyPlan)}
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
             >
               <Eye className="h-4 w-4 ml-2" />
-              عرض التفاصيل
+              <span className="hidden sm:inline">عرض التفاصيل</span>
+              <span className="sm:hidden">عرض</span>
             </Button>
             <Button
               onClick={() => setIsEditDialogOpen(true)}
               variant="outline"
               size="sm"
-              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 w-full sm:w-auto"
             >
               <Edit className="h-4 w-4 ml-2" />
               تعديل
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
+                <Button variant="destructive" size="sm" className="w-full sm:w-auto">
                   <Trash2 className="h-4 w-4 ml-2" />
                   حذف
                 </Button>

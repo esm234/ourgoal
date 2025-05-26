@@ -172,22 +172,76 @@ export const useEventLeaderboard = (eventId: number | null) => {
 
     try {
       setLoading(true);
+      console.log('Loading leaderboard for event:', eventId);
 
-      const { data, error } = await supabase.rpc('get_event_leaderboard', {
+      // Try the RPC function first
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_event_leaderboard', {
         target_event_id: eventId,
         limit_count: 10
       });
 
-      if (error) {
-        throw error;
-      }
+      if (rpcError) {
+        console.log('RPC function failed, trying direct query:', rpcError);
 
-      setLeaderboard(data || []);
+        // Fallback to direct query if RPC function doesn't exist
+        const { data: directData, error: directError } = await supabase
+          .from('event_participations')
+          .select(`
+            user_id,
+            score,
+            total_questions,
+            time_taken_minutes,
+            xp_earned
+          `)
+          .eq('event_id', eventId)
+          .order('score', { ascending: false })
+          .order('time_taken_minutes', { ascending: true })
+          .limit(10);
 
-      // Find user's position
-      if (user) {
-        const userEntry = data?.find((entry: LeaderboardEntry) => entry.user_id === user.id);
-        setUserPosition(userEntry?.rank_position || null);
+        if (directError) {
+          throw directError;
+        }
+
+        // Get usernames separately
+        const userIds = directData?.map(entry => entry.user_id) || [];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, username')
+          .in('id', userIds);
+
+        // Create a map of user_id to username
+        const usernameMap = new Map();
+        profilesData?.forEach(profile => {
+          usernameMap.set(profile.id, profile.username);
+        });
+
+        // Transform direct query data to match leaderboard format
+        const transformedData = directData?.map((entry, index) => ({
+          user_id: entry.user_id,
+          username: usernameMap.get(entry.user_id) || 'مستخدم',
+          score: entry.score,
+          total_questions: entry.total_questions,
+          time_taken_minutes: entry.time_taken_minutes,
+          xp_earned: entry.xp_earned,
+          rank_position: index + 1
+        })) || [];
+
+        setLeaderboard(transformedData);
+
+        // Find user's position
+        if (user) {
+          const userEntry = transformedData.find((entry: LeaderboardEntry) => entry.user_id === user.id);
+          setUserPosition(userEntry?.rank_position || null);
+        }
+      } else {
+        console.log('RPC function succeeded, data:', rpcData);
+        setLeaderboard(rpcData || []);
+
+        // Find user's position
+        if (user) {
+          const userEntry = rpcData?.find((entry: LeaderboardEntry) => entry.user_id === user.id);
+          setUserPosition(userEntry?.rank_position || null);
+        }
       }
     } catch (err) {
       console.error('Error loading leaderboard:', err);

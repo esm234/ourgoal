@@ -214,7 +214,7 @@ const Profile: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
           >
             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-2xl p-6 text-center">
               <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -240,13 +240,7 @@ const Profile: React.FC = () => {
               <div className="text-muted-foreground font-medium">نقاط خبرة</div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-2xl p-6 text-center">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Star className="w-6 h-6 text-purple-500" />
-              </div>
-              <div className="text-3xl font-bold text-purple-500 mb-2">{userStats.totalStudyDays}</div>
-              <div className="text-muted-foreground font-medium">يوم دراسة</div>
-            </Card>
+
           </motion.div>
 
           {/* Main Content Tabs */}

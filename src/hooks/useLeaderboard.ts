@@ -200,7 +200,7 @@ export const useLeaderboard = () => {
       // Get user profile and username
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('username, study_plan')
+        .select('username, xp')
         .eq('id', user.id)
         .single();
 
@@ -208,44 +208,16 @@ export const useLeaderboard = () => {
         throw profileError;
       }
 
-      const studyPlan = profileData?.study_plan as any;
-      const completedDays = studyPlan?.completed_days || [];
       const username = profileData?.username || 'مستخدم';
 
-      // Calculate XP components
-      const planXP = studyPlan ? 500 : 0; // 500 XP for having a plan
-      const studyDaysXP = completedDays.length * 100; // 100 XP per completed day
+      // Get XP from profile (includes event XP)
+      const profileXP = profileData?.xp || 0;
 
-      // Get completed tasks
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('daily_tasks')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('completed', true);
-
-      if (tasksError) {
-        throw tasksError;
-      }
-
-      const tasksXP = (tasksData?.length || 0) * 25; // 25 XP per task
-
-      // Get current streak from user_stats
-      const { data: statsData, error: statsError } = await supabase
-        .from('user_stats')
-        .select('current_streak')
-        .eq('user_id', user.id)
-        .single();
-
-      const currentStreak = statsData?.current_streak || 0;
-      const streakXP = currentStreak * 100; // 100 XP per streak day
-
-      const totalXP = planXP + studyDaysXP + tasksXP + streakXP;
+      // Use profile XP as the main source (includes all XP types)
+      const totalXP = profileXP;
 
       console.log('Manual XP calculation:', {
-        planXP,
-        studyDaysXP,
-        tasksXP,
-        streakXP,
+        profileXP,
         totalXP
       });
 
@@ -254,6 +226,7 @@ export const useLeaderboard = () => {
         .from('user_xp')
         .upsert({
           user_id: user.id,
+          username: username,
           total_xp: totalXP,
           updated_at: new Date().toISOString()
         });
@@ -284,6 +257,44 @@ export const useLeaderboard = () => {
     } catch (err) {
       console.error('Error refreshing all XP:', err);
       return null;
+    }
+  };
+
+  // Update user XP in leaderboard after event participation
+  const updateUserXPFromProfile = async () => {
+    if (!user) return;
+
+    try {
+      // Get current XP from profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('xp, username')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profileData) {
+        console.error('Error getting profile XP:', profileError);
+        return;
+      }
+
+      // Update user_xp table
+      const { error: updateError } = await supabase
+        .from('user_xp')
+        .upsert({
+          user_id: user.id,
+          total_xp: profileData.xp || 0,
+          username: profileData.username || 'مستخدم',
+          updated_at: new Date().toISOString()
+        });
+
+      if (updateError) {
+        console.error('Error updating user_xp:', updateError);
+      } else {
+        // Refresh leaderboard to show updated data
+        await loadLeaderboard();
+      }
+    } catch (err) {
+      console.error('Error updating user XP from profile:', err);
     }
   };
 
@@ -323,6 +334,7 @@ export const useLeaderboard = () => {
     error,
     calculateUserXP,
     refreshAllXP,
+    updateUserXPFromProfile,
     getXPLevel,
     getDifficultyBadge,
     refreshLeaderboard: loadLeaderboard

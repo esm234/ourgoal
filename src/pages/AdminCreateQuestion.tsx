@@ -79,7 +79,8 @@ const AdminCreateQuestion: React.FC = () => {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.question_text.trim()) {
+    // Question text is only required for non-image questions
+    if (formData.question_type !== 'image' && !formData.question_text.trim()) {
       newErrors.question_text = 'نص السؤال مطلوب';
     }
 
@@ -108,7 +109,7 @@ const AdminCreateQuestion: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast.error('يرجى تصحيح الأخطاء في النموذج');
       return;
@@ -181,7 +182,7 @@ const AdminCreateQuestion: React.FC = () => {
     const newOptions = [...formData.options];
     newOptions[index] = value;
     setFormData(prev => ({ ...prev, options: newOptions }));
-    
+
     // Clear errors
     if (errors.options) {
       setErrors(prev => ({ ...prev, options: '' }));
@@ -197,8 +198,8 @@ const AdminCreateQuestion: React.FC = () => {
   const removeOption = (index: number) => {
     if (formData.options.length > 2) {
       const newOptions = formData.options.filter((_, i) => i !== index);
-      setFormData(prev => ({ 
-        ...prev, 
+      setFormData(prev => ({
+        ...prev,
         options: newOptions,
         correct_answer: prev.correct_answer >= newOptions.length ? 0 : prev.correct_answer
       }));
@@ -376,19 +377,28 @@ const AdminCreateQuestion: React.FC = () => {
                 {/* Question Text */}
                 <div className="space-y-2">
                   <Label htmlFor="question_text" className="text-base font-medium">
-                    نص السؤال *
+                    نص السؤال {formData.question_type !== 'image' ? '*' : '(اختياري للأسئلة المصورة)'}
                   </Label>
                   <Textarea
                     id="question_text"
                     value={formData.question_text}
                     onChange={(e) => handleInputChange('question_text', e.target.value)}
-                    placeholder="اكتب نص السؤال هنا..."
+                    placeholder={
+                      formData.question_type === 'image'
+                        ? "نص إضافي للسؤال (اختياري)..."
+                        : "اكتب نص السؤال هنا..."
+                    }
                     className={`min-h-[100px] text-base ${errors.question_text ? 'border-red-500' : ''}`}
                   />
                   {errors.question_text && (
                     <div className="flex items-center gap-2 text-red-500 text-sm">
                       <AlertCircle className="w-4 h-4" />
                       {errors.question_text}
+                    </div>
+                  )}
+                  {formData.question_type === 'image' && (
+                    <div className="text-sm text-muted-foreground">
+                      💡 للأسئلة المصورة، يمكن ترك هذا الحقل فارغاً إذا كانت الصورة تحتوي على السؤال كاملاً
                     </div>
                   )}
                 </div>

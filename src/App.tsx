@@ -30,6 +30,7 @@ import AdminEventQuestions from "@/pages/AdminEventQuestions";
 import EventTest from "@/pages/EventTest";
 import EventResults from "@/pages/EventResults";
 import AdminCreateQuestion from "@/pages/AdminCreateQuestion";
+import PomodoroTimer from "@/pages/PomodoroTimer";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
@@ -62,17 +63,42 @@ const App = () => {
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
-              <Route path="/study-plan" element={<StudyPlan />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/welcome" element={<Welcome />} />
-              <Route path="/plan-details/:planId" element={<PlanDetails />} />
+              <Route path="/study-plan" element={
+                <ProtectedRoute>
+                  <StudyPlan />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/welcome" element={
+                <ProtectedRoute>
+                  <Welcome />
+                </ProtectedRoute>
+              } />
+              <Route path="/plan-details/:planId" element={
+                <ProtectedRoute>
+                  <PlanDetails />
+                </ProtectedRoute>
+              } />
+              <Route path="/pomodoro" element={
+                <ProtectedRoute>
+                  <PomodoroTimer />
+                </ProtectedRoute>
+              } />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/weekly-events" element={
                 <ProtectedRoute>
                   <WeeklyEvents />
                 </ProtectedRoute>
               } />
-              <Route path="/weekly-events/:eventId/test" element={<EventTest />} />
+              <Route path="/weekly-events/:eventId/test" element={
+                <ProtectedRoute>
+                  <EventTest />
+                </ProtectedRoute>
+              } />
               <Route path="/weekly-events/:eventId/results" element={
                 <ProtectedRoute>
                   <EventResults />

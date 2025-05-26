@@ -164,14 +164,10 @@ const XPLeaderboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">{userRank.total_xp}</div>
                 <div className="text-xs text-muted-foreground">نقاط الخبرة</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-500">{userRank.completed_days}</div>
-                <div className="text-xs text-muted-foreground">أيام مكتملة</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-500">#{userRank.rank}</div>
@@ -213,36 +209,47 @@ const XPLeaderboard: React.FC = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className={`p-4 rounded-2xl border bg-gradient-to-r ${getRankColor(leader.rank!)} transition-all duration-300 hover:scale-105`}
+                  className={`p-3 sm:p-4 rounded-2xl border bg-gradient-to-r ${getRankColor(leader.rank!)} transition-all duration-300 hover:scale-105`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-3">
+                    {/* Left side - Rank and User Info */}
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                      {/* Rank Icon and Number */}
+                      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                         {getRankIcon(leader.rank!)}
-                        <span className="text-2xl font-bold text-foreground">#{leader.rank}</span>
+                        <span className="text-lg sm:text-2xl font-bold text-foreground">#{leader.rank}</span>
                       </div>
 
-                      <div>
-                        <h4 className="font-bold text-foreground text-lg">{leader.username}</h4>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>{leader.completed_days} أيام مكتملة</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4" />
-                            <span>المستوى {getXPLevel(leader.total_xp).level}</span>
-                          </div>
+                      {/* User Info */}
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-foreground text-sm sm:text-lg truncate" title={leader.username}>
+                          {leader.username}
+                        </h4>
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                          <Star className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="truncate">المستوى {getXPLevel(leader.total_xp).level}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-primary mb-1">{leader.total_xp}</div>
-                      <div className="text-xs text-muted-foreground mb-2">نقاط الخبرة</div>
-                      <Badge className="bg-gradient-to-r from-primary/20 to-accent/20 text-primary border-0 text-xs">
-                        ⭐ المستوى {xpLevel.level}
-                      </Badge>
+                    {/* Right side - XP and Badge */}
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg sm:text-2xl font-bold text-primary mb-1">{leader.total_xp}</div>
+                      {leader.rank !== 2 && (
+                        <div className="text-xs text-muted-foreground mb-2 hidden sm:block">نقاط الخبرة</div>
+                      )}
+                      {leader.rank === 1 && (
+                        <Badge className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-600 border-0 text-xs">
+                          <span className="hidden sm:inline">👑 المتصدر</span>
+                          <span className="sm:hidden">👑</span>
+                        </Badge>
+                      )}
+                      {leader.rank !== 1 && leader.rank !== 2 && (
+                        <Badge className="bg-gradient-to-r from-primary/20 to-accent/20 text-primary border-0 text-xs">
+                          <span className="hidden sm:inline">⭐ المستوى {xpLevel.level}</span>
+                          <span className="sm:hidden">⭐ {xpLevel.level}</span>
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -250,10 +257,10 @@ const XPLeaderboard: React.FC = () => {
                   {leader.rank! <= 3 && (
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span>المستوى {xpLevel.level}</span>
-                        <span>{xpLevel.currentXP}/{xpLevel.requiredXP} XP</span>
+                        <span className="truncate">المستوى {xpLevel.level}</span>
+                        <span className="text-xs whitespace-nowrap ml-2">{xpLevel.currentXP}/{xpLevel.requiredXP} XP</span>
                       </div>
-                      <Progress value={xpLevel.progress} className="h-1.5" />
+                      <Progress value={xpLevel.progress} className="h-1.5 sm:h-2" />
                     </div>
                   )}
                 </motion.div>
