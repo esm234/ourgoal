@@ -26,6 +26,7 @@ import {
   ArrowLeft,
   Music,
   Waves,
+  Trees,
   AlertCircle,
   BarChart3,
   Trophy,
@@ -39,6 +40,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { generateQuranAudioSources, getFallbackQuranSources, QuranAudioSource } from '@/utils/quranAudio';
 
 // Types
 interface Task {
@@ -136,10 +138,10 @@ const PomodoroTimer: React.FC = () => {
       type: 'generated'
     },
     {
-      id: 'rain-sound',
-      name: 'صوت المطر الهادئ',
-      url: 'generated',
-      type: 'generated'
+      id: 'forest-sounds',
+      name: 'أصوات الغابة الطبيعية',
+      url: '/audio/nature/forest-sounds.webm',
+      type: 'nature'
     },
     {
       id: 'brown-noise',
@@ -147,49 +149,8 @@ const PomodoroTimer: React.FC = () => {
       url: 'generated',
       type: 'generated'
     },
-    // Working Quran sources (direct MP3 links)
-    {
-      id: 'quran-fatiha',
-      name: 'سورة الفاتحة - ياسر الدوسري',
-      url: 'https://download.ourquraan.com/Yasser_Aldosari/001.mp3',
-      type: 'quran',
-      category: 'aldosari'
-    },
-    {
-      id: 'quran-baqarah-aldosari',
-      name: 'سورة البقرة - ياسر الدوسري',
-      url: 'https://download.ourquraan.com/Yasser_Aldosari/002.mp3',
-      type: 'quran',
-      category: 'aldosari'
-    },
-    {
-      id: 'quran-yasin-aldosari',
-      name: 'سورة يس - ياسر الدوسري',
-      url: 'https://download.ourquraan.com/Yasser_Aldosari/036.mp3',
-      type: 'quran',
-      category: 'aldosari'
-    },
-    {
-      id: 'quran-kahf-aldosari',
-      name: 'سورة الكهف - ياسر الدوسري',
-      url: 'https://download.ourquraan.com/Yasser_Aldosari/018.mp3',
-      type: 'quran',
-      category: 'aldosari'
-    },
-    {
-      id: 'quran-baqarah',
-      name: 'سورة البقرة - ماهر المعيقلي',
-      url: 'https://server8.mp3quran.net/maher/002.mp3',
-      type: 'quran',
-      category: 'maher'
-    },
-    {
-      id: 'quran-kahf',
-      name: 'سورة الكهف - عبد الرحمن السديس',
-      url: 'https://server7.mp3quran.net/sudais/018.mp3',
-      type: 'quran',
-      category: 'sudais'
-    }
+    // القرآن الكريم - السور المختارة من YouTube
+    ...generateQuranAudioSources()
   ];
 
   // Load data from localStorage on mount
@@ -612,7 +573,9 @@ const PomodoroTimer: React.FC = () => {
     }
   };
 
-  const playQuranAudio = async (url: string) => {
+  const playQuranAudio = async (url: string, retryCount = 0) => {
+    const maxRetries = 2;
+
     try {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -627,14 +590,55 @@ const PomodoroTimer: React.FC = () => {
         audioRef.current.volume = isMuted ? 0 : audioVolume;
         audioRef.current.loop = true;
 
+        // Add error handling for audio loading
+        audioRef.current.onerror = async () => {
+          if (retryCount < maxRetries) {
+            console.log(`Retrying audio load, attempt ${retryCount + 1}`);
+            setTimeout(() => {
+              playQuranAudio(url, retryCount + 1);
+            }, 1000);
+            return;
+          }
+
+          setAudioError('فشل في تحميل التلاوة - جرب تلاوة أخرى');
+          setAudioLoading(false);
+          toast.error('فشل في تحميل التلاوة - جرب تلاوة أخرى');
+        };
+
+        audioRef.current.onloadstart = () => {
+          if (retryCount === 0) {
+            toast.info('جاري تحميل التلاوة...');
+          }
+        };
+
+        audioRef.current.oncanplay = () => {
+          if (retryCount === 0) {
+            toast.success('تم تحميل التلاوة بنجاح');
+          }
+        };
+
+        audioRef.current.onloadeddata = () => {
+          setAudioLoading(false);
+        };
+
         await audioRef.current.play();
-        toast.success('تم تشغيل التلاوة');
+        if (retryCount === 0) {
+          toast.success('🎵 تم تشغيل التلاوة المباركة');
+        }
       }
     } catch (error) {
       console.error('Quran audio error:', error);
+
+      if (retryCount < maxRetries) {
+        console.log(`Retrying audio play, attempt ${retryCount + 1}`);
+        setTimeout(() => {
+          playQuranAudio(url, retryCount + 1);
+        }, 1000);
+        return;
+      }
+
       setAudioError('فشل في تشغيل التلاوة');
-      toast.error('فشل في تشغيل التلاوة - جرب صوت آخر');
-    } finally {
+      toast.error('فشل في تشغيل التلاوة - جرب تلاوة أخرى');
       setAudioLoading(false);
     }
   };
@@ -992,92 +996,168 @@ const PomodoroTimer: React.FC = () => {
                     <CardContent className="space-y-4">
                       {/* Audio Selection */}
                       <div className="space-y-3">
-                        <div className="max-h-72 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
-                          {audioSources.map((audio) => (
-                            <div
-                              key={audio.id}
-                              onClick={() => {
-                                // Stop current audio first
-                                stopGeneratedAudio();
-                                if (audioRef.current) {
-                                  audioRef.current.pause();
-                                  audioRef.current.currentTime = 0;
-                                }
+                        <div className="max-h-72 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+                          {/* Generated Sounds Section */}
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground px-2 py-1 bg-muted/30 rounded-md">
+                              🎵 أصوات مولدة
+                            </div>
+                            {audioSources.filter(audio => audio.type === 'generated').map((audio) => (
+                              <div
+                                key={audio.id}
+                                onClick={() => {
+                                  // Stop current audio first
+                                  stopGeneratedAudio();
+                                  if (audioRef.current) {
+                                    audioRef.current.pause();
+                                    audioRef.current.currentTime = 0;
+                                  }
 
-                                // Set new selection
-                                setSelectedAudio(audio.id);
+                                  // Set new selection
+                                  setSelectedAudio(audio.id);
 
-                                // Play new audio if not silence
-                                if (audio.id !== 'silence') {
-                                  if (audio.id === 'white-noise') {
-                                    playGeneratedAudio('white-noise');
-                                  } else if (audio.id === 'rain-sound') {
-                                    playGeneratedAudio('rain');
-                                  } else if (audio.id === 'brown-noise') {
-                                    playGeneratedAudio('brown-noise');
-                                  } else if (audio.type === 'quran') {
+                                  // Play new audio if not silence
+                                  if (audio.id !== 'silence') {
+                                    if (audio.id === 'white-noise') {
+                                      playGeneratedAudio('white-noise');
+                                    } else if (audio.id === 'forest-sounds') {
+                                      playQuranAudio(audio.url);
+                                    } else if (audio.id === 'brown-noise') {
+                                      playGeneratedAudio('brown-noise');
+                                    }
+                                  }
+                                }}
+                                className={`
+                                  relative group cursor-pointer rounded-xl p-3 transition-all duration-300 border
+                                  ${selectedAudio === audio.id
+                                    ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
+                                    : 'bg-card/50 border-border/50 hover:bg-card hover:border-border hover:shadow-md'
+                                  }
+                                `}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`
+                                    p-2 rounded-lg transition-colors duration-300
+                                    ${selectedAudio === audio.id
+                                      ? 'bg-primary/20 text-primary'
+                                      : 'bg-muted/50 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
+                                    }
+                                  `}>
+                                    {audio.id === 'silence' && <VolumeX className="w-4 h-4" />}
+                                    {audio.id === 'forest-sounds' && <Trees className="w-4 h-4" />}
+                                    {audio.id !== 'silence' && audio.id !== 'forest-sounds' && <Music className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`
+                                      font-medium text-sm transition-colors duration-300
+                                      ${selectedAudio === audio.id ? 'text-foreground' : 'text-foreground/80 group-hover:text-foreground'}
+                                    `}>
+                                      {audio.name}
+                                    </div>
+                                  </div>
+                                  {selectedAudio === audio.id && audio.id !== 'silence' && (
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
+                                      <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
+                                      <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Quran Recitations Section */}
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground px-2 py-1 bg-muted/30 rounded-md">
+                              📖 تلاوات القرآن الكريم
+                            </div>
+                            {audioSources.filter(audio => audio.type === 'quran').map((audio) => (
+                              <div
+                                key={audio.id}
+                                onClick={() => {
+                                  // Stop current audio first
+                                  stopGeneratedAudio();
+                                  if (audioRef.current) {
+                                    audioRef.current.pause();
+                                    audioRef.current.currentTime = 0;
+                                  }
+
+                                  // Set new selection
+                                  setSelectedAudio(audio.id);
+
+                                  // Play Quran audio
+                                  if (audio.type === 'quran') {
                                     playQuranAudio(audio.url);
                                   }
-                                }
-                              }}
-                              className={`
-                                relative group cursor-pointer rounded-xl p-4 transition-all duration-300 border
-                                ${selectedAudio === audio.id
-                                  ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
-                                  : 'bg-card/50 border-border/50 hover:bg-card hover:border-border hover:shadow-md'
-                                }
-                              `}
-                            >
-                              <div className="flex items-center gap-3">
-                                {/* Icon with background */}
-                                <div className={`
-                                  p-2 rounded-lg transition-colors duration-300
+                                }}
+                                className={`
+                                  relative group cursor-pointer rounded-xl p-3 transition-all duration-300 border
                                   ${selectedAudio === audio.id
-                                    ? 'bg-primary/20 text-primary'
-                                    : 'bg-muted/50 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
+                                    ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30 shadow-lg shadow-green-500/10'
+                                    : 'bg-card/50 border-border/50 hover:bg-card hover:border-border hover:shadow-md'
                                   }
-                                `}>
-                                  {audio.type === 'quran' && <BookOpen className="w-4 h-4" />}
-                                  {audio.type === 'nature' && <Waves className="w-4 h-4" />}
-                                  {audio.type === 'generated' && audio.id === 'silence' && <VolumeX className="w-4 h-4" />}
-                                  {audio.type === 'generated' && audio.id !== 'silence' && <Music className="w-4 h-4" />}
-                                </div>
-
-                                {/* Text content */}
-                                <div className="flex-1 min-w-0">
+                                `}
+                              >
+                                <div className="flex items-center gap-3">
                                   <div className={`
-                                    font-medium text-sm transition-colors duration-300
-                                    ${selectedAudio === audio.id ? 'text-foreground' : 'text-foreground/80 group-hover:text-foreground'}
+                                    p-2 rounded-lg transition-colors duration-300
+                                    ${selectedAudio === audio.id
+                                      ? 'bg-green-500/20 text-green-600'
+                                      : 'bg-muted/50 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
+                                    }
                                   `}>
-                                    {audio.name}
+                                    <BookOpen className="w-4 h-4" />
                                   </div>
-                                  <div className="text-xs text-muted-foreground mt-0.5">
-                                    {audio.type === 'quran' && 'تلاوة قرآنية'}
-                                    {audio.type === 'generated' && audio.id === 'silence' && 'بدون صوت'}
-                                    {audio.type === 'generated' && audio.id !== 'silence' && 'صوت مولد'}
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`
+                                      font-medium text-sm transition-colors duration-300
+                                      ${selectedAudio === audio.id ? 'text-foreground' : 'text-foreground/80 group-hover:text-foreground'}
+                                    `}>
+                                      {audio.name}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">
+                                      تلاوة قرآنية مباركة
+                                    </div>
                                   </div>
+                                  {selectedAudio === audio.id && (
+                                    <div className="flex items-center gap-1">
+                                      {audioLoading ? (
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-100" />
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-200" />
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
+                                          <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
+                                          <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {selectedAudio === audio.id && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                                    </div>
+                                  )}
                                 </div>
-
-                                {/* Playing indicator */}
-                                {selectedAudio === audio.id && audio.id !== 'silence' && (
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
-                                    <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
-                                    <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
-                                  </div>
-                                )}
-
-                                {/* Selection indicator */}
-                                {selectedAudio === audio.id && (
-                                  <div className="absolute top-2 right-2">
-                                    <div className="w-2 h-2 bg-primary rounded-full" />
-                                  </div>
-                                )}
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Audio Error Display */}
+                      {audioError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                          <div className="flex items-center gap-2 text-red-500">
+                            <AlertCircle className="w-4 h-4" />
+                            <span className="text-sm font-medium">{audioError}</span>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Audio Controls */}
                       {selectedAudio !== 'silence' && (
