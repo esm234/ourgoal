@@ -121,6 +121,74 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+     <script>
+      // Prevent inspect element by various methods
+      document.addEventListener('keydown', function(e) {
+        // Prevent F12
+        if(e.key === 'F12' || e.keyCode === 123) {
+          e.preventDefault();
+          return false;
+        }
+        
+        // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+        if(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+          e.preventDefault();
+          return false;
+        }
+        
+        // Prevent Ctrl+U (View Source)
+        if(e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // مؤشر لتحديد ما إذا كان الجهاز محمولًا
+      function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      // دالة اكتشاف أدوات المطور المحسّنة (تتجاهل الأجهزة المحمولة)
+      function detectDevTools() {
+        // تجاهل الكشف على الأجهزة المحمولة
+        if (isMobileDevice()) {
+          return;
+        }
+        
+        // تطبيق الكشف فقط على أجهزة سطح المكتب
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if(widthThreshold || heightThreshold) {
+          document.body.innerHTML = '<div style="text-align:center;padding:50px;direction:rtl"><h1>تم اكتشاف محاولة للوصول إلى أدوات المطورين</h1><p>يرجى إغلاق أدوات المطورين وتحديث الصفحة للمتابعة.</p></div>';
+        }
+      }
+      
+      // تشغيل الكشف بشكل دوري فقط على أجهزة سطح المكتب
+      if (!isMobileDevice()) {
+        setInterval(detectDevTools, 1000);
+      }
+
+      // Disable console
+      (() => {
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        const originalConsoleInfo = console.info;
+        const originalConsoleDebug = console.debug;
+        
+        console.log = console.error = console.warn = console.info = console.debug = () => {
+          return false;
+        };
+
+        // Additional protection against console reopening
+        window.addEventListener('devtoolschange', function(e) {
+          if(e.detail.open) {
+            window.location.reload();
+          }
+        });
+      })();
+    </script>
 
    
   </body>
