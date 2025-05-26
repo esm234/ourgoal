@@ -24,6 +24,10 @@ export default defineConfig(({ mode }) => ({
     // تحسين الضغط والتقسيم
     rollupOptions: {
       output: {
+        // Cache busting with hash in filenames
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           // تقسيم المكتبات الكبيرة
           vendor: ['react', 'react-dom'],
