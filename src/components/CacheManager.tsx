@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Download, Upload, Trash2, Shield, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Shield, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
-import { safeCacheClear, forceRefreshWithDataPreservation, exportUserData, importUserData } from '@/utils/dataBackup';
+import { safeCacheClear, forceRefreshWithDataPreservation } from '@/utils/dataBackup';
 
 const CacheManager = () => {
   const [isClearing, setIsClearing] = useState(false);
@@ -15,12 +15,12 @@ const CacheManager = () => {
     try {
       await safeCacheClear();
       toast.success('تم تنظيف الذاكرة المؤقتة مع الحفاظ على بياناتك المهمة! 🎉');
-      
+
       // Auto refresh after 2 seconds
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-      
+
     } catch (error) {
       console.error('Cache clear failed:', error);
       toast.error('فشل في تنظيف الذاكرة المؤقتة. جرب مرة أخرى.');
@@ -35,49 +35,6 @@ const CacheManager = () => {
     forceRefreshWithDataPreservation();
   };
 
-  const handleExportData = () => {
-    try {
-      const data = exportUserData();
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ourgoal-backup-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      toast.success('تم تصدير بياناتك بنجاح! 📁');
-    } catch (error) {
-      toast.error('فشل في تصدير البيانات');
-    }
-  };
-
-  const handleImportData = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const data = e.target?.result as string;
-            importUserData(data);
-            toast.success('تم استيراد البيانات بنجاح! 🎉');
-            setTimeout(() => window.location.reload(), 1000);
-          } catch (error) {
-            toast.error('فشل في استيراد البيانات. تأكد من صحة الملف.');
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -89,7 +46,7 @@ const CacheManager = () => {
           أدوات لتنظيف الذاكرة المؤقتة مع الحفاظ على بياناتك المهمة
         </p>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Safe Cache Clear */}
         <div className="p-4 border rounded-lg bg-green-50/50 dark:bg-green-950/20">
@@ -160,39 +117,13 @@ const CacheManager = () => {
           </div>
         </div>
 
-        {/* Data Backup */}
-        <div className="p-4 border rounded-lg">
-          <h3 className="font-semibold mb-3">نسخ احتياطي للبيانات</h3>
-          <div className="flex gap-2">
-            <Button
-              onClick={handleExportData}
-              variant="outline"
-              className="flex-1"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              تصدير البيانات
-            </Button>
-            <Button
-              onClick={handleImportData}
-              variant="outline"
-              className="flex-1"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              استيراد البيانات
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            احفظ نسخة احتياطية من بياناتك قبل تنظيف الذاكرة المؤقتة
-          </p>
-        </div>
-
         {/* Warning */}
         <div className="p-3 border border-orange-200 rounded-lg bg-orange-50/50 dark:bg-orange-950/20">
           <div className="flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-orange-700 dark:text-orange-300">
-              <strong>تنبيه:</strong> تجنب استخدام "Clear Application Cache" من Developer Tools 
-              لأنه سيمسح جميع البيانات. استخدم الأدوات أعلاه للحفاظ على بياناتك.
+              <strong>تنبيه:</strong> تجنب استخدام "Clear Application Cache" من Developer Tools
+              لأنه سيمسح جميع البيانات. استخدم الأدوات أعلاه للحفاظ على بياناتك المهمة مثل بيانات البومودورو والخطط الدراسية.
             </div>
           </div>
         </div>

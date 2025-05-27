@@ -9,15 +9,15 @@ interface BackupData {
     pomodoroSettings?: any;
     pomodoroStats?: any;
     pomodoroHistory?: any;
-    
+
     // Study plan data
     studyPlanProgress?: any;
     completedDays?: any;
-    
+
     // User preferences
     userPreferences?: any;
     themeSettings?: any;
-    
+
     // Other important data
     [key: string]: any;
   };
@@ -31,22 +31,22 @@ const PRESERVE_KEYS = [
   'pomodoro-history',
   'pomodoro-session-data',
   'pomodoro-daily-stats',
-  
+
   // Study plan data
   'study-plan-progress',
   'completed-days',
   'current-study-plan',
-  
+
   // User preferences
   'user-preferences',
   'theme-settings',
   'audio-preferences',
   'notification-settings',
-  
+
   // Auth data (if any local storage)
   'user-session',
   'remember-me',
-  
+
   // App settings
   'app-version',
   'first-visit',
@@ -75,7 +75,7 @@ export const backupImportantData = (): BackupData => {
 
   // Also backup any keys that start with important prefixes
   const importantPrefixes = ['pomodoro-', 'study-', 'user-', 'app-'];
-  
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && importantPrefixes.some(prefix => key.startsWith(prefix))) {
@@ -98,7 +98,7 @@ export const backupImportantData = (): BackupData => {
 
 export const restoreImportantData = (backup: BackupData): void => {
   console.log('🔄 Restoring important data...');
-  
+
   Object.entries(backup.data).forEach(([key, value]) => {
     try {
       const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
@@ -113,14 +113,14 @@ export const restoreImportantData = (backup: BackupData): void => {
 
 export const safeCacheClear = async (): Promise<void> => {
   console.log('🧹 Starting safe cache clear...');
-  
+
   // 1. Backup important data
   const backup = backupImportantData();
-  
+
   // 2. Store backup temporarily in a safe place
   const backupKey = `temp-backup-${Date.now()}`;
   localStorage.setItem(backupKey, JSON.stringify(backup));
-  
+
   try {
     // 3. Clear application cache
     if ('caches' in window) {
@@ -132,7 +132,7 @@ export const safeCacheClear = async (): Promise<void> => {
         })
       );
     }
-    
+
     // 4. Clear service worker cache
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -143,7 +143,7 @@ export const safeCacheClear = async (): Promise<void> => {
         })
       );
     }
-    
+
     // 5. Clear localStorage except backup
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -152,24 +152,24 @@ export const safeCacheClear = async (): Promise<void> => {
         keysToRemove.push(key);
       }
     }
-    
+
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    
+
     // 6. Restore important data
     const backupData = localStorage.getItem(backupKey);
     if (backupData) {
       const parsedBackup: BackupData = JSON.parse(backupData);
       restoreImportantData(parsedBackup);
     }
-    
+
     // 7. Clean up temporary backup
     localStorage.removeItem(backupKey);
-    
+
     console.log('✅ Safe cache clear completed');
-    
+
   } catch (error) {
     console.error('❌ Cache clear failed:', error);
-    
+
     // Restore from backup if something went wrong
     const backupData = localStorage.getItem(backupKey);
     if (backupData) {
@@ -177,18 +177,18 @@ export const safeCacheClear = async (): Promise<void> => {
       restoreImportantData(parsedBackup);
       localStorage.removeItem(backupKey);
     }
-    
+
     throw error;
   }
 };
 
 export const forceRefreshWithDataPreservation = (): void => {
   console.log('🔄 Force refresh with data preservation...');
-  
+
   // Backup data before refresh
   const backup = backupImportantData();
   sessionStorage.setItem('pre-refresh-backup', JSON.stringify(backup));
-  
+
   // Force reload
   window.location.reload();
 };
@@ -208,20 +208,4 @@ export const autoRestoreOnLoad = (): void => {
   }
 };
 
-// Export data for manual backup
-export const exportUserData = (): string => {
-  const backup = backupImportantData();
-  return JSON.stringify(backup, null, 2);
-};
-
-// Import data from manual backup
-export const importUserData = (backupString: string): void => {
-  try {
-    const backup: BackupData = JSON.parse(backupString);
-    restoreImportantData(backup);
-    console.log('✅ User data imported successfully');
-  } catch (error) {
-    console.error('❌ Import failed:', error);
-    throw new Error('Invalid backup data format');
-  }
-};
+// Note: Export/Import functions removed as they're handled elsewhere in the app
