@@ -429,7 +429,7 @@ const FAQ: React.FC = () => {
                 انضم إلى مجتمعنا على تليجرام للحصول على مساعدة من الطلاب والخبراء
               </p>
               <a
-                href="https://t.me/ourgoul1"
+                href="https://linktr.ee/Our_goal"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-black font-bold px-8 py-3 rounded-xl hover:scale-105 transition-transform duration-300"

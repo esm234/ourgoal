@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { initCacheManagement, registerServiceWorker } from './utils/cacheUtils'
+import { autoRestoreOnLoad } from './utils/dataBackup'
 
 // Handle Chrome extension errors
 if (typeof chrome !== 'undefined' && chrome.runtime) {
@@ -17,6 +18,9 @@ if (typeof chrome !== 'undefined' && chrome.runtime) {
     originalError.apply(console, args);
   };
 }
+
+// Auto-restore data if needed
+autoRestoreOnLoad();
 
 // Initialize cache management
 initCacheManagement();

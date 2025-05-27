@@ -38,6 +38,7 @@ import XPLeaderboard from '@/components/XPLeaderboard';
 import SingleStudyPlanManager from '@/components/SingleStudyPlanManager';
 import { useUserEventHistory } from '@/hooks/useWeeklyEvents';
 import { formatTimeRemaining, getCategoryLabel } from '@/types/weeklyEvents';
+import CacheManager from '@/components/CacheManager';
 
 const Profile: React.FC = () => {
   const { user, isLoggedIn } = useAuth();
@@ -256,7 +257,7 @@ const Profile: React.FC = () => {
           >
             <Tabs defaultValue="history" dir="rtl" className="w-full">
               <div className="flex justify-center mb-8">
-                <TabsList className="grid grid-cols-3 w-full max-w-2xl bg-transparent p-2">
+                <TabsList className="grid grid-cols-4 w-full max-w-4xl bg-transparent p-2">
                   <TabsTrigger
                     value="history"
                     className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-4 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
@@ -277,6 +278,13 @@ const Profile: React.FC = () => {
                   >
                     <Trophy className="w-4 h-4 mr-2" />
                     المتصدرون
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="settings"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-black font-bold py-3 px-4 rounded-xl transition-all duration-300 data-[state=inactive]:text-muted-foreground hover:text-foreground"
+                  >
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    إعدادات التطبيق
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -515,6 +523,26 @@ const Profile: React.FC = () => {
               {/* XP Leaderboard Tab */}
               <TabsContent value="leaderboard" className="mt-0">
                 <XPLeaderboard />
+              </TabsContent>
+
+              {/* Settings Tab */}
+              <TabsContent value="settings" className="mt-0">
+                <div className="space-y-6">
+                  <Card className="bg-gradient-to-br from-card/90 to-card/60 border-0 rounded-3xl backdrop-blur-xl shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <TrendingUp className="w-6 h-6 text-primary" />
+                        إعدادات التطبيق والذاكرة المؤقتة
+                      </CardTitle>
+                      <p className="text-muted-foreground">
+                        أدوات لإدارة التطبيق وحل مشاكل التحديث مع الحفاظ على بياناتك
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <CacheManager />
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
           </motion.div>
