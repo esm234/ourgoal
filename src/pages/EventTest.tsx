@@ -251,6 +251,11 @@ const EventTest: React.FC = () => {
 
       // Update leaderboard with new XP
       try {
+        console.log('🔄 Starting leaderboard update after event completion...');
+
+        // Small delay to ensure database write is complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         await updateUserXPFromProfile();
 
         // Trigger a global XP update event for other components
@@ -264,7 +269,7 @@ const EventTest: React.FC = () => {
 
         console.log('✅ XP updated successfully after event test completion');
       } catch (leaderboardError) {
-        console.error('Error updating leaderboard:', leaderboardError);
+        console.error('❌ Error updating leaderboard:', leaderboardError);
         // Don't throw error here, participation was successful
       }
 

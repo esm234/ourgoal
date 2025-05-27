@@ -40,6 +40,15 @@ export const useLeaderboard = () => {
         throw leaderboardError;
       }
 
+      console.log('📊 Leaderboard data loaded:', {
+        usersCount: topUsers?.length || 0,
+        topUsers: topUsers?.map(u => ({
+          username: u.username,
+          total_xp: u.total_xp,
+          user_id: u.user_id === user?.id ? 'CURRENT_USER' : 'OTHER'
+        }))
+      });
+
       // If no users found, try to initialize with current user
       if ((!topUsers || topUsers.length === 0) && user) {
         await calculateUserXP();
@@ -214,18 +223,28 @@ export const useLeaderboard = () => {
       let totalXP = 0;
 
       // 1. XP from events (get from event_participations table)
+      console.log('🔍 Fetching event participations for user:', user.id);
+
       const { data: eventsData, error: eventsError } = await supabase
         .from('event_participations')
-        .select('xp_earned')
+        .select('xp_earned, event_id')
         .eq('user_id', user.id);
+
+      if (eventsError) {
+        console.error('❌ Error fetching events data:', eventsError);
+      }
 
       const eventsXP = eventsData?.reduce((sum, event) => sum + (event.xp_earned || 0), 0) || 0;
       totalXP += eventsXP;
 
       console.log('📊 Events XP Details:', {
         eventsCount: eventsData?.length || 0,
-        eventsData: eventsData?.map(e => ({ xp_earned: e.xp_earned })),
-        totalEventsXP: eventsXP
+        eventsData: eventsData?.map(e => ({
+          xp_earned: e.xp_earned,
+          event_id: e.event_id
+        })),
+        totalEventsXP: eventsXP,
+        hasError: !!eventsError
       });
 
       // 2. XP from completed plans
@@ -268,18 +287,58 @@ export const useLeaderboard = () => {
       });
 
       // Insert or update user XP (using minimal columns)
-      const { error: upsertError } = await supabase
+      console.log('💾 Updating user_xp table:', {
+        user_id: user.id,
+        username: username,
+        total_xp: totalXP,
+        breakdown: {
+          eventsXP,
+          completedPlansXP,
+          currentPlanXP
+        }
+      });
+
+      // First try to update existing record
+      const { data: existingRecord } = await supabase
         .from('user_xp')
-        .upsert({
-          user_id: user.id,
-          username: username,
-          total_xp: totalXP,
-          updated_at: new Date().toISOString()
-        });
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      let upsertError;
+
+      if (existingRecord) {
+        // Update existing record
+        const { error } = await supabase
+          .from('user_xp')
+          .update({
+            username: username,
+            total_xp: totalXP,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+        upsertError = error;
+        console.log('📝 Updated existing user_xp record');
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('user_xp')
+          .insert({
+            user_id: user.id,
+            username: username,
+            total_xp: totalXP,
+            updated_at: new Date().toISOString()
+          });
+        upsertError = error;
+        console.log('➕ Inserted new user_xp record');
+      }
 
       if (upsertError) {
+        console.error('❌ Error updating user_xp table:', upsertError);
         throw upsertError;
       }
+
+      console.log('✅ Successfully updated user_xp table with total XP:', totalXP);
 
       // Note: Leaderboard refresh is now manual only to save API calls
       return totalXP;
@@ -315,8 +374,18 @@ export const useLeaderboard = () => {
       const totalXP = await calculateXPManually();
 
       if (totalXP !== null) {
-        // Refresh leaderboard to show updated data
+        console.log('✅ XP updated successfully, refreshing leaderboard...', { totalXP });
+
+        // Small delay to ensure database update is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Force refresh leaderboard to show updated data
         await loadLeaderboard();
+
+        // Also refresh user rank specifically
+        await loadUserRank();
+
+        console.log('🔄 Leaderboard refresh completed');
       }
     } catch (err) {
       console.error('Error updating user XP from profile:', err);
