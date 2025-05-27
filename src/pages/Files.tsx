@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookText, Calculator, FileText, Download, Eye, Search, Filter, ExternalLink, Settings } from "lucide-react";
+import { BookText, Calculator, FileText, Download, Eye, Search, Filter, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { useLocalFiles } from "@/hooks/useLocalFiles";
 import { CustomPagination } from "@/components/ui/custom-pagination";
 import { LocalFile, incrementDownloads } from "@/data/localFiles";
@@ -18,10 +16,10 @@ import { useDebounce } from "@/hooks/useDebounce";
 
 const Files = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("verbal");
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Remove admin functionality since files are now local
+  // const [isAdmin, setIsAdmin] = useState(false);
 
   // Debounce search term to avoid searching on every keystroke
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -40,30 +38,31 @@ const Files = () => {
     pageSize: 12
   });
 
-  useEffect(() => {
-    checkAdminStatus();
-  }, [user]);
+  // Remove admin check since files are now local and don't need admin management
+  // useEffect(() => {
+  //   checkAdminStatus();
+  // }, [user]);
 
-  const checkAdminStatus = async () => {
-    if (!user) {
-      setIsAdmin(false);
-      return;
-    }
+  // const checkAdminStatus = async () => {
+  //   if (!user) {
+  //     setIsAdmin(false);
+  //     return;
+  //   }
 
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from('profiles')
+  //       .select('role')
+  //       .eq('id', user.id)
+  //       .single();
 
-      if (error) throw error;
-      setIsAdmin(data?.role === 'admin');
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      setIsAdmin(false);
-    }
-  };
+  //     if (error) throw error;
+  //     setIsAdmin(data?.role === 'admin');
+  //   } catch (error) {
+  //     console.error('Error checking admin status:', error);
+  //     setIsAdmin(false);
+  //   }
+  // };
 
   const handleDownload = async (file: LocalFile) => {
     try {
@@ -257,22 +256,7 @@ const Files = () => {
                 />
               </div>
 
-              {/* Admin Button - Only visible to admins */}
-              {isAdmin && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Button
-                    onClick={() => navigate('/admin/files')}
-                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    إدارة الملفات
-                  </Button>
-                </motion.div>
-              )}
+              {/* Admin Button removed - Files are now local and don't need admin management */}
             </div>
           </motion.div>
 
