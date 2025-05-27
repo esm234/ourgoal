@@ -200,7 +200,7 @@ export const useLeaderboard = () => {
       // Get user profile and username
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('username, xp')
+        .select('username, completed_plans, study_plan')
         .eq('id', user.id)
         .single();
 
@@ -210,14 +210,36 @@ export const useLeaderboard = () => {
 
       const username = profileData?.username || 'مستخدم';
 
-      // Get XP from profile (includes event XP)
-      const profileXP = profileData?.xp || 0;
+      // Calculate XP from different sources
+      let totalXP = 0;
 
-      // Use profile XP as the main source (includes all XP types)
-      const totalXP = profileXP;
+      // 1. XP from events (get from event_participations table)
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('event_participations')
+        .select('xp_earned')
+        .eq('user_id', user.id);
+
+      const eventsXP = eventsData?.reduce((sum, event) => sum + (event.xp_earned || 0), 0) || 0;
+      totalXP += eventsXP;
+
+      // 2. XP from completed plans
+      const completedPlans = profileData?.completed_plans as any[] || [];
+      const completedPlansXP = completedPlans.reduce((sum, plan) => sum + (plan.xp_earned || 0), 0);
+      totalXP += completedPlansXP;
+
+      // 3. XP from current plan (completed days)
+      const currentPlan = profileData?.study_plan as any;
+      let currentPlanXP = 0;
+      if (currentPlan && currentPlan.study_days) {
+        const completedDays = currentPlan.study_days.filter((day: any) => day.completed).length;
+        currentPlanXP = completedDays * 100; // 100 XP per completed day
+      }
+      totalXP += currentPlanXP;
 
       console.log('Manual XP calculation:', {
-        profileXP,
+        eventsXP,
+        completedPlansXP,
+        currentPlanXP,
         totalXP
       });
 
@@ -265,31 +287,10 @@ export const useLeaderboard = () => {
     if (!user) return;
 
     try {
-      // Get current XP from profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('xp, username')
-        .eq('id', user.id)
-        .single();
+      // Recalculate XP using the manual calculation method
+      const totalXP = await calculateXPManually();
 
-      if (profileError || !profileData) {
-        console.error('Error getting profile XP:', profileError);
-        return;
-      }
-
-      // Update user_xp table
-      const { error: updateError } = await supabase
-        .from('user_xp')
-        .upsert({
-          user_id: user.id,
-          total_xp: profileData.xp || 0,
-          username: profileData.username || 'مستخدم',
-          updated_at: new Date().toISOString()
-        });
-
-      if (updateError) {
-        console.error('Error updating user_xp:', updateError);
-      } else {
+      if (totalXP !== null) {
         // Refresh leaderboard to show updated data
         await loadLeaderboard();
       }

@@ -43,7 +43,7 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
 
   // Use custom hooks
-  const { plans: savedPlans, loading: plansLoading, deletePlan, updatePlan } = useStudyPlans();
+  const { plans: savedPlans, completedPlans, loading: plansLoading, deletePlan, updatePlan, completePlan } = useStudyPlans();
   const { stats, loading: statsLoading, getFormattedStats } = useUserStats();
   const {
     tasks: dailyTasks,
@@ -144,6 +144,10 @@ const Profile: React.FC = () => {
     return await updatePlan(updatedPlan);
   };
 
+  const handleCompletePlan = async () => {
+    await completePlan();
+  };
+
   const getTodayTasks = () => {
     return dailyTasks.filter(task => task.task_date === today);
   };
@@ -220,8 +224,8 @@ const Profile: React.FC = () => {
               <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Target className="w-6 h-6 text-blue-500" />
               </div>
-              <div className="text-3xl font-bold text-blue-500 mb-2">{userStats.totalPlansCreated}</div>
-              <div className="text-muted-foreground font-medium">خطة دراسية</div>
+              <div className="text-3xl font-bold text-blue-500 mb-2">{completedPlans.length}</div>
+              <div className="text-muted-foreground font-medium">خطة مكتملة</div>
             </Card>
 
             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6 text-center">
@@ -400,6 +404,7 @@ const Profile: React.FC = () => {
                     studyPlan={savedPlans.length > 0 ? savedPlans[0] : null}
                     onDelete={handleDeletePlan}
                     onUpdate={handleUpdatePlan}
+                    onComplete={handleCompletePlan}
                     onViewDetails={viewPlanDetails}
                   />
 

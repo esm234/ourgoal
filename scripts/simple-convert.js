@@ -21,6 +21,7 @@ const sources = [
     category: 'nature',
     title: 'Forest Sounds'
   },
+
   {
     url: 'https://youtu.be/K8w3XN-g4LM',
     filename: 'taha-ayyub',
@@ -68,22 +69,32 @@ console.log('\n🎵 Starting conversion...\n');
 for (const source of sources) {
   const outputDir = source.category === 'nature' ? natureDir : quranDir;
   const outputPath = path.join(outputDir, `${source.filename}.mp3`);
-  
+
   console.log(`🎬 Converting: ${source.title}`);
   console.log(`📹 URL: ${source.url}`);
-  
+
   if (fs.existsSync(outputPath)) {
     console.log(`⏭️  File exists, skipping: ${source.filename}.mp3\n`);
     continue;
   }
-  
+
   try {
-    // Simple yt-dlp command
-    const command = `yt-dlp -x --audio-format mp3 --audio-quality 192K "${source.url}" -o "${outputPath.replace('.mp3', '.%(ext)s')}"`;
-    
+    // Simple yt-dlp command with optional duration limit
+    let command = `yt-dlp -x --audio-format mp3 --audio-quality 192K`;
+
+    // Add duration limit if specified
+    if (source.duration) {
+      command += ` --download-sections "*0:00-${source.duration}"`;
+    }
+
+    command += ` "${source.url}" -o "${outputPath.replace('.mp3', '.%(ext)s')}"`;
+
     console.log('🔄 Downloading and converting...');
+    if (source.duration) {
+      console.log(`⏱️  Limited to first ${source.duration}`);
+    }
     execSync(command, { stdio: 'inherit' });
-    
+
     if (fs.existsSync(outputPath)) {
       const stats = fs.statSync(outputPath);
       const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
@@ -91,7 +102,7 @@ for (const source of sources) {
     } else {
       console.log(`❌ Failed to create: ${source.filename}.mp3\n`);
     }
-    
+
   } catch (error) {
     console.error(`❌ Error converting ${source.title}:`, error.message);
     console.log('');

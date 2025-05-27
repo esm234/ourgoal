@@ -98,6 +98,8 @@ export type Database = {
           role: string | null
           study_plan: Json | null
           current_streak: number | null
+          completed_plans: Json | null
+          xp: number | null
         }
         Insert: {
           created_at?: string
@@ -107,6 +109,8 @@ export type Database = {
           role?: string | null
           study_plan?: Json | null
           current_streak?: number | null
+          completed_plans?: Json | null
+          xp?: number | null
         }
         Update: {
           created_at?: string
@@ -116,6 +120,8 @@ export type Database = {
           role?: string | null
           study_plan?: Json | null
           current_streak?: number | null
+          completed_plans?: Json | null
+          xp?: number | null
         }
         Relationships: []
       }

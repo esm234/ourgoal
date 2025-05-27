@@ -28,9 +28,21 @@ export interface StudyPlan {
   updated_at?: string;
 }
 
+export interface CompletedPlan {
+  name: string;
+  total_days: number;
+  review_rounds: number;
+  test_date: string;
+  completed_days: number;
+  xp_earned: number;
+  completed_at: string;
+  original_created_at: string;
+}
+
 export const useStudyPlans = () => {
   const { user } = useAuth();
   const [plans, setPlans] = useState<StudyPlan[]>([]);
+  const [completedPlans, setCompletedPlans] = useState<CompletedPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +60,7 @@ export const useStudyPlans = () => {
 
       const { data, error: fetchError } = await supabase
         .from('profiles')
-        .select('study_plan')
+        .select('study_plan, completed_plans')
         .eq('id', user.id)
         .single();
 
@@ -61,6 +73,13 @@ export const useStudyPlans = () => {
         setPlans([data.study_plan as StudyPlan]);
       } else {
         setPlans([]);
+      }
+
+      // Load completed plans
+      if (data?.completed_plans) {
+        setCompletedPlans(data.completed_plans as CompletedPlan[]);
+      } else {
+        setCompletedPlans([]);
       }
     } catch (err) {
       console.error('Error loading study plan:', err);
@@ -90,11 +109,11 @@ export const useStudyPlans = () => {
         throw profileError;
       }
 
-      // If user already has a plan, show confirmation dialog
+      // If user already has a current plan, show confirmation dialog
       if (profileData?.study_plan) {
         const existingPlan = profileData.study_plan as StudyPlan;
-        toast.error('لديك خطة دراسة محفوظة بالفعل!', {
-          description: `الخطة الحالية: ${existingPlan.name}. يجب حذف الخطة الحالية أولاً لحفظ خطة جديدة.`,
+        toast.error('لديك خطة دراسة حالية بالفعل!', {
+          description: `الخطة الحالية: ${existingPlan.name}. يجب إكمال أو حذف الخطة الحالية أولاً لحفظ خطة جديدة.`,
           duration: 6000,
         });
         return null;
@@ -132,7 +151,38 @@ export const useStudyPlans = () => {
     }
   };
 
-  // Delete the user's study plan
+  // Complete current plan and move to completed plans
+  const completePlan = async () => {
+    if (!user) return false;
+
+    try {
+      // Call the database function to complete the plan
+      const { data, error: completeError } = await supabase.rpc('complete_current_plan', {
+        user_id: user.id
+      });
+
+      if (completeError) {
+        throw completeError;
+      }
+
+      if (!data) {
+        toast.error('لا توجد خطة حالية لإكمالها');
+        return false;
+      }
+
+      // Reload plans to get updated data
+      await loadPlans();
+
+      toast.success('تم إكمال الخطة وحفظها في الخطط المكتملة! يمكنك الآن إنشاء خطة جديدة.');
+      return true;
+    } catch (err) {
+      console.error('Error completing study plan:', err);
+      toast.error('حدث خطأ في إكمال خطة الدراسة');
+      return false;
+    }
+  };
+
+  // Delete the user's study plan (without completing)
   const deletePlan = async () => {
     if (!user) return false;
 
@@ -232,11 +282,13 @@ export const useStudyPlans = () => {
 
   return {
     plans,
+    completedPlans,
     loading,
     error,
     savePlan,
     updatePlan,
     deletePlan,
+    completePlan,
     getPlan,
     refreshPlans: loadPlans
   };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, Calendar, Clock, RotateCcw, Edit, Eye } from 'lucide-react';
+import { Trash2, Calendar, Clock, RotateCcw, Edit, Eye, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { StudyPlan } from '@/hooks/useStudyPlans';
@@ -13,6 +13,7 @@ interface SingleStudyPlanManagerProps {
   studyPlan: StudyPlan | null;
   onDelete: () => Promise<boolean>;
   onUpdate: (updatedPlan: StudyPlan) => Promise<boolean>;
+  onComplete?: () => Promise<boolean>;
   onViewDetails: (plan: StudyPlan) => void;
 }
 
@@ -20,6 +21,7 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
   studyPlan,
   onDelete,
   onUpdate,
+  onComplete,
   onViewDetails
 }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -34,6 +36,15 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
   const handleUpdate = async (updatedPlan: StudyPlan) => {
     const success = await onUpdate(updatedPlan);
     return success;
+  };
+
+  const handleComplete = async () => {
+    if (onComplete) {
+      const success = await onComplete();
+      if (success) {
+        toast.success('تم إكمال الخطة وحفظها في الخطط المكتملة!');
+      }
+    }
   };
 
   if (!studyPlan) {
@@ -90,6 +101,35 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
               <Edit className="h-4 w-4 ml-2" />
               تعديل
             </Button>
+            {onComplete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 w-full sm:w-auto"
+                  >
+                    <CheckCircle className="h-4 w-4 ml-2" />
+                    إكمال
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>إكمال خطة الدراسة</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      هل تريد إكمال خطة الدراسة "{studyPlan.name}" وحفظها في الخطط المكتملة؟
+                      سيتم حفظ نقاط الخبرة المكتسبة ويمكنك إنشاء خطة جديدة.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleComplete} className="bg-green-600 text-white hover:bg-green-700">
+                      إكمال الخطة
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="sm" className="w-full sm:w-auto">
