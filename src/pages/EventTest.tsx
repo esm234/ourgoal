@@ -267,6 +267,17 @@ const EventTest: React.FC = () => {
       // Update leaderboard with new XP
       try {
         await updateUserXPFromProfile();
+
+        // Trigger a global XP update event for other components
+        window.dispatchEvent(new CustomEvent('xpUpdated', {
+          detail: {
+            userId: user.id,
+            xpEarned: xpEarned,
+            source: 'event_test'
+          }
+        }));
+
+        console.log('✅ XP updated successfully after event test completion');
       } catch (leaderboardError) {
         console.error('Error updating leaderboard:', leaderboardError);
         // Don't throw error here, participation was successful

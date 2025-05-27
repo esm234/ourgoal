@@ -83,6 +83,25 @@ const Profile: React.FC = () => {
     }
   }, [user]);
 
+  // Listen for XP updates from events
+  useEffect(() => {
+    const handleXPUpdate = (event: CustomEvent) => {
+      console.log('🔄 XP update received in Profile:', event.detail);
+
+      // Force refresh of event history to show updated XP
+      if (event.detail?.source === 'event_test') {
+        // Trigger a refresh of the event history hook
+        window.location.reload(); // Simple solution for now
+      }
+    };
+
+    window.addEventListener('xpUpdated', handleXPUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('xpUpdated', handleXPUpdate as EventListener);
+    };
+  }, []);
+
   const loadUserData = async () => {
     if (!user) return;
 
