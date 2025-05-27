@@ -222,6 +222,12 @@ export const useLeaderboard = () => {
       const eventsXP = eventsData?.reduce((sum, event) => sum + (event.xp_earned || 0), 0) || 0;
       totalXP += eventsXP;
 
+      console.log('📊 Events XP Details:', {
+        eventsCount: eventsData?.length || 0,
+        eventsData: eventsData?.map(e => ({ xp_earned: e.xp_earned })),
+        totalEventsXP: eventsXP
+      });
+
       // 2. XP from completed plans
       const completedPlans = profileData?.completed_plans as any[] || [];
       const completedPlansXP = completedPlans.reduce((sum, plan) => sum + (plan.xp_earned || 0), 0);

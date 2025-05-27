@@ -194,12 +194,12 @@ const EventTest: React.FC = () => {
     const percentage = (score / totalQuestions) * 100;
     const baseXP = event?.xp_reward || 50;
 
-    if (percentage >= 90) return baseXP;
-    if (percentage >= 80) return Math.floor(baseXP * 0.9);
-    if (percentage >= 70) return Math.floor(baseXP * 0.8);
-    if (percentage >= 60) return Math.floor(baseXP * 0.7);
-    if (percentage >= 50) return Math.floor(baseXP * 0.6);
-    return Math.floor(baseXP * 0.5);
+    // Calculate XP based on exact percentage
+    // If you get 10% correct, you get 10% of the XP
+    const earnedXP = Math.floor((percentage / 100) * baseXP);
+
+    // Minimum XP is 0 (no automatic minimum)
+    return Math.max(0, earnedXP);
   };
 
   const handleSubmitTest = async () => {
@@ -218,6 +218,16 @@ const EventTest: React.FC = () => {
       const timeTaken = Math.floor((new Date().getTime() - testStartTime.getTime()) / (1000 * 60));
       const xpEarned = calculateXP(score, totalQuestions);
 
+      // Debug logging for XP calculation
+      console.log('🎯 Event Test XP Calculation:', {
+        score,
+        totalQuestions,
+        percentage: (score / totalQuestions) * 100,
+        baseXP: event?.xp_reward,
+        calculatedXP: xpEarned,
+        eventTitle: event?.title
+      });
+
       // Submit participation directly
       const { error: submitError } = await supabase
         .from('event_participations')
@@ -235,34 +245,9 @@ const EventTest: React.FC = () => {
         throw submitError;
       }
 
-      // Add XP to user's total using RPC function
-      try {
-        const { error: xpError } = await supabase.rpc('add_event_xp_to_user', {
-          target_user_id: user.id,
-          xp_amount: xpEarned
-        });
-
-        if (xpError) {
-          console.error('Error updating user XP:', xpError);
-          // Fallback to manual update if RPC fails
-          const { data: currentProfile } = await supabase
-            .from('profiles')
-            .select('xp')
-            .eq('id', user.id)
-            .single();
-
-          if (currentProfile) {
-            const newXP = (currentProfile.xp || 0) + xpEarned;
-            await supabase
-              .from('profiles')
-              .update({ xp: newXP })
-              .eq('id', user.id);
-          }
-        }
-      } catch (xpError) {
-        console.error('Error updating user XP:', xpError);
-        // Don't throw error here, participation was successful
-      }
+      // Note: XP is now calculated automatically from event_participations table
+      // No need to manually add XP to user profile or user_xp table
+      // The leaderboard system will read XP from event_participations directly
 
       // Update leaderboard with new XP
       try {
