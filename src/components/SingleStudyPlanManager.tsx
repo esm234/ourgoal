@@ -118,7 +118,10 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
                     <AlertDialogTitle>إكمال خطة الدراسة</AlertDialogTitle>
                     <AlertDialogDescription>
                       هل تريد إكمال خطة الدراسة "{studyPlan.name}" وحفظها في الخطط المكتملة؟
-                      سيتم حفظ نقاط الخبرة المكتسبة ويمكنك إنشاء خطة جديدة.
+                      <br /><br />
+                      <strong>ملاحظة:</strong> سيتم تعليم جميع أيام الخطة كـ "مكتملة" للحصول على نقاط الخبرة الكاملة ({(studyPlan.study_days.length + 1) * 100} XP).
+                      <br />
+                      يمكنك بعدها إنشاء خطة جديدة والاحتفاظ بنقاط الخبرة المكتسبة.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

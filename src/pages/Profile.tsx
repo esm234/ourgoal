@@ -20,7 +20,8 @@ import {
   TrendingUp,
   Eye,
   ArrowRight,
-  Trophy
+  Trophy,
+  RotateCcw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -407,6 +408,96 @@ const Profile: React.FC = () => {
                     onComplete={handleCompletePlan}
                     onViewDetails={viewPlanDetails}
                   />
+
+                  {/* Completed Plans Section */}
+                  {completedPlans.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground">الخطط المكتملة</h3>
+                        <div className="bg-green-500/20 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+                          {completedPlans.length} خطة
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4">
+                        {completedPlans.map((plan, index) => (
+                          <Card key={index} className="bg-gradient-to-br from-card/90 to-card/60 border border-green-500/20 rounded-xl p-6 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                  <h4 className="text-lg font-bold text-foreground">{plan.name}</h4>
+                                  <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-sm">
+                                    ✓ مكتملة
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                  <div className="flex items-center gap-2 p-3 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-lg">
+                                    <Calendar className="w-4 h-4 text-blue-600" />
+                                    <div>
+                                      <div className="text-xs text-muted-foreground">إجمالي الأيام</div>
+                                      <div className="font-bold text-blue-600">{plan.total_days}</div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 p-3 bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-lg">
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                    <div>
+                                      <div className="text-xs text-muted-foreground">أيام مكتملة</div>
+                                      <div className="font-bold text-green-600">{plan.completed_days}</div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 p-3 bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-lg">
+                                    <RotateCcw className="w-4 h-4 text-purple-600" />
+                                    <div>
+                                      <div className="text-xs text-muted-foreground">جولات المراجعة</div>
+                                      <div className="font-bold text-purple-600">{plan.review_rounds}</div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 p-3 bg-gradient-to-br from-orange-500/10 to-orange-600/10 rounded-lg">
+                                    <Trophy className="w-4 h-4 text-orange-600" />
+                                    <div>
+                                      <div className="text-xs text-muted-foreground">نقاط الخبرة</div>
+                                      <div className="font-bold text-orange-600">{plan.xp_earned} XP</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground bg-background/50 p-3 rounded-lg">
+                                  <span className="flex items-center gap-1">
+                                    <CheckCircle className="w-3 h-3" />
+                                    تاريخ الإكمال: {new Date(plan.completed_at).toLocaleDateString('ar-SA')}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    تاريخ الاختبار: {new Date(plan.test_date).toLocaleDateString('ar-SA')}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl border border-green-500/20">
+                                  <div className="text-3xl font-bold text-green-600">{Math.round((plan.completed_days / plan.total_days) * 100)}%</div>
+                                  <div className="text-xs text-muted-foreground font-medium">معدل الإنجاز</div>
+                                  <div className="w-full bg-green-200 rounded-full h-2 mt-2">
+                                    <div
+                                      className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                      style={{ width: `${Math.round((plan.completed_days / plan.total_days) * 100)}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Quick Action Button */}
                   <div className="text-center">

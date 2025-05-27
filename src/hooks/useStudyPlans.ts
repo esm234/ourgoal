@@ -158,7 +158,7 @@ export const useStudyPlans = () => {
     try {
       // Call the database function to complete the plan
       const { data, error: completeError } = await supabase.rpc('complete_current_plan', {
-        user_id: user.id
+        target_user_id: user.id
       });
 
       if (completeError) {
@@ -172,6 +172,9 @@ export const useStudyPlans = () => {
 
       // Reload plans to get updated data
       await loadPlans();
+
+      // Trigger leaderboard update by dispatching a custom event
+      window.dispatchEvent(new CustomEvent('xpUpdated'));
 
       toast.success('تم إكمال الخطة وحفظها في الخطط المكتملة! يمكنك الآن إنشاء خطة جديدة.');
       return true;

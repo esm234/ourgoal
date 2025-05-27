@@ -185,8 +185,8 @@ export const useCompletedDays = () => {
       const completedDays = studyPlan?.completed_days || [];
       const username = profileData?.username || 'مستخدم';
 
-      // Calculate XP components
-      const planXP = studyPlan ? 500 : 0;
+      // Calculate XP components (NO automatic plan XP)
+      const planXP = 0; // No XP just for having a plan
       const studyDaysXP = completedDays.length * 100;
 
       // Get current streak from profiles

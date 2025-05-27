@@ -227,12 +227,30 @@ export const useLeaderboard = () => {
       const completedPlansXP = completedPlans.reduce((sum, plan) => sum + (plan.xp_earned || 0), 0);
       totalXP += completedPlansXP;
 
-      // 3. XP from current plan (completed days)
+      // 3. XP from current plan (only actually completed days)
       const currentPlan = profileData?.study_plan as any;
       let currentPlanXP = 0;
       if (currentPlan && currentPlan.study_days) {
-        const completedDays = currentPlan.study_days.filter((day: any) => day.completed).length;
-        currentPlanXP = completedDays * 100; // 100 XP per completed day
+        // Count only days that are actually marked as completed
+        const completedDays = currentPlan.study_days.filter((day: any) => day.completed === true).length;
+
+        // Add final review day if it's completed
+        let finalReviewCompleted = 0;
+        if (currentPlan.final_review_day && currentPlan.final_review_day.completed === true) {
+          finalReviewCompleted = 1;
+        }
+
+        currentPlanXP = (completedDays + finalReviewCompleted) * 100; // 100 XP per actually completed day
+
+        // Debug logging
+        console.log('Current plan XP calculation:', {
+          totalStudyDays: currentPlan.study_days.length,
+          completedDays,
+          finalReviewCompleted,
+          currentPlanXP,
+          sampleDay: currentPlan.study_days[0],
+          finalReviewDay: currentPlan.final_review_day
+        });
       }
       totalXP += currentPlanXP;
 
@@ -326,6 +344,21 @@ export const useLeaderboard = () => {
   // Load data on mount and when user changes
   useEffect(() => {
     loadLeaderboard();
+  }, [user]);
+
+  // Listen for XP updates
+  useEffect(() => {
+    const handleXPUpdate = async () => {
+      if (user) {
+        await updateUserXPFromProfile();
+      }
+    };
+
+    window.addEventListener('xpUpdated', handleXPUpdate);
+
+    return () => {
+      window.removeEventListener('xpUpdated', handleXPUpdate);
+    };
   }, [user]);
 
   return {

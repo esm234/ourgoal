@@ -41,6 +41,7 @@ interface StudyDay {
   isReviewDay: boolean;
   isFinalReview: boolean;
   roundNumber?: number;
+  completed?: boolean;
 }
 
 interface StudyPlan {
@@ -174,7 +175,8 @@ const StudyPlanGenerator: React.FC = () => {
           quantitativeRange: { start: quantitativeStart, end: quantitativeEnd },
           isReviewDay: false,
           isFinalReview: false,
-          roundNumber: round
+          roundNumber: round,
+          completed: false
         });
 
         // Update running totals
@@ -194,7 +196,8 @@ const StudyPlanGenerator: React.FC = () => {
       verbalRange: { start: 0, end: 0 },
       quantitativeRange: { start: 0, end: 0 },
       isReviewDay: true,
-      isFinalReview: true
+      isFinalReview: true,
+      completed: false
     };
 
     const plan: StudyPlan = {
