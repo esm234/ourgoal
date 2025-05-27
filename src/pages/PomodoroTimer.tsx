@@ -144,6 +144,18 @@ const PomodoroTimer: React.FC = () => {
       type: 'nature'
     },
     {
+      id: 'rain-coffee-fireplace',
+      name: 'مطر وقهوة ونار الموقد ☕',
+      url: '/audio/nature/صوت المطر والرعد وفرقعة الحطب مع كوب قهوة☕ للدراسة والتركيز والتفكير العميق I 4K.mp3',
+      type: 'nature'
+    },
+    {
+      id: 'thunderstorm-heavy-rain',
+      name: 'عاصفة رعدية ومطر غزير ⛈️',
+      url: '/audio/nature/Thunderstorm with Heavy rain sounds for Sleep Study and Relaxation The Hideout Ambience 3 Hours (2).mp3',
+      type: 'nature'
+    },
+    {
       id: 'brown-noise',
       name: 'ضوضاء بنية للاسترخاء',
       url: 'generated',
@@ -1025,7 +1037,7 @@ const PomodoroTimer: React.FC = () => {
                                   if (audio.id !== 'silence') {
                                     if (audio.id === 'white-noise') {
                                       playGeneratedAudio('white-noise');
-                                    } else if (audio.id === 'forest-sounds') {
+                                    } else if (audio.id === 'forest-sounds' || audio.id === 'rain-coffee-fireplace' || audio.id === 'thunderstorm-heavy-rain') {
                                       playQuranAudio(audio.url, 0, 'nature');
                                     } else if (audio.id === 'brown-noise') {
                                       playGeneratedAudio('brown-noise');
@@ -1050,7 +1062,9 @@ const PomodoroTimer: React.FC = () => {
                                   `}>
                                     {audio.id === 'silence' && <VolumeX className="w-4 h-4" />}
                                     {audio.id === 'forest-sounds' && <Trees className="w-4 h-4" />}
-                                    {audio.id !== 'silence' && audio.id !== 'forest-sounds' && <Music className="w-4 h-4" />}
+                                    {audio.id === 'rain-coffee-fireplace' && <Coffee className="w-4 h-4" />}
+                                    {audio.id === 'thunderstorm-heavy-rain' && <Zap className="w-4 h-4" />}
+                                    {audio.id !== 'silence' && audio.id !== 'forest-sounds' && audio.id !== 'rain-coffee-fireplace' && audio.id !== 'thunderstorm-heavy-rain' && <Music className="w-4 h-4" />}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className={`

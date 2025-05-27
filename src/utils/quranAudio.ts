@@ -14,6 +14,7 @@ export const SURAH_NUMBERS = {
   MARYAM: 19,        // مريم
   TAHA: 20,          // طه
   ASH_SHUARA: 26,    // الشعراء
+  YASEEN: 36,        // يس
   AS_SAFFAT: 37,     // الصافات
 } as const;
 
@@ -102,6 +103,7 @@ export const getSurahName = (surahNumber: number): string => {
     19: 'مريم',
     20: 'طه',
     26: 'الشعراء',
+    36: 'يس',
     37: 'الصافات'
   };
 
@@ -148,6 +150,18 @@ export const generateQuranAudioSources = (): QuranAudioSource[] => {
     url: '/audio/quran/hijr-minshawi.mp3',
     type: 'quran',
     category: 'minshawi'
+  });
+
+  // يس - ياسر الدوسري (من YouTube)
+  sources.push({
+    id: 'quran-yaseen-aldosari',
+    name: 'سورة يس - ياسر الدوسري',
+    surahName: 'يس',
+    surahNumber: SURAH_NUMBERS.YASEEN,
+    reciter: RECITERS.YASSER_ALDOSARI.name,
+    url: '/audio/quran/سورة يسٓ كاملة للشيخ ياسر الدوسري من ليالي رمضان عام 1442 هـ Surah Yaseen.mp3',
+    type: 'quran',
+    category: 'aldosari'
   });
 
   return sources;
