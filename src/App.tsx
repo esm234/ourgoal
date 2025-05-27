@@ -33,6 +33,7 @@ import PomodoroTimer from "@/pages/PomodoroTimer";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
+import RedirectHandler from "@/components/RedirectHandler";
 
 // Set this to true to enable maintenance mode
 const MAINTENANCE_MODE =  false;
@@ -57,6 +58,7 @@ const App = () => {
             />
             <BrowserRouter>
               <ScrollToTop />
+              <RedirectHandler />
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />

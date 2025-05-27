@@ -110,7 +110,7 @@ const Home = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
               <a
-                href="https://t.me/ourgoul1"
+                href="https://linktr.ee/Our_goal"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -491,7 +491,7 @@ const Home = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href="https://t.me/ourgoul1"
+                  href="https://linktr.ee/Our_goal"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
