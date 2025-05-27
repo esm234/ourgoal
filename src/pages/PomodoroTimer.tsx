@@ -140,7 +140,7 @@ const PomodoroTimer: React.FC = () => {
     {
       id: 'forest-sounds',
       name: 'أصوات الغابة الطبيعية',
-      url: '/audio/nature/forest-sounds.webm',
+      url: '/audio/nature/forest-sounds.mp3',
       type: 'nature'
     },
     {

@@ -5,12 +5,12 @@ This directory contains audio files for the Pomodoro Timer feature.
 ## Structure:
 
 ### `/nature/`
-- `forest-sounds.mp3` - Forest sounds from YouTube (https://youtu.be/eNUpTV9BGac)
+- `forest-sounds.mp3` - Forest sounds from YouTube (https://youtu.be/eNUpTV9BGac) - ~5MB
 
 ### `/quran/`
-- `taha-ayyub.mp3` - سورة طه - محمد أيوب (https://youtu.be/K8w3XN-g4LM)
-- `ibrahim-minshawi.mp3` - سورة إبراهيم - المنشاوي (https://youtu.be/JfFJSsc602g)
-- `hijr-minshawi.mp3` - سورة الحجر - المنشاوي (https://youtu.be/57SBLLGD3Zs)
+- `taha-ayyub.mp3` - سورة طه - محمد أيوب (https://youtu.be/K8w3XN-g4LM) - ~5MB
+- `ibrahim-minshawi.mp3` - سورة إبراهيم - المنشاوي (https://youtu.be/JfFJSsc602g) - ~5MB
+- `hijr-minshawi.mp3` - سورة الحجر - المنشاوي (https://youtu.be/57SBLLGD3Zs) - ~5MB
 
 ## Notes:
 - Audio files are converted from YouTube videos using yt-dlp or similar tools

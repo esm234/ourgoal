@@ -121,7 +121,7 @@ export const generateQuranAudioSources = (): QuranAudioSource[] => {
     surahName: 'طه',
     surahNumber: SURAH_NUMBERS.TAHA,
     reciter: RECITERS.MUHAMMAD_AYYUB.name,
-    url: '/audio/quran/taha-ayyub.webm',
+    url: '/audio/quran/taha-ayyub.mp3',
     type: 'quran',
     category: 'ayyub'
   });
@@ -133,7 +133,7 @@ export const generateQuranAudioSources = (): QuranAudioSource[] => {
     surahName: 'إبراهيم',
     surahNumber: SURAH_NUMBERS.IBRAHIM,
     reciter: RECITERS.MINSHAWI_MURATTAL.name,
-    url: '/audio/quran/ibrahim-minshawi.webm',
+    url: '/audio/quran/ibrahim-minshawi.mp3',
     type: 'quran',
     category: 'minshawi'
   });
@@ -145,7 +145,7 @@ export const generateQuranAudioSources = (): QuranAudioSource[] => {
     surahName: 'الحجر',
     surahNumber: SURAH_NUMBERS.AL_HIJR,
     reciter: RECITERS.MINSHAWI_MURATTAL.name,
-    url: '/audio/quran/hijr-minshawi.webm',
+    url: '/audio/quran/hijr-minshawi.mp3',
     type: 'quran',
     category: 'minshawi'
   });
