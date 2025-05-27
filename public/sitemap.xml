@@ -40,6 +40,14 @@
   <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/files" />
 </url>
 
+<url>
+  <loc>https://ourgoal.pages.dev/pomodoro</loc>
+  <lastmod>2024-12-19T12:00:00+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/pomodoro" />
+</url>
+
 <!-- Support & Information -->
 <url>
   <loc>https://ourgoal.pages.dev/faq</loc>
@@ -49,22 +57,7 @@
   <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/faq" />
 </url>
 
-<!-- Authentication -->
-<url>
-  <loc>https://ourgoal.pages.dev/login</loc>
-  <lastmod>2024-12-19T12:00:00+00:00</lastmod>
-  <changefreq>yearly</changefreq>
-  <priority>0.5</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/login" />
-</url>
-
-<url>
-  <loc>https://ourgoal.pages.dev/forgot-password</loc>
-  <lastmod>2024-12-19T12:00:00+00:00</lastmod>
-  <changefreq>yearly</changefreq>
-  <priority>0.3</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/forgot-password" />
-</url>
+<!-- Authentication pages excluded to prevent phishing detection -->
 
 <!-- File Categories (Dynamic content examples) -->
 <url>

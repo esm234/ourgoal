@@ -1,0 +1,27 @@
+Contact: mailto:admin@ourgoal.site
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://ourgoal.site/pgp-key.txt
+Preferred-Languages: ar, en
+Canonical: https://ourgoal.site/.well-known/security.txt
+
+# Our Goal - Arabic Educational Platform Security Policy
+# 
+# This is a legitimate educational platform for Arabic language learning
+# and test preparation. We are not a phishing site.
+#
+# Platform Purpose:
+# - Arabic educational content and files
+# - Study plan generation
+# - Pomodoro timer for productivity
+# - Weekly educational events
+#
+# Security Features:
+# - Supabase authentication
+# - Content Security Policy headers
+# - Input validation and sanitization
+# - Secure password requirements
+#
+# If you believe you have found a security vulnerability,
+# please report it responsibly to the contact above.
+#
+# Thank you for helping keep our educational platform secure!

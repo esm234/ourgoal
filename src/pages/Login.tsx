@@ -142,7 +142,12 @@ const Login = () => {
                 </CardHeader>
                 <CardContent>
                   <Form {...loginForm}>
-                    <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                    <form
+                      onSubmit={loginForm.handleSubmit(handleLogin)}
+                      className="space-y-4"
+                      autoComplete="on"
+                      method="post"
+                    >
                       <FormField
                         control={loginForm.control}
                         name="email"
@@ -155,6 +160,8 @@ const Login = () => {
                                 {...field}
                                 type="email"
                                 dir="ltr"
+                                autoComplete="email"
+                                required
                               />
                             </FormControl>
                             <FormMessage />
@@ -184,6 +191,8 @@ const Login = () => {
                                 {...field}
                                 type="password"
                                 dir="ltr"
+                                autoComplete="current-password"
+                                required
                               />
                             </FormControl>
                             <FormMessage />

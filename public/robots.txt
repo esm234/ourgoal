@@ -18,20 +18,22 @@ Allow: /equivalency-calculator
 Allow: /study-plan
 Allow: /files
 Allow: /faq
-Allow: /login
+Allow: /pomodoro
 
 # File categories
 Allow: /files/verbal
 Allow: /files/quantitative
 Allow: /files/mixed
 
-# Disallow admin and private pages
+# Disallow admin and private pages to prevent phishing detection
 Disallow: /admin/
 Disallow: /profile
 Disallow: /welcome
 Disallow: /plan-details/
 Disallow: /reset-password
 Disallow: /forgot-password
+Disallow: /login
+Disallow: /signup
 
 # Disallow API endpoints if any
 Disallow: /api/
