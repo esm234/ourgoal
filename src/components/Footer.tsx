@@ -126,7 +126,7 @@ const Footer = () => {
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">البريد الإلكتروني</div>
-                    <div className="text-foreground font-medium">info@ourgoal.com</div>
+                    <div className="text-foreground font-medium">infoourgoal@gmail.com</div>
                   </div>
                 </li>
                 <li className="flex items-center gap-3 text-muted-foreground">

@@ -1,11 +1,11 @@
-Contact: mailto:admin@ourgoal.site
+Contact: mailto:infoourgoal@gmail.com
 Expires: 2025-12-31T23:59:59.000Z
 Encryption: https://ourgoal.site/pgp-key.txt
 Preferred-Languages: ar, en
 Canonical: https://ourgoal.site/.well-known/security.txt
 
 # Our Goal - Arabic Educational Platform Security Policy
-# 
+#
 # This is a legitimate educational platform for Arabic language learning
 # and test preparation. We are not a phishing site.
 #
