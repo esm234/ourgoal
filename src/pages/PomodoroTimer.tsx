@@ -573,7 +573,7 @@ const PomodoroTimer: React.FC = () => {
     }
   };
 
-  const playQuranAudio = async (url: string, retryCount = 0) => {
+  const playQuranAudio = async (url: string, retryCount = 0, audioType: 'quran' | 'nature' = 'quran') => {
     const maxRetries = 2;
 
     try {
@@ -595,25 +595,28 @@ const PomodoroTimer: React.FC = () => {
           if (retryCount < maxRetries) {
             console.log(`Retrying audio load, attempt ${retryCount + 1}`);
             setTimeout(() => {
-              playQuranAudio(url, retryCount + 1);
+              playQuranAudio(url, retryCount + 1, audioType);
             }, 1000);
             return;
           }
 
-          setAudioError('فشل في تحميل التلاوة - جرب تلاوة أخرى');
+          const errorMessage = audioType === 'quran' ? 'فشل في تحميل التلاوة - جرب تلاوة أخرى' : 'فشل في تحميل الصوت - جرب صوت آخر';
+          setAudioError(errorMessage);
           setAudioLoading(false);
-          toast.error('فشل في تحميل التلاوة - جرب تلاوة أخرى');
+          toast.error(errorMessage);
         };
 
         audioRef.current.onloadstart = () => {
           if (retryCount === 0) {
-            toast.info('جاري تحميل التلاوة...');
+            const loadingMessage = audioType === 'quran' ? 'جاري تحميل التلاوة...' : 'جاري تحميل الصوت...';
+            toast.info(loadingMessage);
           }
         };
 
         audioRef.current.oncanplay = () => {
           if (retryCount === 0) {
-            toast.success('تم تحميل التلاوة بنجاح');
+            const successMessage = audioType === 'quran' ? 'تم تحميل التلاوة بنجاح' : 'تم تحميل الصوت بنجاح';
+            toast.success(successMessage);
           }
         };
 
@@ -623,22 +626,24 @@ const PomodoroTimer: React.FC = () => {
 
         await audioRef.current.play();
         if (retryCount === 0) {
-          toast.success('🎵 تم تشغيل التلاوة المباركة');
+          const playMessage = audioType === 'quran' ? '🎵 تم تشغيل التلاوة المباركة' : '🎵 تم تشغيل الصوت';
+          toast.success(playMessage);
         }
       }
     } catch (error) {
-      console.error('Quran audio error:', error);
+      console.error('Audio error:', error);
 
       if (retryCount < maxRetries) {
         console.log(`Retrying audio play, attempt ${retryCount + 1}`);
         setTimeout(() => {
-          playQuranAudio(url, retryCount + 1);
+          playQuranAudio(url, retryCount + 1, audioType);
         }, 1000);
         return;
       }
 
-      setAudioError('فشل في تشغيل التلاوة');
-      toast.error('فشل في تشغيل التلاوة - جرب تلاوة أخرى');
+      const errorMessage = audioType === 'quran' ? 'فشل في تشغيل التلاوة - جرب تلاوة أخرى' : 'فشل في تشغيل الصوت - جرب صوت آخر';
+      setAudioError(errorMessage);
+      toast.error(errorMessage);
       setAudioLoading(false);
     }
   };
@@ -662,8 +667,8 @@ const PomodoroTimer: React.FC = () => {
         playGeneratedAudio('rain');
       } else if (selectedAudio === 'brown-noise') {
         playGeneratedAudio('brown-noise');
-      } else if (selectedSource?.url && selectedSource.type === 'quran') {
-        playQuranAudio(selectedSource.url);
+      } else if (selectedSource?.url && (selectedSource.type === 'quran' || selectedSource.type === 'nature')) {
+        playQuranAudio(selectedSource.url, 0, selectedSource.type === 'quran' ? 'quran' : 'nature');
       }
     }
 
@@ -997,12 +1002,12 @@ const PomodoroTimer: React.FC = () => {
                       {/* Audio Selection */}
                       <div className="space-y-3">
                         <div className="max-h-72 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
-                          {/* Generated Sounds Section */}
+                          {/* Generated & Nature Sounds Section */}
                           <div className="space-y-2">
                             <div className="text-xs font-medium text-muted-foreground px-2 py-1 bg-muted/30 rounded-md">
-                              🎵 أصوات مولدة
+                              🎵 أصوات مصاحبة
                             </div>
-                            {audioSources.filter(audio => audio.type === 'generated').map((audio) => (
+                            {audioSources.filter(audio => audio.type === 'generated' || audio.type === 'nature').map((audio) => (
                               <div
                                 key={audio.id}
                                 onClick={() => {
@@ -1021,7 +1026,7 @@ const PomodoroTimer: React.FC = () => {
                                     if (audio.id === 'white-noise') {
                                       playGeneratedAudio('white-noise');
                                     } else if (audio.id === 'forest-sounds') {
-                                      playQuranAudio(audio.url);
+                                      playQuranAudio(audio.url, 0, 'nature');
                                     } else if (audio.id === 'brown-noise') {
                                       playGeneratedAudio('brown-noise');
                                     }
@@ -1088,7 +1093,7 @@ const PomodoroTimer: React.FC = () => {
 
                                   // Play Quran audio
                                   if (audio.type === 'quran') {
-                                    playQuranAudio(audio.url);
+                                    playQuranAudio(audio.url, 0, 'quran');
                                   }
                                 }}
                                 className={`
