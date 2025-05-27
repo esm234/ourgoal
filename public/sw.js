@@ -1,5 +1,6 @@
 // Service Worker for Our Goal Platform - NO HTML CACHING
 const CACHE_NAME = 'ourgoal-static-v' + Date.now(); // Dynamic cache name
+const AUDIO_BYPASS_VERSION = 'v2'; // Force audio bypass update
 const STATIC_CACHE_URLS = [
   // Only cache static assets, NOT HTML pages
   '/new-favicon.jpg',
@@ -81,6 +82,18 @@ self.addEventListener('fetch', (event) => {
           });
         })
     );
+    return;
+  }
+
+  // Handle audio files - bypass service worker completely
+  if (url.pathname.includes('/audio/') &&
+      (url.pathname.endsWith('.mp3') ||
+       url.pathname.endsWith('.webm') ||
+       url.pathname.endsWith('.wav') ||
+       url.pathname.endsWith('.ogg'))) {
+
+    console.log('SW: Bypassing audio file:', url.pathname);
+    // Let the browser handle audio files directly without service worker intervention
     return;
   }
 

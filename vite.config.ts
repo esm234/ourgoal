@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    fs: {
+      // Allow serving files from audio directory
+      allow: ['..', './public/audio']
+    }
   },
   plugins: [
     react(),
@@ -27,7 +31,13 @@ export default defineConfig(({ mode }) => ({
         // Cache busting with hash in filenames
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+        assetFileNames: (assetInfo) => {
+          // Keep audio files in their original location without hash
+          if (assetInfo.name && /\.(mp3|webm|wav|ogg)$/.test(assetInfo.name)) {
+            return 'audio/[name].[ext]';
+          }
+          return 'assets/[name]-[hash].[ext]';
+        },
         manualChunks: {
           // تقسيم المكتبات الكبيرة
           vendor: ['react', 'react-dom'],
