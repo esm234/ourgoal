@@ -10,22 +10,48 @@ import {
   Search,
   ExternalLink,
   Clock,
+  Users,
   BookOpen,
   Calculator,
   FileText,
   Play,
-  Target
+  Target,
+  Download,
+  Calendar,
+  HelpCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { getFileById, LocalFile, LocalExam } from '@/data/localFiles';
+import { supabase } from '@/integrations/supabase/client';
+
+interface FileData {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  file_url: string;
+  file_size: string;
+  downloads: number;
+  created_at: string;
+}
+
+interface ExamData {
+  id: number;
+  file_id: number;
+  title: string;
+  google_form_url: string;
+  duration: number;
+  questions: number;
+  attempts: number;
+  created_at: string;
+}
 
 const FileDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [file, setFile] = useState<LocalFile | null>(null);
-  const [exams, setExams] = useState<LocalExam[]>([]);
+  const [file, setFile] = useState<FileData | null>(null);
+  const [exams, setExams] = useState<ExamData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,16 +62,25 @@ const FileDetails = () => {
 
   const fetchFileAndExams = async () => {
     try {
-      // Get file details from local data
-      const fileData = getFileById(Number(id));
+      // Fetch file details
+      const { data: fileData, error: fileError } = await supabase
+        .from('files')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-      if (!fileData) {
-        throw new Error('File not found');
-      }
-
+      if (fileError) throw fileError;
       setFile(fileData);
-      setExams(fileData.exams || []);
 
+      // Fetch exams for this file
+      const { data: examsData, error: examsError } = await supabase
+        .from('exams')
+        .select('*')
+        .eq('file_id', id)
+        .order('created_at', { ascending: true });
+
+      if (examsError) throw examsError;
+      setExams(examsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('خطأ في تحميل البيانات');
@@ -54,9 +89,52 @@ const FileDetails = () => {
     }
   };
 
-  const handleExamClick = (exam: LocalExam) => {
-    // Open Google Form in new tab
-    window.open(exam.google_form_url, '_blank');
+  const handleDownload = async () => {
+    if (!file) return;
+
+    try {
+      // Increment download counter
+      const { error } = await supabase
+        .from('files')
+        .update({ downloads: file.downloads + 1 })
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      // Open file in new tab
+      window.open(file.file_url, '_blank');
+
+      // Update local state
+      setFile({ ...file, downloads: file.downloads + 1 });
+    } catch (error) {
+      console.error('Error updating download count:', error);
+      // Still open the file even if counter update fails
+      window.open(file.file_url, '_blank');
+    }
+  };
+
+  const handleExamClick = async (exam: ExamData) => {
+    try {
+      // Increment exam attempts counter
+      const { error } = await supabase
+        .from('exams')
+        .update({ attempts: exam.attempts + 1 })
+        .eq('id', exam.id);
+
+      if (error) throw error;
+
+      // Open Google Form in new tab
+      window.open(exam.google_form_url, '_blank');
+
+      // Update local state
+      setExams(exams.map(e =>
+        e.id === exam.id ? { ...e, attempts: e.attempts + 1 } : e
+      ));
+    } catch (error) {
+      console.error('Error updating exam attempts:', error);
+      // Still open the exam even if counter update fails
+      window.open(exam.google_form_url, '_blank');
+    }
   };
 
   const filteredExams = exams.filter(exam =>
@@ -215,28 +293,21 @@ const FileDetails = () => {
 
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-3 gap-4 mb-4">
-                      {exam.estimated_time && (
+                      {exam.duration && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="w-4 h-4" />
-                          <span>{exam.estimated_time} دقيقة</span>
+                          <span>{exam.duration} دقيقة</span>
                         </div>
                       )}
-                      {exam.questions_count && (
+                      {exam.questions && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <FileText className="w-4 h-4" />
-                          <span>{exam.questions_count} سؤال</span>
+                          <span>{exam.questions} سؤال</span>
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Target className="w-4 h-4" />
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          exam.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                          exam.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {exam.difficulty === 'easy' ? 'سهل' :
-                           exam.difficulty === 'medium' ? 'متوسط' : 'صعب'}
-                        </span>
+                        <Users className="w-4 h-4" />
+                        <span>{exam.attempts}</span>
                       </div>
                     </div>
 
