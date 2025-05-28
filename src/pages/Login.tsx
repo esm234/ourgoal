@@ -175,14 +175,7 @@ const Login = () => {
                         render={({ field }) => (
                           <FormItem className="text-right">
                             <div className="flex items-center justify-between">
-                              <Button
-                                variant="link"
-                                className="p-0 h-auto text-xs text-primary"
-                                type="button"
-                                onClick={() => navigate("/forgot-password")}
-                              >
-                                نسيت كلمة المرور؟
-                              </Button>
+                              
                               <FormLabel>كلمة المرور</FormLabel>
                             </div>
                             <FormControl>
