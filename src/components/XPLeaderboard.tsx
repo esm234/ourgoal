@@ -24,6 +24,7 @@ const XPLeaderboard: React.FC = () => {
     leaderboard,
     userRank,
     loading,
+    isUpdatingXP,
     calculateUserXP,
     getXPLevel,
     getDifficultyBadge,
@@ -96,10 +97,20 @@ const XPLeaderboard: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleCalculateXP}
-                className="bg-primary/10 border-primary/20 text-primary"
+                disabled={isUpdatingXP}
+                className="bg-primary/10 border-primary/20 text-primary disabled:opacity-50"
               >
-                <Zap className="w-4 h-4 mr-2" />
-                اختبار
+                {isUpdatingXP ? (
+                  <>
+                    <div className="w-4 h-4 mr-2 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                    جاري الحساب...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    حساب النقاط
+                  </>
+                )}
               </Button>
             )}
           </div>

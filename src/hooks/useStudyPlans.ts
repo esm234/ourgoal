@@ -156,30 +156,70 @@ export const useStudyPlans = () => {
     if (!user) return false;
 
     try {
+      console.log('🏁 Starting plan completion process for user:', user.id);
+
       // Call the database function to complete the plan
       const { data, error: completeError } = await supabase.rpc('complete_current_plan', {
         target_user_id: user.id
       });
 
       if (completeError) {
+        console.error('❌ Error completing plan:', completeError);
         throw completeError;
       }
 
       if (!data) {
+        console.log('⚠️ No current plan found to complete');
         toast.error('لا توجد خطة حالية لإكمالها');
         return false;
       }
 
+      console.log('✅ Plan completion successful, result:', data);
+
+      // Wait a moment for database operations to complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Reload plans to get updated data
+      console.log('🔄 Reloading plans data...');
       await loadPlans();
 
+      // Verify XP calculation after completion
+      console.log('🧮 Verifying XP calculation after plan completion...');
+      try {
+        const { data: xpData, error: xpError } = await supabase.rpc('calculate_user_xp_basic', {
+          target_user_id: user.id
+        });
+
+        if (!xpError && xpData !== null) {
+          console.log('✅ XP verified after plan completion:', xpData);
+        } else {
+          console.warn('⚠️ XP verification failed:', { error: xpError, data: xpData });
+
+          // Try alternative verification by checking user_xp table directly
+          const { data: userXpData, error: userXpError } = await supabase
+            .from('user_xp')
+            .select('total_xp')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!userXpError && userXpData) {
+            console.log('✅ XP verified via user_xp table:', userXpData.total_xp);
+          } else {
+            console.warn('⚠️ Could not verify XP via user_xp table:', userXpError);
+          }
+        }
+      } catch (xpErr) {
+        console.warn('⚠️ XP verification error:', xpErr);
+      }
+
       // Trigger leaderboard update by dispatching a custom event
+      console.log('📢 Triggering leaderboard update...');
       window.dispatchEvent(new CustomEvent('xpUpdated'));
 
       toast.success('تم إكمال الخطة وحفظها في الخطط المكتملة! يمكنك الآن إنشاء خطة جديدة.');
       return true;
     } catch (err) {
-      console.error('Error completing study plan:', err);
+      console.error('❌ Error completing study plan:', err);
       toast.error('حدث خطأ في إكمال خطة الدراسة');
       return false;
     }

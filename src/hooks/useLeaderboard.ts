@@ -20,6 +20,7 @@ export const useLeaderboard = () => {
   const [userRank, setUserRank] = useState<LeaderboardUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdatingXP, setIsUpdatingXP] = useState(false);
 
   // Load leaderboard data
   const loadLeaderboard = async () => {
@@ -174,8 +175,14 @@ export const useLeaderboard = () => {
       return null;
     }
 
+    if (isUpdatingXP) {
+      console.log('⏳ XP update already in progress, skipping...');
+      return null;
+    }
+
     try {
-      console.log('Calculating XP for user:', user.id);
+      setIsUpdatingXP(true);
+      console.log('🧮 Calculating XP for user:', user.id);
 
       // Try the basic database function first
       const { data, error } = await supabase.rpc('calculate_user_xp_basic', {
@@ -183,19 +190,23 @@ export const useLeaderboard = () => {
       });
 
       if (error) {
-        console.error('Database function error:', error);
+        console.error('❌ Database function error:', error);
         // Fallback to manual calculation
-        return await calculateXPManually();
+        const manualXP = await calculateXPManually();
+        return manualXP;
       }
 
-      console.log('XP calculation result:', data);
+      console.log('✅ XP calculation result:', data);
 
       // Note: Leaderboard refresh is now manual only to save API calls
       return data;
     } catch (err) {
-      console.error('Error calculating user XP:', err);
+      console.error('❌ Error calculating user XP:', err);
       // Fallback to manual calculation
-      return await calculateXPManually();
+      const manualXP = await calculateXPManually();
+      return manualXP;
+    } finally {
+      setIsUpdatingXP(false);
     }
   };
 
@@ -276,14 +287,23 @@ export const useLeaderboard = () => {
           sampleDay: currentPlan.study_days[0],
           finalReviewDay: currentPlan.final_review_day
         });
+      } else {
+        console.log('No current plan found - this is normal after completing a plan');
       }
       totalXP += currentPlanXP;
 
-      console.log('Manual XP calculation:', {
+      console.log('Manual XP calculation breakdown:', {
         eventsXP,
         completedPlansXP,
         currentPlanXP,
-        totalXP
+        totalXP,
+        completedPlansCount: completedPlans.length,
+        hasCurrentPlan: !!currentPlan,
+        completedPlansDetails: completedPlans.map(p => ({
+          name: p.name,
+          xp_earned: p.xp_earned,
+          completed_days: p.completed_days
+        }))
       });
 
       // Insert or update user XP (using minimal columns)
@@ -369,9 +389,34 @@ export const useLeaderboard = () => {
   const updateUserXPFromProfile = async () => {
     if (!user) return;
 
+    if (isUpdatingXP) {
+      console.log('⏳ XP update already in progress, skipping...');
+      return;
+    }
+
     try {
-      // Recalculate XP using the manual calculation method
-      const totalXP = await calculateXPManually();
+      setIsUpdatingXP(true);
+      console.log('🔄 Starting XP update for user:', user.id);
+
+      // First try database function, then fallback to manual calculation
+      let totalXP = null;
+
+      try {
+        const { data: dbXP, error: dbError } = await supabase.rpc('calculate_user_xp_basic', {
+          target_user_id: user.id
+        });
+
+        if (!dbError && dbXP !== null) {
+          totalXP = dbXP;
+          console.log('✅ XP calculated via database function:', totalXP);
+        } else {
+          console.warn('⚠️ Database function failed, using manual calculation:', dbError);
+          totalXP = await calculateXPManually();
+        }
+      } catch (dbErr) {
+        console.warn('⚠️ Database function error, using manual calculation:', dbErr);
+        totalXP = await calculateXPManually();
+      }
 
       if (totalXP !== null) {
         console.log('✅ XP updated successfully, refreshing leaderboard...', { totalXP });
@@ -386,9 +431,13 @@ export const useLeaderboard = () => {
         await loadUserRank();
 
         console.log('🔄 Leaderboard refresh completed');
+      } else {
+        console.error('❌ Failed to calculate XP');
       }
     } catch (err) {
-      console.error('Error updating user XP from profile:', err);
+      console.error('❌ Error updating user XP from profile:', err);
+    } finally {
+      setIsUpdatingXP(false);
     }
   };
 
@@ -441,6 +490,7 @@ export const useLeaderboard = () => {
     userRank,
     loading,
     error,
+    isUpdatingXP,
     calculateUserXP,
     refreshAllXP,
     updateUserXPFromProfile,
