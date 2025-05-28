@@ -106,7 +106,7 @@ export const localFiles: LocalFile[] = [
         id: 305,
         title: " 5 اختبار العلاقات" ,
         description: "اختبار لعلاقات استيعاب المقروء",
-        google_form_url: "https://forms.gle/FxHNoWdAwe9q6D6B7",
+        google_form_url: "https://forms.gle/uxYyNni2foRqzQY4A",
         difficulty: "medium",
         estimated_time: 40,
         questions_count: 60
@@ -238,7 +238,7 @@ export const localFiles: LocalFile[] = [
         google_form_url: "https://forms.gle/mi9Z8xMo8EmPqxJW7",
         difficulty: "medium",
         estimated_time: 30,
-        questions_count: 15
+        questions_count: 25
       },
       {
         id: 602,
@@ -247,7 +247,7 @@ export const localFiles: LocalFile[] = [
         google_form_url: "https://forms.gle/dbkwu459XMy2Hpon7",
         difficulty: "medium",
         estimated_time: 30,
-        questions_count: 15
+        questions_count: 25
       }
     ]
   },
@@ -421,12 +421,12 @@ export const localFiles: LocalFile[] = [
     exams: [
       {
         id: 1501,
-        title: "اختبار مسائل السرعة",
-        description: "اختبار شامل على مسائل السرعة والزمن والمسافة",
+        title: "مسائل السرعة",
+        description: "اختبار شامل على مسائل السرعة والمسافة والزمن",
         google_form_url: "https://forms.office.com/r/m8ZuabPCBp",
         difficulty: "medium",
-        estimated_time: 50,
-        questions_count: 20
+        estimated_time: 45,
+        questions_count: 30
       }
     ]
   },
@@ -473,8 +473,8 @@ export const localFiles: LocalFile[] = [
         description: "اختبار الجزء الأول لتقفيلات الكمي",
         google_form_url: "https://forms.gle/gU9JwKbgMFP33m2x8",
         difficulty: "hard",
-        estimated_time: 45,
-        questions_count: 20
+        estimated_time: 60,
+        questions_count: 40
       },
       {
         id: 1802,
@@ -482,8 +482,8 @@ export const localFiles: LocalFile[] = [
         description: "اختبار الجزء الثاني لتقفيلات الكمي",
         google_form_url: "https://forms.gle/FZ99oo2m4h97bAAS9",
         difficulty: "hard",
-        estimated_time: 45,
-        questions_count: 20
+        estimated_time: 60,
+        questions_count: 40
       }
     ]
   },
@@ -510,7 +510,15 @@ export const localFiles: LocalFile[] = [
     downloads: 1345,
     created_at: getMay26WithTime(14, 45),
     exams: [
-
+      {
+        id: 2801,
+        title: "الاحتمالات",
+        description: "اختبار شامل على أسئلة الاحتمالات",
+        google_form_url: "https://forms.gle/KnCjYo9hpRRGangW9",
+        difficulty: "hard",
+        estimated_time: 40,
+        questions_count: 30
+      }
     ]
   },
   {
@@ -523,7 +531,15 @@ export const localFiles: LocalFile[] = [
     downloads: 2134,
     created_at: getMay26WithTime(15, 0),
     exams: [
-
+      {
+        id: 2901,
+        title: "التدريب",
+        description: "اختبار تدريبي شامل على أسئلة متنوعة",
+        google_form_url: "https://forms.gle/i716cF7GBZZNFGSu7",
+        difficulty: "medium",
+        estimated_time: 50,
+        questions_count: 35
+      }
     ]
   },
   {
@@ -538,51 +554,48 @@ export const localFiles: LocalFile[] = [
     exams: [
       {
         id: 3001,
-        title: "مقارنات إجابتها د - الجزء الرابع",
-        description: "اختبار مقارنات متخصص للإجابات من نوع د",
-        google_form_url: "https://forms.gle/GMFXTUMsZ8VPx1wVA",
+        title: "مقارنات إجابتها (د) - الجزء الأول",
+        description: "اختبار الجزء الأول للمقارنات التي إجابتها (د)",
+        google_form_url: "https://forms.office.com/r/YaumiPqWBH",
         difficulty: "medium",
-        estimated_time: 40,
-        questions_count: 15
+        estimated_time: 35,
+        questions_count: 25
       },
       {
         id: 3002,
-        title: "مقارنات إجابتها د - الجزء الخامس",
-        description: "اختبار مقارنات متخصص للإجابات من نوع د",
-        google_form_url: "https://forms.gle/ZjaJTdtH4eAUzLcG7",
+        title: "مقارنات إجابتها (د) - الجزء الثاني",
+        description: "اختبار الجزء الثاني للمقارنات التي إجابتها (د)",
+        google_form_url: "https://forms.office.com/r/r9eYc3kuJG",
         difficulty: "medium",
-        estimated_time: 40,
-        questions_count: 15
-      }
-    ]
-  },
-  {
-    id: 31,
-    title: "ملف الضمائر",
-    description: "الملف غير محلل لغير المشتركين بدورة\nأ/ايهاب عبدالعظيم‼️",
-    category: "verbal",
-    file_url: "https://drive.google.com/uc?export=download&id=placeholder",
-    file_size: "1.5 MB",
-    downloads: 234,
-    created_at: getMay26WithTime(15, 30),
-    exams: [
-      {
-        id: 3101,
-        title: "الضمائر - الجزء الأول",
-        description: "اختبار الجزء الأول على أسئلة الضمائر",
-        google_form_url: "https://forms.gle/BCXP2sEBssxixmqSA",
-        difficulty: "medium",
-        estimated_time: 30,
-        questions_count: 12
+        estimated_time: 35,
+        questions_count: 25
       },
       {
-        id: 3102,
-        title: "الضمائر - الجزء الثاني",
-        description: "اختبار الجزء الثاني على أسئلة الضمائر",
-        google_form_url: "https://forms.gle/sFpVHb5UxJxarKLq8",
+        id: 3003,
+        title: "مقارنات إجابتها (د) - الجزء الثالث",
+        description: "اختبار الجزء الثالث للمقارنات التي إجابتها (د)",
+        google_form_url: "https://forms.gle/PfbJgLbYMpEPG1gVA",
         difficulty: "medium",
-        estimated_time: 30,
-        questions_count: 12
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 3004,
+        title: "مقارنات إجابتها (د) - الجزء الرابع",
+        description: "اختبار الجزء الرابع للمقارنات التي إجابتها (د)",
+        google_form_url: "https://forms.gle/GMFXTUMsZ8VPx1wVA",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 3005,
+        title: "مقارنات إجابتها (د) - الجزء الخامس",
+        description: "اختبار الجزء الخامس للمقارنات التي إجابتها (د)",
+        google_form_url: "https://forms.gle/ZjaJTdtH4eAUzLcG7",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
       }
     ]
   },
@@ -675,7 +688,24 @@ export const localFiles: LocalFile[] = [
     downloads: 892,
     created_at: getMay26WithTime(13, 30),
     exams: [
-
+      {
+        id: 2301,
+        title: "الضمائر - الجزء الأول",
+        description: "اختبار الجزء الأول على أسئلة الضمائر",
+        google_form_url: "https://forms.gle/BCXP2sEBssxixmqSA",
+        difficulty: "medium",
+        estimated_time: 25,
+        questions_count: 20
+      },
+      {
+        id: 2302,
+        title: "الضمائر - الجزء الثاني",
+        description: "اختبار الجزء الثاني على أسئلة الضمائر",
+        google_form_url: "https://forms.gle/sFpVHb5UxJxarKLq8",
+        difficulty: "medium",
+        estimated_time: 25,
+        questions_count: 20
+      }
     ]
   },
   {
@@ -688,7 +718,24 @@ export const localFiles: LocalFile[] = [
     downloads: 654,
     created_at: getMay26WithTime(13, 45),
     exams: [
-
+      {
+        id: 2401,
+        title: "الشخصيات - الجزء الأول",
+        description: "اختبار الجزء الأول على أسئلة الشخصيات",
+        google_form_url: "https://forms.gle/3HsgGoUkZTqKhoKw5",
+        difficulty: "medium",
+        estimated_time: 30,
+        questions_count: 25
+      },
+      {
+        id: 2402,
+        title: "الشخصيات - الجزء الثاني",
+        description: "اختبار الجزء الثاني على أسئلة الشخصيات",
+        google_form_url: "https://forms.gle/ncqLYwfwu1B3p2Cf6",
+        difficulty: "medium",
+        estimated_time: 30,
+        questions_count: 25
+      }
     ]
   },
   {
@@ -701,7 +748,69 @@ export const localFiles: LocalFile[] = [
     downloads: 1456,
     created_at: getMay26WithTime(14, 0),
     exams: [
-
+      {
+        id: 2501,
+        title: "تقفيلات اللفظي - تناظر",
+        description: "اختبار تقفيلات اللفظي - الجزء الأول (تناظر)",
+        google_form_url: "https://forms.office.com/r/qNcC613QHV",
+        difficulty: "hard",
+        estimated_time: 45,
+        questions_count: 30
+      },
+      {
+        id: 2502,
+        title: "تقفيلات اللفظي - إكمال وخطأ",
+        description: "اختبار تقفيلات اللفظي - الجزء الأول (إكمال وخطأ)",
+        google_form_url: "https://forms.office.com/r/jSz2AaBt4N",
+        difficulty: "hard",
+        estimated_time: 45,
+        questions_count: 30
+      },
+      {
+        id: 2503,
+        title: "تقفيلات اللفظي - استيعاب (1)",
+        description: "اختبار تقفيلات اللفظي - الجزء الأول (استيعاب)",
+        google_form_url: "https://forms.gle/CdXcYCXmxTeJtDMZ6",
+        difficulty: "hard",
+        estimated_time: 40,
+        questions_count: 25
+      },
+      {
+        id: 2504,
+        title: "تقفيلات اللفظي - استيعاب (2)",
+        description: "اختبار تقفيلات اللفظي - الجزء الثاني (استيعاب)",
+        google_form_url: "https://forms.gle/7Ao8CA2h7hmSZsPj8",
+        difficulty: "hard",
+        estimated_time: 40,
+        questions_count: 25
+      },
+      {
+        id: 2505,
+        title: "تقفيلات اللفظي - مفردة",
+        description: "اختبار تقفيلات اللفظي - الجزء الأول (مفردة)",
+        google_form_url: "https://forms.office.com/r/XUu3B3aw5V",
+        difficulty: "hard",
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 2506,
+        title: "البنك السابع",
+        description: "اختبار البنك السابع الشامل",
+        google_form_url: "https://forms.office.com/Pages/ResponsePage.aspx?id=HeVmpx24pESCxfp2QsYl-8Lw2hZAil1KgQwUysc6gxxUN1c0TElXV1Y2SUJXTlNCS0RBUldGNEZKUi4u",
+        difficulty: "hard",
+        estimated_time: 60,
+        questions_count: 40
+      },
+      {
+        id: 2507,
+        title: "البنك الثامن",
+        description: "اختبار البنك الثامن الشامل",
+        google_form_url: "https://forms.office.com/Pages/ResponsePage.aspx?id=HeVmpx24pESCxfp2QsYl-8Lw2hZAil1KgQwUysc6gxxURTdEUzVFODcxMUQ2RjM2Rk9aSUNERE9QNy4u",
+        difficulty: "hard",
+        estimated_time: 60,
+        questions_count: 40
+      }
     ]
   },
   {
@@ -714,7 +823,51 @@ export const localFiles: LocalFile[] = [
     downloads: 1123,
     created_at: getMay26WithTime(14, 15),
     exams: [
-
+      {
+        id: 2601,
+        title: "مقارنات إجابتها (ج) - الجزء الأول",
+        description: "اختبار الجزء الأول للمقارنات التي إجابتها (ج)",
+        google_form_url: "https://forms.office.com/r/YaumiPqWBH",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 2602,
+        title: "مقارنات إجابتها (ج) - الجزء الثاني",
+        description: "اختبار الجزء الثاني للمقارنات التي إجابتها (ج)",
+        google_form_url: "https://forms.office.com/r/r9eYc3kuJG",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 2603,
+        title: "مقارنات إجابتها (ج) - الجزء الثالث",
+        description: "اختبار الجزء الثالث للمقارنات التي إجابتها (ج)",
+        google_form_url: "https://forms.gle/PfbJgLbYMpEPG1gVA",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 2604,
+        title: "مقارنات إجابتها (ج) - الجزء الرابع",
+        description: "اختبار الجزء الرابع للمقارنات التي إجابتها (ج)",
+        google_form_url: "https://forms.gle/GMFXTUMsZ8VPx1wVA",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
+      },
+      {
+        id: 2605,
+        title: "مقارنات إجابتها (ج) - الجزء الخامس",
+        description: "اختبار الجزء الخامس للمقارنات التي إجابتها (ج)",
+        google_form_url: "https://forms.gle/ZjaJTdtH4eAUzLcG7",
+        difficulty: "medium",
+        estimated_time: 35,
+        questions_count: 25
+      }
     ]
   }
 ];
