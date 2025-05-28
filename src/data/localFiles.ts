@@ -231,7 +231,24 @@ export const localFiles: LocalFile[] = [
     downloads: 823,
     created_at: getMay26WithTime(9, 15),
     exams: [
-
+      {
+        id: 601,
+        title: "المفردة المتشابهة - الجزء الأول",
+        description: "اختبار الجزء الأول للمفردات المتشابهة",
+        google_form_url: "https://forms.gle/mi9Z8xMo8EmPqxJW7",
+        difficulty: "medium",
+        estimated_time: 30,
+        questions_count: 15
+      },
+      {
+        id: 602,
+        title: "المفردة المتشابهة - الجزء الثاني",
+        description: "اختبار الجزء الثاني للمفردات المتشابهة",
+        google_form_url: "https://forms.gle/dbkwu459XMy2Hpon7",
+        difficulty: "medium",
+        estimated_time: 30,
+        questions_count: 15
+      }
     ]
   },
   {
@@ -402,7 +419,15 @@ export const localFiles: LocalFile[] = [
     downloads: 387,
     created_at: getMay26WithTime(11, 30),
     exams: [
-
+      {
+        id: 1501,
+        title: "اختبار مسائل السرعة",
+        description: "اختبار شامل على مسائل السرعة والزمن والمسافة",
+        google_form_url: "https://forms.office.com/r/m8ZuabPCBp",
+        difficulty: "medium",
+        estimated_time: 50,
+        questions_count: 20
+      }
     ]
   },
   {
@@ -442,7 +467,24 @@ export const localFiles: LocalFile[] = [
     downloads: 342,
     created_at: getMay26WithTime(12, 15),
     exams: [
-  
+      {
+        id: 1801,
+        title: "تقفيلات الكمي - الجزء الأول",
+        description: "اختبار الجزء الأول لتقفيلات الكمي",
+        google_form_url: "https://forms.gle/gU9JwKbgMFP33m2x8",
+        difficulty: "hard",
+        estimated_time: 45,
+        questions_count: 20
+      },
+      {
+        id: 1802,
+        title: "تقفيلات الكمي - الجزء الثاني",
+        description: "اختبار الجزء الثاني لتقفيلات الكمي",
+        google_form_url: "https://forms.gle/FZ99oo2m4h97bAAS9",
+        difficulty: "hard",
+        estimated_time: 45,
+        questions_count: 20
+      }
     ]
   },
   {
@@ -455,7 +497,7 @@ export const localFiles: LocalFile[] = [
     downloads: 1789,
     created_at: getMay26WithTime(14, 30),
     exams: [
-      
+
     ]
   },
   {
@@ -468,7 +510,7 @@ export const localFiles: LocalFile[] = [
     downloads: 1345,
     created_at: getMay26WithTime(14, 45),
     exams: [
-     
+
     ]
   },
   {
@@ -481,7 +523,7 @@ export const localFiles: LocalFile[] = [
     downloads: 2134,
     created_at: getMay26WithTime(15, 0),
     exams: [
-     
+
     ]
   },
   {
@@ -494,7 +536,54 @@ export const localFiles: LocalFile[] = [
     downloads: 987,
     created_at: getMay26WithTime(15, 15),
     exams: [
-   
+      {
+        id: 3001,
+        title: "مقارنات إجابتها د - الجزء الرابع",
+        description: "اختبار مقارنات متخصص للإجابات من نوع د",
+        google_form_url: "https://forms.gle/GMFXTUMsZ8VPx1wVA",
+        difficulty: "medium",
+        estimated_time: 40,
+        questions_count: 15
+      },
+      {
+        id: 3002,
+        title: "مقارنات إجابتها د - الجزء الخامس",
+        description: "اختبار مقارنات متخصص للإجابات من نوع د",
+        google_form_url: "https://forms.gle/ZjaJTdtH4eAUzLcG7",
+        difficulty: "medium",
+        estimated_time: 40,
+        questions_count: 15
+      }
+    ]
+  },
+  {
+    id: 31,
+    title: "ملف الضمائر",
+    description: "الملف غير محلل لغير المشتركين بدورة\nأ/ايهاب عبدالعظيم‼️",
+    category: "verbal",
+    file_url: "https://drive.google.com/uc?export=download&id=placeholder",
+    file_size: "1.5 MB",
+    downloads: 234,
+    created_at: getMay26WithTime(15, 30),
+    exams: [
+      {
+        id: 3101,
+        title: "الضمائر - الجزء الأول",
+        description: "اختبار الجزء الأول على أسئلة الضمائر",
+        google_form_url: "https://forms.gle/BCXP2sEBssxixmqSA",
+        difficulty: "medium",
+        estimated_time: 30,
+        questions_count: 12
+      },
+      {
+        id: 3102,
+        title: "الضمائر - الجزء الثاني",
+        description: "اختبار الجزء الثاني على أسئلة الضمائر",
+        google_form_url: "https://forms.gle/sFpVHb5UxJxarKLq8",
+        difficulty: "medium",
+        estimated_time: 30,
+        questions_count: 12
+      }
     ]
   },
   {
@@ -507,7 +596,7 @@ export const localFiles: LocalFile[] = [
     downloads: 1567,
     created_at: getMay26WithTime(15, 30),
     exams: [
-    
+
     ]
   },
   {
@@ -520,7 +609,7 @@ export const localFiles: LocalFile[] = [
     downloads: 2345,
     created_at: getMay26WithTime(15, 45),
     exams: [
-   
+
     ]
   },
   {
@@ -533,8 +622,8 @@ export const localFiles: LocalFile[] = [
     downloads: 1876,
     created_at: getMay26WithTime(12, 30),
     exams: [
-      
-      
+
+
     ]
   },
   {
@@ -547,7 +636,7 @@ export const localFiles: LocalFile[] = [
     downloads: 1234,
     created_at: getMay26WithTime(12, 45),
     exams: [
-      
+
     ]
   },
   {
@@ -560,7 +649,7 @@ export const localFiles: LocalFile[] = [
     downloads: 987,
     created_at: getMay26WithTime(13, 0),
     exams: [
-    
+
     ]
   },
   {
@@ -573,7 +662,7 @@ export const localFiles: LocalFile[] = [
     downloads: 743,
     created_at: getMay26WithTime(13, 15),
     exams: [
-    
+
     ]
   },
   {
@@ -586,7 +675,7 @@ export const localFiles: LocalFile[] = [
     downloads: 892,
     created_at: getMay26WithTime(13, 30),
     exams: [
-      
+
     ]
   },
   {
@@ -599,7 +688,7 @@ export const localFiles: LocalFile[] = [
     downloads: 654,
     created_at: getMay26WithTime(13, 45),
     exams: [
-     
+
     ]
   },
   {
@@ -612,7 +701,7 @@ export const localFiles: LocalFile[] = [
     downloads: 1456,
     created_at: getMay26WithTime(14, 0),
     exams: [
-     
+
     ]
   },
   {
@@ -625,7 +714,7 @@ export const localFiles: LocalFile[] = [
     downloads: 1123,
     created_at: getMay26WithTime(14, 15),
     exams: [
-     
+
     ]
   }
 ];
