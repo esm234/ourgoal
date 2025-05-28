@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, Calendar, Clock, RotateCcw, Edit, Eye, CheckCircle } from 'lucide-react';
+import { Trash2, Calendar, Clock, RotateCcw, Edit, Eye, CheckCircle, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { StudyPlan } from '@/hooks/useStudyPlans';
+import { useCompletedDays } from '@/hooks/useCompletedDays';
 import { toast } from 'sonner';
 import EditStudyPlanDialog from './EditStudyPlanDialog';
 
@@ -25,6 +26,7 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
   onViewDetails
 }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { areAllDaysCompleted, getRemainingCompletionsToday, DAILY_COMPLETION_LIMIT } = useCompletedDays();
 
   const handleDelete = async () => {
     const success = await onDelete();
@@ -46,6 +48,10 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
       }
     }
   };
+
+  // Check if all days are completed
+  const allDaysCompleted = studyPlan ? areAllDaysCompleted(studyPlan) : false;
+  const remainingCompletions = getRemainingCompletionsToday();
 
   if (!studyPlan) {
     return (
@@ -107,9 +113,19 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200 w-full sm:w-auto"
+                    disabled={!allDaysCompleted}
+                    className={`w-full sm:w-auto ${
+                      allDaysCompleted
+                        ? 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200'
+                        : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+                    }`}
+                    title={!allDaysCompleted ? 'يجب إكمال جميع أيام الخطة أولاً' : ''}
                   >
-                    <CheckCircle className="h-4 w-4 ml-2" />
+                    {allDaysCompleted ? (
+                      <CheckCircle className="h-4 w-4 ml-2" />
+                    ) : (
+                      <Lock className="h-4 w-4 ml-2" />
+                    )}
                     إكمال
                   </Button>
                 </AlertDialogTrigger>
@@ -163,6 +179,28 @@ const SingleStudyPlanManager: React.FC<SingleStudyPlanManagerProps> = ({
         <div className="text-sm text-muted-foreground">
           تم الإنشاء: {format(new Date(studyPlan.created_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
         </div>
+
+        {/* Daily Completion Limit Info */}
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            📅 <strong>الحد اليومي:</strong> يمكنك إكمال {DAILY_COMPLETION_LIMIT} أيام كحد أقصى في اليوم الواحد.
+            {remainingCompletions > 0 ? (
+              <span className="text-green-600"> متبقي اليوم: {remainingCompletions} أيام</span>
+            ) : (
+              <span className="text-orange-600"> وصلت للحد الأقصى اليوم!</span>
+            )}
+          </p>
+        </div>
+
+        {/* Plan Completion Status */}
+        {!allDaysCompleted && (
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-800">
+              🔒 <strong>إكمال الخطة:</strong> يجب إكمال جميع أيام الخطة قبل أن تتمكن من إكمالها ونقلها للخطط المكتملة.
+            </p>
+          </div>
+        )}
+
         <div className="mt-4 p-4 bg-muted rounded-lg">
           <p className="text-sm">
             💡 <strong>ملاحظة:</strong> يمكنك حفظ خطة دراسة واحدة فقط في ملفك الشخصي.

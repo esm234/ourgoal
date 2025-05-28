@@ -12,7 +12,8 @@ import {
   BookOpen,
   Calculator,
   TrendingUp,
-  Trophy
+  Trophy,
+  Calendar
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -35,7 +36,10 @@ const PlanDetails: React.FC = () => {
   const {
     completedDays,
     loading: completedLoading,
-    toggleDayCompletion
+    toggleDayCompletion,
+    canCompleteMoreToday,
+    getRemainingCompletionsToday,
+    DAILY_COMPLETION_LIMIT
   } = useCompletedDays();
 
   const [plan, setPlan] = useState<any | null>(null);
@@ -115,6 +119,14 @@ const PlanDetails: React.FC = () => {
   };
 
   const handleToggleDay = async (dayNumber: number) => {
+    const isCompleted = completedDays.has(dayNumber);
+
+    // If trying to complete a day and reached daily limit, show warning
+    if (!isCompleted && !canCompleteMoreToday()) {
+      toast.error(`لقد وصلت للحد الأقصى اليومي! يمكنك إكمال ${DAILY_COMPLETION_LIMIT} أيام فقط في اليوم الواحد.`);
+      return;
+    }
+
     await toggleDayCompletion(dayNumber);
   };
 
@@ -243,6 +255,27 @@ const PlanDetails: React.FC = () => {
                     <div className="text-sm text-muted-foreground">تاريخ الاختبار</div>
                   </div>
                 </div>
+
+                {/* Daily Completion Limit Info */}
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-blue-800">الحد اليومي للإكمال</div>
+                        <div className="text-sm text-blue-600">
+                          يمكنك إكمال {DAILY_COMPLETION_LIMIT} أيام كحد أقصى في اليوم الواحد
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{getRemainingCompletionsToday()}</div>
+                      <div className="text-xs text-blue-500">متبقي اليوم</div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -289,6 +322,7 @@ const PlanDetails: React.FC = () => {
                     <CardContent className="space-y-4">
                       {roundDays.map((day: any, dayIndex: number) => {
                         const isCompleted = completedDays.has(day.dayNumber);
+                        const canComplete = isCompleted || canCompleteMoreToday();
 
                         return (
                           <motion.div
@@ -296,33 +330,53 @@ const PlanDetails: React.FC = () => {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.4, delay: dayIndex * 0.05 }}
-                            className={`group p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                            className={`group p-6 rounded-2xl border transition-all duration-300 ${
+                              canComplete ? 'cursor-pointer' : 'cursor-not-allowed'
+                            } ${
                               isCompleted
                                 ? 'bg-green-500/10 border-green-500/30 shadow-lg'
-                                : 'bg-background/50 border-primary/10 hover:border-primary/30'
+                                : canComplete
+                                ? 'bg-background/50 border-primary/10 hover:border-primary/30'
+                                : 'bg-orange-50/80 border-orange-200/60 relative'
                             }`}
-                            onClick={() => handleToggleDay(day.dayNumber)}
+                            onClick={() => canComplete && handleToggleDay(day.dayNumber)}
+                            title={!canComplete ? `وصلت للحد الأقصى اليومي (${DAILY_COMPLETION_LIMIT} أيام)` : ''}
                           >
+                            {/* Daily limit overlay for disabled days */}
+                            {!canComplete && (
+                              <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                🔒 محدود
+                              </div>
+                            )}
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                               <div className="flex items-center gap-4 sm:gap-6">
                                 <Checkbox
                                   checked={isCompleted}
-                                  onChange={() => handleToggleDay(day.dayNumber)}
+                                  onChange={() => canComplete && handleToggleDay(day.dayNumber)}
+                                  disabled={!canComplete}
                                   className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
                                 />
                                 <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
                                   isCompleted
                                     ? 'bg-green-500/20 scale-110'
-                                    : 'bg-gradient-to-r from-primary/20 to-accent/20 group-hover:scale-110'
+                                    : canComplete
+                                    ? 'bg-gradient-to-r from-primary/20 to-accent/20 group-hover:scale-110'
+                                    : 'bg-orange-200/60'
                                 }`}>
                                   <span className={`text-lg sm:text-xl font-bold ${
-                                    isCompleted ? 'text-green-500' : 'text-primary'
+                                    isCompleted
+                                      ? 'text-green-500'
+                                      : canComplete
+                                      ? 'text-primary'
+                                      : 'text-orange-600'
                                   }`}>
                                     {day.dayNumber}
                                   </span>
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="text-sm sm:text-lg font-bold text-foreground mb-1 break-words">
+                                  <div className={`text-sm sm:text-lg font-bold mb-1 break-words ${
+                                    canComplete ? 'text-foreground' : 'text-orange-700'
+                                  }`}>
                                     {format(new Date(day.date), "EEEE، dd MMMM yyyy", { locale: ar })}
                                   </div>
                                   {isCompleted && (
@@ -331,38 +385,43 @@ const PlanDetails: React.FC = () => {
                                       مكتمل
                                     </Badge>
                                   )}
+                                  {!canComplete && !isCompleted && (
+                                    <Badge className="bg-orange-500/20 text-orange-700 border-orange-500/30 text-xs">
+                                      🔒 وصلت للحد الأقصى اليومي
+                                    </Badge>
+                                  )}
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:flex lg:items-center lg:gap-6 xl:gap-8">
                                 <div className="text-center">
                                   <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                                    <span className="text-xs sm:text-sm text-muted-foreground">لفظي</span>
+                                    <BookOpen className={`w-4 h-4 sm:w-5 sm:h-5 ${canComplete ? 'text-blue-500' : 'text-orange-600'}`} />
+                                    <span className={`text-xs sm:text-sm ${canComplete ? 'text-muted-foreground' : 'text-orange-600'}`}>لفظي</span>
                                   </div>
-                                  <div className="text-lg sm:text-2xl font-bold text-blue-500">
+                                  <div className={`text-lg sm:text-2xl font-bold ${canComplete ? 'text-blue-500' : 'text-orange-700'}`}>
                                     {day.verbalRange?.start}-{day.verbalRange?.end}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">({day.verbalTests} اختبار)</div>
+                                  <div className={`text-xs ${canComplete ? 'text-muted-foreground' : 'text-orange-600'}`}>({day.verbalTests} اختبار)</div>
                                 </div>
 
                                 <div className="text-center">
                                   <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                                    <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-                                    <span className="text-xs sm:text-sm text-muted-foreground">كمي</span>
+                                    <Calculator className={`w-4 h-4 sm:w-5 sm:h-5 ${canComplete ? 'text-green-500' : 'text-orange-600'}`} />
+                                    <span className={`text-xs sm:text-sm ${canComplete ? 'text-muted-foreground' : 'text-orange-600'}`}>كمي</span>
                                   </div>
-                                  <div className="text-lg sm:text-2xl font-bold text-green-500">
+                                  <div className={`text-lg sm:text-2xl font-bold ${canComplete ? 'text-green-500' : 'text-orange-700'}`}>
                                     {day.quantitativeRange?.start}-{day.quantitativeRange?.end}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">({day.quantitativeTests} اختبار)</div>
+                                  <div className={`text-xs ${canComplete ? 'text-muted-foreground' : 'text-orange-600'}`}>({day.quantitativeTests} اختبار)</div>
                                 </div>
 
                                 <div className="text-center">
                                   <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                                    <span className="text-xs sm:text-sm text-muted-foreground">المجموع</span>
+                                    <TrendingUp className={`w-4 h-4 sm:w-5 sm:h-5 ${canComplete ? 'text-primary' : 'text-orange-600'}`} />
+                                    <span className={`text-xs sm:text-sm ${canComplete ? 'text-muted-foreground' : 'text-orange-600'}`}>المجموع</span>
                                   </div>
-                                  <div className="text-lg sm:text-2xl font-bold text-primary">{day.totalTests}</div>
+                                  <div className={`text-lg sm:text-2xl font-bold ${canComplete ? 'text-primary' : 'text-orange-700'}`}>{day.totalTests}</div>
                                 </div>
                               </div>
                             </div>
@@ -392,39 +451,73 @@ const PlanDetails: React.FC = () => {
                 </CardHeader>
 
                 <CardContent className="relative z-10">
-                  <div
-                    className={`p-8 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                      completedDays.has(plan.final_review_day.dayNumber)
-                        ? 'bg-amber-500/20 border-amber-500/40 shadow-lg'
-                        : 'bg-background/60 border-amber-500/20 hover:border-amber-500/40'
-                    }`}
-                    onClick={() => handleToggleDay(plan.final_review_day.dayNumber)}
-                  >
+                  {(() => {
+                    const isCompleted = completedDays.has(plan.final_review_day.dayNumber);
+                    const canComplete = isCompleted || canCompleteMoreToday();
+
+                    return (
+                      <div
+                        className={`p-8 rounded-2xl border transition-all duration-300 relative ${
+                          canComplete ? 'cursor-pointer' : 'cursor-not-allowed'
+                        } ${
+                          isCompleted
+                            ? 'bg-amber-500/20 border-amber-500/40 shadow-lg'
+                            : canComplete
+                            ? 'bg-background/60 border-amber-500/20 hover:border-amber-500/40'
+                            : 'bg-orange-50/80 border-orange-200/60'
+                        }`}
+                        onClick={() => canComplete && handleToggleDay(plan.final_review_day.dayNumber)}
+                        title={!canComplete ? `وصلت للحد الأقصى اليومي (${DAILY_COMPLETION_LIMIT} أيام)` : ''}
+                      >
+                        {/* Daily limit overlay for disabled final review day */}
+                        {!canComplete && (
+                          <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            🔒 محدود
+                          </div>
+                        )}
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                       <div className="flex items-center gap-4 sm:gap-6">
                         <Checkbox
-                          checked={completedDays.has(plan.final_review_day.dayNumber)}
-                          onChange={() => handleToggleDay(plan.final_review_day.dayNumber)}
+                          checked={isCompleted}
+                          onChange={() => canComplete && handleToggleDay(plan.final_review_day.dayNumber)}
+                          disabled={!canComplete}
                           className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
                         />
                         <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
-                          completedDays.has(plan.final_review_day.dayNumber)
+                          isCompleted
                             ? 'bg-amber-500/30 scale-110'
-                            : 'bg-amber-500/20'
+                            : canComplete
+                            ? 'bg-amber-500/20'
+                            : 'bg-orange-200/60'
                         }`}>
-                          <span className="text-2xl sm:text-3xl font-bold text-amber-600">{plan.final_review_day.dayNumber}</span>
+                          <span className={`text-2xl sm:text-3xl font-bold ${
+                            isCompleted
+                              ? 'text-amber-600'
+                              : canComplete
+                              ? 'text-amber-600'
+                              : 'text-orange-600'
+                          }`}>{plan.final_review_day.dayNumber}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-lg sm:text-2xl font-bold text-foreground mb-2 break-words">
+                          <div className={`text-lg sm:text-2xl font-bold mb-2 break-words ${
+                            canComplete ? 'text-foreground' : 'text-orange-700'
+                          }`}>
                             {format(new Date(plan.final_review_day.date), "EEEE، dd MMMM yyyy", { locale: ar })}
                           </div>
-                          <div className="text-amber-600 font-medium text-sm sm:text-lg">
+                          <div className={`font-medium text-sm sm:text-lg ${
+                            canComplete ? 'text-amber-600' : 'text-orange-600'
+                          }`}>
                             مراجعة الأخطاء والنقاط المهمة فقط
                           </div>
-                          {completedDays.has(plan.final_review_day.dayNumber) && (
+                          {isCompleted && (
                             <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 mt-2 text-xs">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               مكتمل - أحسنت!
+                            </Badge>
+                          )}
+                          {!canComplete && !isCompleted && (
+                            <Badge className="bg-orange-500/20 text-orange-700 border-orange-500/30 mt-2 text-xs">
+                              🔒 وصلت للحد الأقصى اليومي
                             </Badge>
                           )}
                         </div>
@@ -435,7 +528,9 @@ const PlanDetails: React.FC = () => {
                         <div className="text-base sm:text-lg font-bold text-amber-600">يوم النجاح</div>
                       </div>
                     </div>
-                  </div>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </motion.div>

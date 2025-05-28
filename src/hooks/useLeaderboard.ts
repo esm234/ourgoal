@@ -263,32 +263,27 @@ export const useLeaderboard = () => {
       const completedPlansXP = completedPlans.reduce((sum, plan) => sum + (plan.xp_earned || 0), 0);
       totalXP += completedPlansXP;
 
-      // 3. XP from current plan (only actually completed days)
+      // 3. XP from current plan (using completed_days array)
       const currentPlan = profileData?.study_plan as any;
       let currentPlanXP = 0;
-      if (currentPlan && currentPlan.study_days) {
-        // Count only days that are actually marked as completed
-        const completedDays = currentPlan.study_days.filter((day: any) => day.completed === true).length;
-
-        // Add final review day if it's completed
-        let finalReviewCompleted = 0;
-        if (currentPlan.final_review_day && currentPlan.final_review_day.completed === true) {
-          finalReviewCompleted = 1;
-        }
-
-        currentPlanXP = (completedDays + finalReviewCompleted) * 100; // 100 XP per actually completed day
+      if (currentPlan && currentPlan.completed_days) {
+        // Count completed days from completed_days array
+        const completedDaysArray = currentPlan.completed_days || [];
+        currentPlanXP = completedDaysArray.length * 100; // 100 XP per completed day
 
         // Debug logging
         console.log('Current plan XP calculation:', {
-          totalStudyDays: currentPlan.study_days.length,
-          completedDays,
-          finalReviewCompleted,
+          completedDaysArray,
+          completedDaysCount: completedDaysArray.length,
           currentPlanXP,
-          sampleDay: currentPlan.study_days[0],
-          finalReviewDay: currentPlan.final_review_day
+          planStructure: {
+            hasStudyDays: !!currentPlan.study_days,
+            hasCompletedDays: !!currentPlan.completed_days,
+            totalDays: currentPlan.total_days
+          }
         });
       } else {
-        console.log('No current plan found - this is normal after completing a plan');
+        console.log('No current plan found or no completed_days array - this is normal after completing a plan');
       }
       totalXP += currentPlanXP;
 
