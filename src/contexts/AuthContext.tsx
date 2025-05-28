@@ -67,11 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) throw error;
-      
+
       const userRole = data?.role || "user";
       setRole(userRole);
       setLastRoleFetch(now);
-      
+
       // تخزين الدور محليًا
       localStorage.setItem(
         roleLocalStorageKey,
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       setIsLoggedIn(!!session);
       setUsername(session?.user?.email ?? null);
-      
+
       if (session?.user?.id) {
         fetchUserRole(session.user.id);
       } else {
@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // مسح التخزين المؤقت المحلي عند تسجيل الخروج
         localStorage.removeItem(roleLocalStorageKey);
       }
-      
+
       // Debug auth state changes
       console.log("Auth state change:", event, !!session);
     });
@@ -113,13 +113,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       setIsLoggedIn(!!session);
       setUsername(session?.user?.email ?? null);
-      
+
       if (session?.user?.id) {
         fetchUserRole(session.user.id);
       } else {
         setRole(null);
       }
-      
+
       setLoading(false);
     });
 
@@ -188,21 +188,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      // Use the production URL for password reset
-      const productionUrl = "https://asrargroup.vercel.app";
+      // Always use the production URL for password reset emails
+      // This ensures that reset links work regardless of where the request originates
+      const productionUrl = "https://ourgoal.site";
 
-      // Determine if we're in production or development
-      const baseUrl = window.location.hostname === "localhost"
-        ? window.location.origin
-        : productionUrl;
-
-      // Make sure the redirectTo URL is exactly correct
-      // This will only send a token for verification without auto-login
+      // Use production URL for reset password emails to ensure they work for all users
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${baseUrl}/reset-password`,
+        redirectTo: `${productionUrl}/reset-password`,
       });
 
-      console.log("Reset password requested for:", email, "with redirect to:", `${baseUrl}/reset-password`);
+      console.log("Reset password requested for:", email, "with redirect to:", `${productionUrl}/reset-password`);
       return { error };
     } catch (error: any) {
       return { error };
