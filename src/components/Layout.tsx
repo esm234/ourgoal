@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import WeeklyEventNotificationBanner from "./WeeklyEventNotificationBanner";
 import { clearAllCaches, forceReload } from "@/utils/cacheUtils";
 import { Button } from "./ui/button";
+import { useWeeklyEvents } from "@/hooks/useWeeklyEvents";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +13,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [showCacheButton, setShowCacheButton] = useState(false);
+  const { events } = useWeeklyEvents();
 
   useEffect(() => {
     // Show cache button in development or when pressing Ctrl+Shift+C
@@ -36,6 +39,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <WeeklyEventNotificationBanner events={events} />
       <Navbar />
       <main className="flex-grow">
         {children}
