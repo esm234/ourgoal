@@ -28,7 +28,9 @@ import AdminEditEvent from "@/pages/AdminEditEvent";
 import AdminEventQuestions from "@/pages/AdminEventQuestions";
 import EventTest from "@/pages/EventTest";
 import EventResults from "@/pages/EventResults";
+import EventPreview from "@/pages/EventPreview";
 import AdminCreateQuestion from "@/pages/AdminCreateQuestion";
+import AdminEditQuestion from "@/pages/AdminEditQuestion";
 import PomodoroTimer from "@/pages/PomodoroTimer";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -106,6 +108,11 @@ const App = () => {
                   <EventResults />
                 </ProtectedRoute>
               } />
+              <Route path="/weekly-events/:eventId/preview" element={
+                <ProtectedRoute adminOnly={true}>
+                  <EventPreview />
+                </ProtectedRoute>
+              } />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
@@ -142,6 +149,11 @@ const App = () => {
               <Route path="/admin/weekly-events/:eventId/questions/create" element={
                 <ProtectedRoute adminOnly={true}>
                   <AdminCreateQuestion />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/weekly-events/:eventId/questions/:questionId/edit" element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminEditQuestion />
                 </ProtectedRoute>
               } />
 
