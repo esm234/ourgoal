@@ -225,7 +225,7 @@ const LocalFileDetails = () => {
                       )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Users className="w-4 h-4" />
-                        <span>0</span>
+                        <span>100+</span>
                       </div>
                     </div>
 
