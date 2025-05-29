@@ -1,6 +1,6 @@
 // إعدادات إشعارات الفعاليات الأسبوعية - نظام بسيط بدون استدعاء قاعدة البيانات
 export const WEEKLY_EVENT_NOTIFICATION_CONFIG = {
-  enabled: true, // تفعيل/إلغاء تفعيل نظام الإشعارات (غير هذا إلى false لإيقاف الإشعارات)
+  enabled: false, // تفعيل/إلغاء تفعيل نظام الإشعارات (غير هذا إلى false لإيقاف الإشعارات)
 
   // نوع الإشعار: 'active' للفعاليات النشطة، 'upcoming' للفعاليات القادمة، null لإيقاف
   currentEventType: 'active' as 'active' | 'active' | null,
