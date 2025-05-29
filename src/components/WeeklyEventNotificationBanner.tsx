@@ -1,44 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trophy, Clock, Play, Calendar } from 'lucide-react';
+import { X, Trophy, Play, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { WeeklyEvent, isEventActive as isWeeklyEventActive } from '@/types/weeklyEvents';
 import {
-  getEventForNotification,
-  isEventDismissed,
-  dismissEvent,
-  getEventStatusColor,
-  getEventCategoryIcon,
-  getEventStatusText,
-  getEventTimeText,
+  shouldShowNotification,
+  getCurrentNotificationId,
+  dismissNotification,
+  getNotificationColor,
+  getNotificationIcon,
+  getNotificationStatusText,
   WEEKLY_EVENT_NOTIFICATION_CONFIG
 } from '@/utils/eventNotifications';
 
 interface WeeklyEventNotificationBannerProps {
-  events: WeeklyEvent[];
+  // لا نحتاج events بعد الآن - النظام بسيط ولا يستدعي قاعدة البيانات
 }
 
-const WeeklyEventNotificationBanner: React.FC<WeeklyEventNotificationBannerProps> = ({ events }) => {
+const WeeklyEventNotificationBanner: React.FC<WeeklyEventNotificationBannerProps> = () => {
   const navigate = useNavigate();
-  const [currentEvent, setCurrentEvent] = useState<WeeklyEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // تحديث الفعالية الحالية
+  // فحص ما إذا كان يجب إظهار الإشعار
   useEffect(() => {
-    const event = getEventForNotification(events);
-
-    if (event && !isEventDismissed(event.id)) {
-      setCurrentEvent(event);
-      setIsVisible(true);
-      setIsDismissed(false);
-    } else {
-      setCurrentEvent(null);
-      setIsVisible(false);
-    }
-  }, [events]);
+    const shouldShow = shouldShowNotification();
+    setIsVisible(shouldShow);
+    setIsDismissed(!shouldShow);
+  }, []);
 
   // إضافة padding للـ body عند وجود إشعار
   useEffect(() => {
@@ -66,39 +56,32 @@ const WeeklyEventNotificationBanner: React.FC<WeeklyEventNotificationBannerProps
   }, [isVisible]);
 
   const handleDismiss = () => {
-    if (currentEvent) {
-      dismissEvent(currentEvent.id);
-      setIsDismissed(true);
-      setIsVisible(false);
-    }
+    const notificationId = getCurrentNotificationId();
+    dismissNotification(notificationId);
+    setIsDismissed(true);
+    setIsVisible(false);
   };
 
   const handleEventClick = () => {
-    if (currentEvent) {
-      // إخفاء الإشعار عند النقر
-      dismissEvent(currentEvent.id);
-      setIsDismissed(true);
-      setIsVisible(false);
+    // إخفاء الإشعار عند النقر
+    const notificationId = getCurrentNotificationId();
+    dismissNotification(notificationId);
+    setIsDismissed(true);
+    setIsVisible(false);
 
-      if (isWeeklyEventActive(currentEvent)) {
-        // إذا كانت الفعالية نشطة، اذهب مباشرة للاختبار
-        navigate(`/weekly-events/${currentEvent.id}/test`);
-      } else {
-        // إذا كانت قادمة، اذهب لصفحة الفعاليات
-        navigate('/weekly-events');
-      }
-    }
+    // الذهاب لصفحة الفعاليات الأسبوعية
+    navigate('/weekly-events');
   };
 
-  if (!isVisible || !currentEvent || isDismissed) {
+  if (!isVisible || isDismissed) {
     return null;
   }
 
-  const isActive = isWeeklyEventActive(currentEvent);
-  const statusColor = getEventStatusColor(currentEvent);
-  const categoryIcon = getEventCategoryIcon(currentEvent.category);
-  const statusText = getEventStatusText(currentEvent);
-  const timeText = getEventTimeText(currentEvent);
+  const isActive = WEEKLY_EVENT_NOTIFICATION_CONFIG.currentEventType === 'active';
+  const statusColor = getNotificationColor();
+  const categoryIcon = getNotificationIcon();
+  const statusText = getNotificationStatusText();
+  const message = WEEKLY_EVENT_NOTIFICATION_CONFIG.message;
 
   return (
     <AnimatePresence>
@@ -118,11 +101,11 @@ const WeeklyEventNotificationBanner: React.FC<WeeklyEventNotificationBannerProps
                 <span className="text-white text-xl">{categoryIcon}</span>
               </div>
 
-              {/* تفاصيل الفعالية */}
+              {/* تفاصيل الإشعار */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-foreground truncate">
-                    {currentEvent.title}
+                    {message}
                   </h3>
                   <Badge
                     className={`${
@@ -137,12 +120,8 @@ const WeeklyEventNotificationBanner: React.FC<WeeklyEventNotificationBannerProps
 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{timeText}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
                     <Trophy className="w-4 h-4" />
-                    <span>{currentEvent.xp_reward} نقطة خبرة</span>
+                    <span>شارك في الفعاليات واكسب نقاط الخبرة</span>
                   </div>
                 </div>
               </div>
