@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
+import { getResetPasswordUrl } from "@/config/environment";
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -188,16 +189,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      // Always use the production URL for password reset emails
-      // This ensures that reset links work regardless of where the request originates
-      const productionUrl = "https://ourgoal.site";
+      // Get the appropriate reset password URL based on current environment
+      const resetUrl = getResetPasswordUrl();
 
-      // Use production URL for reset password emails to ensure they work for all users
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${productionUrl}/reset-password`,
+        redirectTo: resetUrl,
       });
 
-      console.log("Reset password requested for:", email, "with redirect to:", `${productionUrl}/reset-password`);
+      console.log("Reset password requested for:", email, "with redirect to:", resetUrl);
       return { error };
     } catch (error: any) {
       return { error };
