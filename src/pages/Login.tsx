@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -175,7 +175,12 @@ const Login = () => {
                         render={({ field }) => (
                           <FormItem className="text-right">
                             <div className="flex items-center justify-between">
-                              
+                              <Link
+                                to="/forgot-password"
+                                className="text-sm text-primary hover:underline"
+                              >
+                                نسيت كلمة المرور؟
+                              </Link>
                               <FormLabel>كلمة المرور</FormLabel>
                             </div>
                             <FormControl>
