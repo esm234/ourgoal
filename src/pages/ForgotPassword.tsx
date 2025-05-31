@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ArrowRight, Mail } from "lucide-react";
+import { ENV } from "@/config/environment";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("البريد الإلكتروني غير صالح"),
@@ -48,7 +49,7 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       const { error } = await resetPassword(data.email);
-      
+
       if (error) {
         throw error;
       } else {
@@ -79,6 +80,11 @@ const ForgotPassword = () => {
               <CardDescription>
                 أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور
               </CardDescription>
+              {ENV.isDevelopment && (
+                <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded text-xs text-blue-700">
+                  🔧 وضع التطوير: الرابط سيوجه إلى {ENV.baseUrl}
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {emailSent ? (
@@ -90,8 +96,8 @@ const ForgotPassword = () => {
                   <p className="text-muted-foreground mb-4">
                     تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد الخاص بك.
                   </p>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="mt-2"
                     onClick={() => navigate("/login")}
                   >
@@ -112,9 +118,9 @@ const ForgotPassword = () => {
                               <span className="absolute left-3 top-2.5 text-muted-foreground">
                                 <Mail size={16} />
                               </span>
-                              <Input 
-                                placeholder="name@example.com" 
-                                {...field} 
+                              <Input
+                                placeholder="name@example.com"
+                                {...field}
                                 type="email"
                                 dir="ltr"
                                 className="pl-10"
@@ -125,10 +131,10 @@ const ForgotPassword = () => {
                         </FormItem>
                       )}
                     />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
+
+                    <Button
+                      type="submit"
+                      className="w-full"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
@@ -138,8 +144,8 @@ const ForgotPassword = () => {
               )}
             </CardContent>
             <CardFooter className="flex justify-center">
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 onClick={() => navigate("/login")}
                 className="flex items-center gap-1"
               >
