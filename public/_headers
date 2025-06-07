@@ -12,6 +12,9 @@
   # Performance headers
   X-DNS-Prefetch-Control: on
 
+  # Domain redirect hint for crawlers
+  X-Robots-Tag: noindex
+
 # Static assets caching
 /assets/*
   Cache-Control: public, max-age=31536000, immutable

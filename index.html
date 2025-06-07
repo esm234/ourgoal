@@ -10,6 +10,13 @@
     <link rel="icon" type="image/jpeg" sizes="32x32" href="/new-favicon.jpg" />
     <link rel="icon" type="image/jpeg" sizes="16x16" href="/new-favicon.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Domain redirect for bots and crawlers -->
+    <script>
+      if (window.location.hostname === 'ourgoal.pages.dev') {
+        document.write('<meta http-equiv="refresh" content="0; url=https://ourgoal.site' + window.location.pathname + window.location.search + window.location.hash + '">');
+      }
+    </script>
 <meta name="google-site-verification" content="gBHJl4hR-prp7h_HETEJumYCx3mTyh7SkIPaOtQ8XIU" />
 
     <!-- Security Meta Tags to prevent phishing detection -->
