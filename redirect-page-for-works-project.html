@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تم نقل الموقع - اور جول</title>
+    
+    <!-- Immediate redirect -->
+    <meta http-equiv="refresh" content="0; url=https://ourgoal.site/">
+    
+    <!-- SEO -->
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://ourgoal.site/">
+    
+    <!-- Open Graph -->
+    <meta property="og:url" content="https://ourgoal.site/">
+    <meta property="og:title" content="اور جول - Our Goal | منصة تعليمية لاختبار القدرات">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+        .new-url {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FFD700;
+            text-decoration: none;
+            border: 2px solid #FFD700;
+            padding: 15px 30px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .new-url:hover {
+            background: #FFD700;
+            color: #333;
+        }
+        .countdown {
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 تم نقل الموقع</h1>
+        <p>تم نقل موقع <strong>اور جول</strong> إلى العنوان الجديد</p>
+        
+        <a href="https://ourgoal.site/" class="new-url">
+            https://ourgoal.site/
+        </a>
+        
+        <p>سيتم توجيهك تلقائياً خلال <span id="countdown">3</span> ثواني...</p>
+        
+        <p>إذا لم يتم التوجيه تلقائياً، اضغط على الرابط أعلاه</p>
+    </div>
+
+    <script>
+        // Countdown timer
+        let count = 3;
+        const countdownElement = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            count--;
+            countdownElement.textContent = count;
+            
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.replace("https://ourgoal.site/");
+            }
+        }, 1000);
+        
+        // Immediate redirect as backup
+        setTimeout(() => {
+            window.location.replace("https://ourgoal.site/");
+        }, 100);
+    </script>
+</body>
+</html>

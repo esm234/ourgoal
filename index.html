@@ -193,6 +193,15 @@
   </head>
 
   <body>
+    <!-- Domain redirect script -->
+    <script>
+      // Check if user is on old domain and redirect to new domain
+      if (window.location.hostname === 'ourgoal.pages.dev') {
+        const newUrl = 'https://ourgoal.site' + window.location.pathname + window.location.search + window.location.hash;
+        window.location.replace(newUrl);
+      }
+    </script>
+
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>

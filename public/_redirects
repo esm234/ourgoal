@@ -1,9 +1,6 @@
 # Cloudflare Pages redirects for React Router SPA
 # This file will be copied to the build output
 
-# Domain redirect from old .pages.dev to new custom domain
-# Redirect all traffic from ourgoal.pages.dev to ourgoal.site
-https://ourgoal.pages.dev/*  https://ourgoal.site/:splat  301
 
 # Static assets - serve directly
 /assets/*  /assets/:splat  200
