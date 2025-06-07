@@ -62,7 +62,7 @@ const WeeklyEvents: React.FC = () => {
     "@type": "WebPage",
     "name": "الفعاليات الأسبوعية - اور جول",
     "description": "شارك في الفعاليات التعليمية الأسبوعية واختبر مهاراتك في اختبار القدرات مع طلاب آخرين",
-    "url": "https://ourgoal.pages.dev/weekly-events",
+    "url": "https://ourgoal.site/weekly-events",
     "mainEntity": {
       "@type": "Event",
       "name": "فعاليات اختبار القدرات الأسبوعية",

@@ -23,10 +23,10 @@ const Home = () => {
     "name": "اور جول - Our Goal",
     "alternateName": "Our Goal",
     "description": "منصة تعليمية متخصصة في مساعدة الطلاب على التحضير لاختبار القدرات العامة",
-    "url": "https://ourgoal.pages.dev",
+    "url": "https://ourgoal.site",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://ourgoal.pages.dev/files?search={search_term_string}",
+      "target": "https://ourgoal.site/files?search={search_term_string}",
       "query-input": "required name=search_term_string"
     },
     "mainEntity": {

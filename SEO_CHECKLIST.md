@@ -76,7 +76,7 @@ https://tools.pingdom.com/
 # Run Lighthouse in Chrome DevTools
 # Or use CLI
 npm install -g lighthouse
-lighthouse https://ourgoal.pages.dev --output html
+lighthouse https://ourgoal.site --output html
 ```
 
 ### 3. Arabic SEO Testing

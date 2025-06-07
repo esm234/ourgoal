@@ -675,7 +675,7 @@ const EquivalencyCalculator = () => {
     "@type": "WebApplication",
     "name": "حاسبة المعادلة التقديرية - اور جول",
     "description": "احسب معدلك التقديري للمعادلة المصرية بناء على نسبة الثانوية العامة ودرجة اختبار القدرات",
-    "url": "https://ourgoal.pages.dev/equivalency-calculator",
+    "url": "https://ourgoal.site/equivalency-calculator",
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web Browser",
     "offers": {

@@ -172,7 +172,7 @@ const FAQ: React.FC = () => {
     "@type": "FAQPage",
     "name": "الأسئلة الشائعة - اور جول",
     "description": "إجابات شاملة لأكثر الأسئلة والمشاكل شيوعاً التي تواجه الطلاب في التحضير لاختبار القدرات",
-    "url": "https://ourgoal.pages.dev/faq",
+    "url": "https://ourgoal.site/faq",
     "mainEntity": faqData.map(faq => ({
       "@type": "Question",
       "name": faq.question,

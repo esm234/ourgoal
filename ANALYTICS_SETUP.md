@@ -9,7 +9,7 @@ This guide helps you set up comprehensive analytics and search engine optimizati
 1. Go to [Google Analytics](https://analytics.google.com/)
 2. Click "Start measuring"
 3. Create an account named "Our Goal Platform"
-4. Set up a property for "ourgoal.pages.dev"
+4. Set up a property for "ourgoal.site"
 5. Choose "Web" as the platform
 
 ### 2. Install GA4 Tracking Code
@@ -50,7 +50,7 @@ gtag('event', 'use_calculator', {
 ### 1. Add Property
 1. Go to [Google Search Console](https://search.google.com/search-console/)
 2. Click "Add Property"
-3. Choose "URL prefix" and enter: `https://ourgoal.pages.dev`
+3. Choose "URL prefix" and enter: `https://ourgoal.site`
 
 ### 2. Verify Ownership
 Choose one of these methods:
@@ -73,14 +73,14 @@ Add this to your `index.html` `<head>`:
 
 ### 3. Submit Sitemap
 1. In Search Console, go to "Sitemaps"
-2. Add sitemap URL: `https://ourgoal.pages.dev/sitemap.xml`
+2. Add sitemap URL: `https://ourgoal.site/sitemap.xml`
 3. Submit and monitor indexing status
 
 ## 🌐 Bing Webmaster Tools Setup
 
 ### 1. Add Site
 1. Go to [Bing Webmaster Tools](https://www.bing.com/webmasters/)
-2. Add your site: `https://ourgoal.pages.dev`
+2. Add your site: `https://ourgoal.site`
 
 ### 2. Verify Ownership
 Similar to Google, choose:
