@@ -9,7 +9,7 @@ const StudyPlan: React.FC = () => {
     "@type": "WebApplication",
     "name": "مولد خطة الدراسة الذكي - اور جول",
     "description": "أنشئ خطة دراسية مخصصة ومنظمة لاختبار القدرات بناءً على تاريخ اختبارك وعدد مرات المراجعة",
-    "url": "https://ourgoal.pages.dev/study-plan",
+    "url": "https://ourgoal.site/study-plan",
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web Browser",
     "offers": {

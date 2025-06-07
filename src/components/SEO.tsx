@@ -34,7 +34,7 @@ const SEO: React.FC<SEOProps> = ({
   canonical,
   structuredData
 }) => {
-  const siteUrl = "https://ourgoal.pages.dev";
+  const siteUrl = "https://ourgoal.site";
   const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
   const fullImageUrl = image.startsWith('http') ? image : `${siteUrl}${image}`;
   const canonicalUrl = canonical || fullUrl;
@@ -68,26 +68,83 @@ const SEO: React.FC<SEOProps> = ({
       "itemListElement": [
         {
           "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "SAR",
+          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Course",
             "name": "خطة دراسية مخصصة",
-            "description": "خطط دراسية مخصصة لاختبار القدرات"
+            "description": "خطط دراسية مخصصة لاختبار القدرات",
+            "provider": {
+              "@type": "EducationalOrganization",
+              "name": "اور جول - Our Goal",
+              "url": siteUrl
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "SAR",
+              "availability": "https://schema.org/InStock"
+            },
+            "hasCourseInstance": {
+              "@type": "CourseInstance",
+              "courseMode": "online",
+              "courseWorkload": "PT2H"
+            }
           }
         },
         {
           "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "SAR",
+          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Course",
             "name": "حاسبة المعادلة",
-            "description": "حاسبة لتحويل درجات اختبار القدرات"
+            "description": "حاسبة لتحويل درجات اختبار القدرات",
+            "provider": {
+              "@type": "EducationalOrganization",
+              "name": "اور جول - Our Goal",
+              "url": siteUrl
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "SAR",
+              "availability": "https://schema.org/InStock"
+            },
+            "hasCourseInstance": {
+              "@type": "CourseInstance",
+              "courseMode": "online",
+              "courseWorkload": "PT1H"
+            }
           }
         },
         {
           "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "SAR",
+          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Course",
             "name": "ملفات تدريبية",
-            "description": "ملفات ومواد تدريبية لاختبار القدرات"
+            "description": "ملفات ومواد تدريبية لاختبار القدرات",
+            "provider": {
+              "@type": "EducationalOrganization",
+              "name": "اور جول - Our Goal",
+              "url": siteUrl
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "SAR",
+              "availability": "https://schema.org/InStock"
+            },
+            "hasCourseInstance": {
+              "@type": "CourseInstance",
+              "courseMode": "online",
+              "courseWorkload": "PT3H"
+            }
           }
         }
       ]

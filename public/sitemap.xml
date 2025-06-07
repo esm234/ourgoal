@@ -7,81 +7,81 @@
 
 <!-- Main Pages -->
 <url>
-  <loc>https://ourgoal.pages.dev/</loc>
-  <lastmod>2024-12-19T12:00:00+00:00</lastmod>
+  <loc>https://ourgoal.site/</loc>
+  <lastmod>2024-12-20T12:00:00+00:00</lastmod>
   <changefreq>weekly</changefreq>
   <priority>1.0</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/" />
-  <xhtml:link rel="alternate" hreflang="en" href="https://ourgoal.pages.dev/" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/" />
+  <xhtml:link rel="alternate" hreflang="en" href="https://ourgoal.site/" />
 </url>
 
 <!-- Core Features -->
 <url>
-  <loc>https://ourgoal.pages.dev/equivalency-calculator</loc>
+  <loc>https://ourgoal.site/equivalency-calculator</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.9</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/equivalency-calculator" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/equivalency-calculator" />
 </url>
 
 <url>
-  <loc>https://ourgoal.pages.dev/study-plan</loc>
+  <loc>https://ourgoal.site/study-plan</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.9</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/study-plan" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/study-plan" />
 </url>
 
 <url>
-  <loc>https://ourgoal.pages.dev/files</loc>
+  <loc>https://ourgoal.site/files</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.8</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/files" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/files" />
 </url>
 
 <url>
-  <loc>https://ourgoal.pages.dev/pomodoro</loc>
+  <loc>https://ourgoal.site/pomodoro</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/pomodoro" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/pomodoro" />
 </url>
 
 <!-- Support & Information -->
 <url>
-  <loc>https://ourgoal.pages.dev/faq</loc>
+  <loc>https://ourgoal.site/faq</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.7</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/faq" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/faq" />
 </url>
 
 <!-- Authentication pages excluded to prevent phishing detection -->
 
 <!-- File Categories (Dynamic content examples) -->
 <url>
-  <loc>https://ourgoal.pages.dev/files/verbal</loc>
+  <loc>https://ourgoal.site/files/verbal</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.6</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/files/verbal" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/files/verbal" />
 </url>
 
 <url>
-  <loc>https://ourgoal.pages.dev/files/quantitative</loc>
+  <loc>https://ourgoal.site/files/quantitative</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.6</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/files/quantitative" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/files/quantitative" />
 </url>
 
 <url>
-  <loc>https://ourgoal.pages.dev/files/mixed</loc>
+  <loc>https://ourgoal.site/files/mixed</loc>
   <lastmod>2024-12-19T12:00:00+00:00</lastmod>
   <changefreq>weekly</changefreq>
   <priority>0.6</priority>
-  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.pages.dev/files/mixed" />
+  <xhtml:link rel="alternate" hreflang="ar" href="https://ourgoal.site/files/mixed" />
 </url>
 
 </urlset>

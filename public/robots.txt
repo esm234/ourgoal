@@ -55,10 +55,10 @@ Allow: /*.svg$
 Allow: /*.webp$
 
 # Sitemap location
-Sitemap: https://ourgoal.pages.dev/sitemap.xml
+Sitemap: https://ourgoal.site/sitemap.xml
 
 # Crawl delay (optional) - reduced for better indexing
 Crawl-delay: 1
 
 # Host directive
-Host: https://ourgoal.pages.dev
+Host: https://ourgoal.site

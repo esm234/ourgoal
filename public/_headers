@@ -54,11 +54,12 @@
   Pragma: no-cache
   Expires: 0
 
-# Root path - NO CACHE
+# Root path - NO CACHE + Canonical
 /
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
   Expires: 0
+  Link: <https://ourgoal.site/>; rel="canonical"
 
 # API routes - NO CACHE
 /api/*

@@ -39,26 +39,83 @@ const Home = () => {
         "itemListElement": [
           {
             "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "SAR",
+            "availability": "https://schema.org/InStock",
             "itemOffered": {
               "@type": "Course",
               "name": "حاسبة المعادلة",
-              "description": "حاسبة لتحويل درجات اختبار القدرات إلى معدل تقديري"
+              "description": "حاسبة لتحويل درجات اختبار القدرات إلى معدل تقديري",
+              "provider": {
+                "@type": "EducationalOrganization",
+                "name": "اور جول - Our Goal",
+                "url": "https://ourgoal.site"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "SAR",
+                "availability": "https://schema.org/InStock"
+              },
+              "hasCourseInstance": {
+                "@type": "CourseInstance",
+                "courseMode": "online",
+                "courseWorkload": "PT1H"
+              }
             }
           },
           {
             "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "SAR",
+            "availability": "https://schema.org/InStock",
             "itemOffered": {
               "@type": "Course",
               "name": "خطة دراسية مخصصة",
-              "description": "مولد خطط دراسية ذكية لاختبار القدرات"
+              "description": "مولد خطط دراسية ذكية لاختبار القدرات",
+              "provider": {
+                "@type": "EducationalOrganization",
+                "name": "اور جول - Our Goal",
+                "url": "https://ourgoal.site"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "SAR",
+                "availability": "https://schema.org/InStock"
+              },
+              "hasCourseInstance": {
+                "@type": "CourseInstance",
+                "courseMode": "online",
+                "courseWorkload": "PT2H"
+              }
             }
           },
           {
             "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "SAR",
+            "availability": "https://schema.org/InStock",
             "itemOffered": {
               "@type": "Course",
               "name": "ملفات تدريبية",
-              "description": "مواد تعليمية شاملة للقسمين الكمي واللفظي"
+              "description": "مواد تعليمية شاملة للقسمين الكمي واللفظي",
+              "provider": {
+                "@type": "EducationalOrganization",
+                "name": "اور جول - Our Goal",
+                "url": "https://ourgoal.site"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "SAR",
+                "availability": "https://schema.org/InStock"
+              },
+              "hasCourseInstance": {
+                "@type": "CourseInstance",
+                "courseMode": "online",
+                "courseWorkload": "PT3H"
+              }
             }
           }
         ]
