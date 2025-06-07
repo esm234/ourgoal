@@ -11,10 +11,13 @@
     <link rel="icon" type="image/jpeg" sizes="16x16" href="/new-favicon.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Domain redirect for bots and crawlers -->
+    <!-- Conditional meta refresh for old domain -->
     <script>
-      if (window.location.hostname === 'ourgoal.pages.dev') {
-        document.write('<meta http-equiv="refresh" content="0; url=https://ourgoal.site' + window.location.pathname + window.location.search + window.location.hash + '">');
+      if (typeof window !== 'undefined' && window.location && window.location.hostname === 'ourgoal.pages.dev') {
+        var metaRefresh = document.createElement('meta');
+        metaRefresh.setAttribute('http-equiv', 'refresh');
+        metaRefresh.setAttribute('content', '0; url=https://ourgoal.site' + window.location.pathname + window.location.search + window.location.hash);
+        document.head.appendChild(metaRefresh);
       }
     </script>
 <meta name="google-site-verification" content="gBHJl4hR-prp7h_HETEJumYCx3mTyh7SkIPaOtQ8XIU" />
