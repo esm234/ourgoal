@@ -12,6 +12,8 @@ const getMay29WithTime = (hour: number, minute: number): string => {
   return may29.toISOString();
 };
 
+
+
 // بيانات الملفات المحلية - تحديث مستمر
 export interface LocalFile {
   id: number;
@@ -632,6 +634,17 @@ export const localFiles: LocalFile[] = [
     exams: [
 
     ]
+  },
+  {
+    id: 33,
+    title: "مقولات اللفظي",
+    description: "ملف مقولات اللفظي",
+    category: "verbal",
+    file_url: "https://drive.google.com/uc?export=download&id=1Yt-zxkyp3MvaiM74dM1N29a0FIiOpUk5",
+    file_size: "1 MB",
+    downloads: 0,
+    created_at: new Date(2025, 5, 12, 16, 0, 0).toISOString(),
+    exams: []
   },
   {
     id: 19,
