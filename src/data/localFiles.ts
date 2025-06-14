@@ -148,7 +148,7 @@ export const localFiles: LocalFile[] = [
         id: 402,
         title: " 2 اختبار الخيار الواحدة",
         description: "اختبار لأسئلة الخيار الواحدة",
-        google_form_url: "https://forms.office.com/r/Q0MF7hrtSk",
+        google_form_url: "https://forms.gle/KYuW8JwYY9ft4gEH9",
         difficulty: "medium",
         estimated_time: 50,
         questions_count: 70
@@ -193,7 +193,7 @@ export const localFiles: LocalFile[] = [
         id: 403,
         title: " 7 اختبار الخيار الواحدة",
         description: "اختبار لأسئلة الخيار الواحدة",
-        google_form_url: "https://forms.office.com/r/xPZFP1mD3s",
+        google_form_url: "https://docs.google.com/forms/d/e/1FAIpQLScrIpIv-vJQKCr0umFvBAm8LDF14s-l4jORrhh6LtnT3cUMDQ/viewform",
         difficulty: "medium",
         estimated_time: 50,
         questions_count: 70
@@ -202,7 +202,7 @@ export const localFiles: LocalFile[] = [
         id: 403,
         title: " 8 اختبار الخيار الواحدة",
         description: "اختبار لأسئلة الخيار الواحدة",
-        google_form_url: "https://forms.office.com/r/xrrz2DPDga",
+        google_form_url: "https://forms.gle/hu2mSKwnhYDEz4FP8",
         difficulty: "medium",
         estimated_time: 50,
         questions_count: 70
@@ -211,7 +211,7 @@ export const localFiles: LocalFile[] = [
         id: 403,
         title: " 9 اختبار الخيار الواحدة",
         description: "اختبار لأسئلة الخيار الواحدة",
-        google_form_url: "https://forms.office.com/r/PDTDL2Zk1n",
+        google_form_url: "https://forms.gle/WqW8L2MYd1N4R2mC8",
         difficulty: "medium",
         estimated_time: 50,
         questions_count: 70
