@@ -1,0 +1,48 @@
+/* DevTools Detection CSS */
+
+/* Hide content when DevTools is open (width-based detection) */
+@media (min-width: 0px) {
+  body * {
+    transition: 0s !important;
+  }
+}
+
+/* Hide content when element is inspected */
+*:hover {
+  outline: 0 !important;
+}
+
+/* Prevent selection of text */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Additional protection for specific browsers */
+@-webkit-keyframes devtools-detect {
+  to {
+    height: 0;
+  }
+}
+
+@keyframes devtools-detect {
+  to {
+    height: 0;
+  }
+}
+
+body::before {
+  content: '';
+  animation: devtools-detect 1s infinite;
+  position: fixed;
+  z-index: -1000;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Hide body when animation stops (DevTools open) */
+body.devtools-open {
+  display: none !important;
+} 
