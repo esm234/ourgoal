@@ -2,16 +2,24 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://nflstcphbhcdyeyiyhps.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mbHN0Y3BoYmhjZHlleWl5aHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxMDIwMTYsImV4cCI6MjA2MzY3ODAxNn0.5f2Z8l33qiOXnsTQ7YDxjSk4urn28BZOoUNjqPg90tA";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    persistSession: true, // Make sessions persist in localStorage
-    autoRefreshToken: true, // Automatically refresh the token before it expires
-    storageKey: 'almoadela-qiyas-auth', // Custom storage key
-  },
-});
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error('Missing Supabase environment variables. Please check your .env file.');
+}
+
+export const supabase = createClient<Database>(
+  SUPABASE_URL as string, 
+  SUPABASE_PUBLISHABLE_KEY as string, 
+  {
+    auth: {
+      persistSession: true, // Make sessions persist in localStorage
+      autoRefreshToken: true, // Automatically refresh the token before it expires
+      storageKey: 'almoadela-qiyas-auth', // Custom storage key
+    },
+  }
+);
