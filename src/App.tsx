@@ -62,15 +62,15 @@ const App = () => {
             />
             <BrowserRouter>
               <ScrollToTop />
-              <RedirectHandler />
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
+              <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
+              <Route path="/auth-callback" element={<RedirectHandler />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
-              <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
               <Route path="/study-plan" element={
                 <ProtectedRoute>
                   <StudyPlan />
