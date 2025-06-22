@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User, Provider } from "@supabase/supabase-js";
-import { getResetPasswordUrl, getBaseUrl } from "@/config/environment";
+import { getResetPasswordUrl } from "@/config/environment";
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${getBaseUrl()}/auth-callback`,
+          redirectTo: `${window.location.origin}/`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -164,7 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${getBaseUrl()}/auth-callback`,
+          redirectTo: `${window.location.origin}/`,
         },
       });
       return { error };
