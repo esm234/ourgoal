@@ -21,6 +21,8 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import FAQ from "@/pages/FAQ";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import WeeklyEvents from "@/pages/WeeklyEvents";
 import AdminWeeklyEvents from "@/pages/AdminWeeklyEvents";
 import AdminCreateEvent from "@/pages/AdminCreateEvent";
@@ -66,6 +68,8 @@ const App = () => {
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
               <Route path="/study-plan" element={
                 <ProtectedRoute>
