@@ -67,6 +67,7 @@ const App = () => {
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
               <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
+              <Route path="/auth-callback" element={<RedirectHandler />} />
               <Route path="/study-plan" element={
                 <ProtectedRoute>
                   <StudyPlan />

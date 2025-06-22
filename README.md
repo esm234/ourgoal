@@ -86,7 +86,8 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 6. أضف اسمًا للتطبيق
 7. أضف عناوين URL المسموح بها للتحويل (Authorized redirect URIs):
    - `https://<your-supabase-project>.supabase.co/auth/v1/callback`
-   - `http://localhost:5173/auth/callback` (للتطوير المحلي)
+   - `https://ourgool.site/auth-callback` (للموقع الرسمي)
+   - `http://localhost:5173/auth-callback` (للتطوير المحلي)
 8. انقر على "Create"
 9. احتفظ بـ Client ID و Client Secret، ستحتاج إليهما لاحقًا
 
@@ -99,6 +100,17 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 5. أدخل Client ID و Client Secret الذي حصلت عليه من Google Cloud Console
 6. احفظ التغييرات
 
-### 3. اختبار تسجيل الدخول
+### 3. تكوين URL المسموح بها في Supabase
+
+1. في لوحة تحكم Supabase، انتقل إلى "Authentication" > "URL Configuration"
+2. تأكد من إضافة عناوين URL التالية إلى "Additional redirect URLs":
+   - `https://ourgool.site/auth-callback`
+   - `http://localhost:5173/auth-callback`
+
+### 4. اختبار تسجيل الدخول
 
 بعد إكمال الإعداد، يمكنك اختبار تسجيل الدخول باستخدام Google من خلال النقر على زر "تسجيل الدخول باستخدام Google" في تطبيقك.
+
+### ملاحظة مهمة
+
+تم استخدام صفحة وسيطة (`/auth-callback`) للتعامل مع إعادة التوجيه بعد تسجيل الدخول بدلاً من استخدام نطاق مخصص في Supabase (الذي يتطلب خطة مدفوعة).
