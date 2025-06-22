@@ -71,3 +71,34 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## إعداد تسجيل الدخول باستخدام Google
+
+لإعداد تسجيل الدخول باستخدام Google مع Supabase، اتبع الخطوات التالية:
+
+### 1. إنشاء مشروع Google Cloud وتكوين OAuth
+
+1. انتقل إلى [Google Cloud Console](https://console.cloud.google.com/)
+2. أنشئ مشروعًا جديدًا أو استخدم مشروعًا موجودًا
+3. انتقل إلى "APIs & Services" > "Credentials"
+4. انقر على "Create Credentials" واختر "OAuth client ID"
+5. اختر "Web application" كنوع التطبيق
+6. أضف اسمًا للتطبيق
+7. أضف عناوين URL المسموح بها للتحويل (Authorized redirect URIs):
+   - `https://<your-supabase-project>.supabase.co/auth/v1/callback`
+   - `http://localhost:5173/auth/callback` (للتطوير المحلي)
+8. انقر على "Create"
+9. احتفظ بـ Client ID و Client Secret، ستحتاج إليهما لاحقًا
+
+### 2. تكوين مزود OAuth في Supabase
+
+1. انتقل إلى [لوحة تحكم Supabase](https://app.supabase.com)
+2. اختر مشروعك
+3. انتقل إلى "Authentication" > "Providers"
+4. ابحث عن "Google" وقم بتمكينه
+5. أدخل Client ID و Client Secret الذي حصلت عليه من Google Cloud Console
+6. احفظ التغييرات
+
+### 3. اختبار تسجيل الدخول
+
+بعد إكمال الإعداد، يمكنك اختبار تسجيل الدخول باستخدام Google من خلال النقر على زر "تسجيل الدخول باستخدام Google" في تطبيقك.
