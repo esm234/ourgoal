@@ -15,6 +15,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: any | null }>;
   signInWithGoogle: () => Promise<{ error: any | null }>;
+  signInWithFacebook: () => Promise<{ error: any | null }>;
   loading: boolean;
 }
 
@@ -144,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://ourgool.site',
+          redirectTo: `${window.location.origin}/auth-callback`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -154,6 +155,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error };
     } catch (error: any) {
       console.error("Google sign-in error:", error);
+      return { error };
+    }
+  };
+
+  const signInWithFacebook = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/auth-callback`,
+        },
+      });
+      return { error };
+    } catch (error: any) {
+      console.error("Facebook sign-in error:", error);
       return { error };
     }
   };
@@ -249,6 +265,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resetPassword,
       updatePassword,
       signInWithGoogle,
+      signInWithFacebook,
       loading
     }}>
       {children}
