@@ -230,6 +230,12 @@ const Welcome: React.FC = () => {
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
               نحن سعداء لانضمامك إلى مجتمعنا التعليمي المتعاون
             </p>
+            
+            <div className="p-4 mb-8 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-700 dark:text-blue-400">
+              <p className="font-medium">
+                لإكمال عملية التسجيل، يرجى إضافة اسم المستخدم الخاص بك أدناه. هذا ضروري للوصول إلى جميع ميزات المنصة بما في ذلك الخطط الدراسية والفعاليات.
+              </p>
+            </div>
 
             {/* Features Preview */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
