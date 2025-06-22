@@ -119,12 +119,14 @@ const Profile: React.FC = () => {
         console.error('Error fetching profile:', error);
         // If no profile exists, redirect to welcome page
         if (error.code === 'PGRST116') {
+          toast.info('يرجى إكمال معلومات الملف الشخصي أولاً');
           navigate('/welcome');
           return;
         }
       } else {
         // If profile exists but no username, redirect to welcome
         if (!profile?.username || !profile.username.trim()) {
+          toast.info('يرجى إضافة اسم المستخدم لإكمال ملفك الشخصي');
           navigate('/welcome');
           return;
         }
