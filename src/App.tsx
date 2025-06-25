@@ -38,6 +38,7 @@ import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
 import RedirectHandler from "@/components/RedirectHandler";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 // Set this to true to enable maintenance mode
 const MAINTENANCE_MODE =  false;
@@ -61,6 +62,7 @@ const App = () => {
               preloadFonts={['https://fonts.gstatic.com/s/tajawal/v9/Iura6YBj_oCad4k1l_6gLg.woff2']}
             />
             <BrowserRouter>
+              <AnalyticsTracker />
               <ScrollToTop />
               <Routes>
               <Route path="/" element={<Home />} />

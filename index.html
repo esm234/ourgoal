@@ -22,8 +22,21 @@
     </script>
 <meta name="google-site-verification" content="gBHJl4hR-prp7h_HETEJumYCx3mTyh7SkIPaOtQ8XIU" />
 
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX', {
+        page_title: document.title,
+        page_location: window.location.href,
+        send_page_view: true
+      });
+    </script>
+
     <!-- Security Meta Tags to prevent phishing detection -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co https://supabase.co https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' https://supabase.co https://*.supabase.co https://api.supabase.io https://*.supabase.io https://fonts.googleapis.com https://fonts.gstatic.com; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co https://supabase.co https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' https://supabase.co https://*.supabase.co https://api.supabase.io https://*.supabase.io https://fonts.googleapis.com https://fonts.gstatic.com https://www.google-analytics.com https://analytics.google.com; frame-src 'none'; object-src 'none'; base-uri 'self';" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
@@ -224,13 +237,13 @@
           e.preventDefault();
           return false;
         }
-        
+
         // Prevent Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
         if(e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
           e.preventDefault();
           return false;
         }
-        
+
         // Prevent Ctrl+U (View Source)
         if(e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
           e.preventDefault();
@@ -249,16 +262,16 @@
         if (isMobileDevice()) {
           return;
         }
-        
+
         // تطبيق الكشف فقط على أجهزة سطح المكتب
         const widthThreshold = window.outerWidth - window.innerWidth > 160;
         const heightThreshold = window.outerHeight - window.innerHeight > 160;
-        
+
         if(widthThreshold || heightThreshold) {
           document.body.innerHTML = '<div style="text-align:center;padding:50px;direction:rtl"><h1>تم اكتشاف محاولة للوصول إلى أدوات المطورين</h1><p>يرجى إغلاق أدوات المطورين وتحديث الصفحة للمتابعة.</p></div>';
         }
       }
-      
+
       // تشغيل الكشف بشكل دوري فقط على أجهزة سطح المكتب
       if (!isMobileDevice()) {
         setInterval(detectDevTools, 1000);
@@ -271,7 +284,7 @@
         const originalConsoleWarn = console.warn;
         const originalConsoleInfo = console.info;
         const originalConsoleDebug = console.debug;
-        
+
         console.log = console.error = console.warn = console.info = console.debug = () => {
           return false;
         };

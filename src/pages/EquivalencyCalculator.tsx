@@ -34,6 +34,8 @@ import { motion } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
+import { trackCalculatorUsage, trackFormSubmission } from '@/utils/analytics';
+import { useTimeTracking } from '@/hooks/useAnalytics';
 
 // Add CSS to hide number input spinners
 const hideSpinnerStyle = `
@@ -534,6 +536,9 @@ const collegesFemale = [
 
 const EquivalencyCalculator = () => {
   const { toast } = useToast();
+
+  // Track time spent on this page
+  useTimeTracking('equivalency_calculator');
   const [gender, setGender] = useState<"male" | "female">("male");
   const [highSchoolPercentage, setHighSchoolPercentage] = useState<number | string>("");
   const [qiyasScore, setQiyasScore] = useState<number | string>("");
@@ -601,6 +606,17 @@ const EquivalencyCalculator = () => {
     setShowResult(true);
     setIsCalculating(false);
     setActiveTab("results");
+
+    // Track calculator usage
+    trackCalculatorUsage('equivalency_calculator', {
+      highSchoolPercentage: hsPercentage,
+      qiyasScore: qScore,
+      finalScore: score,
+      gender: gender
+    });
+
+    // Track form submission success
+    trackFormSubmission('equivalency_calculator', true);
 
     toast({
       title: "تم حساب المعدل بنجاح",

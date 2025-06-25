@@ -13,9 +13,14 @@ import { useLocalFiles } from "@/hooks/useLocalFiles";
 import { CustomPagination } from "@/components/ui/custom-pagination";
 import { LocalFile, incrementDownloads } from "@/data/localFiles";
 import { useDebounce } from "@/hooks/useDebounce";
+import { trackFileDownload } from '@/utils/analytics';
+import { useTimeTracking } from '@/hooks/useAnalytics';
 
 const Files = () => {
   const navigate = useNavigate();
+
+  // Track time spent on this page
+  useTimeTracking('files_page');
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("verbal");
   // Remove admin functionality since files are now local
@@ -68,6 +73,9 @@ const Files = () => {
     try {
       // زيادة عداد التحميلات
       incrementDownloads(file.id);
+
+      // Track file download
+      trackFileDownload(file.id.toString(), file.title, file.category);
 
       // فتح الملف
       window.open(file.file_url, '_blank');

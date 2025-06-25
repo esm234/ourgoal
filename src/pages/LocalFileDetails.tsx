@@ -21,11 +21,16 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useLocalFileDetails } from "@/hooks/useLocalFiles";
 import { incrementDownloads, convertToDirectDownload } from "@/data/localFiles";
+import { trackFileDownload, trackEventParticipation } from '@/utils/analytics';
+import { useTimeTracking } from '@/hooks/useAnalytics';
 
 const LocalFileDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Track time spent on this page
+  useTimeTracking('file_details');
   const fileId = parseInt(id || "0");
 
   const { file, exams, loading, error } = useLocalFileDetails(fileId);
@@ -36,6 +41,9 @@ const LocalFileDetails = () => {
     try {
       // Increment download counter
       incrementDownloads(file.id);
+
+      // Track file download
+      trackFileDownload(file.id.toString(), file.title, file.category);
 
       // Open file in new tab
       window.open(file.file_url, '_blank');
@@ -48,6 +56,9 @@ const LocalFileDetails = () => {
 
   const handleExamClick = async (exam: any) => {
     try {
+      // Track exam start
+      trackEventParticipation(exam.id.toString(), exam.title, 'start');
+
       // Open Google Form in new tab
       window.open(exam.google_form_url, '_blank');
     } catch (error) {

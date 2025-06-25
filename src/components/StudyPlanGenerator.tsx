@@ -29,6 +29,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useStudyPlans } from '@/hooks/useStudyPlans';
+import { trackStudyPlanGeneration, trackFormSubmission } from '@/utils/analytics';
+import { useTimeTracking } from '@/hooks/useAnalytics';
 
 interface StudyDay {
   dayNumber: number;
@@ -55,6 +57,9 @@ const StudyPlanGenerator: React.FC = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const { savePlan } = useStudyPlans();
+
+  // Track time spent on this page
+  useTimeTracking('study_plan_generator');
   const [testDate, setTestDate] = useState<Date | undefined>(undefined);
   const [reviewRounds, setReviewRounds] = useState<string>('2');
   const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
@@ -209,6 +214,17 @@ const StudyPlanGenerator: React.FC = () => {
 
     setStudyPlan(plan);
     setIsGenerating(false);
+
+    // Track study plan generation
+    trackStudyPlanGeneration('custom_plan', {
+      totalDays: plan.totalDays,
+      reviewRounds: plan.reviewRounds,
+      testDate: testDate?.toISOString(),
+      totalTests: plan.studyDays.reduce((sum, day) => sum + day.totalTests, 0)
+    });
+
+    // Track form submission success
+    trackFormSubmission('study_plan_generator', true);
   };
 
 
@@ -254,6 +270,13 @@ const StudyPlanGenerator: React.FC = () => {
       const savedPlan = await savePlan(planData);
 
       if (savedPlan) {
+        // Track study plan save
+        trackStudyPlanGeneration('saved_plan', {
+          totalDays: studyPlan.totalDays,
+          reviewRounds: studyPlan.reviewRounds,
+          planName: planName
+        });
+
         toast.success('تم حفظ الخطة في ملفك الشخصي بنجاح! 🎉', {
           description: 'يمكنك الآن الوصول إليها من صفحة الملف الشخصي',
           duration: 4000,

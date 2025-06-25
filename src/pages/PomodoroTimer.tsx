@@ -41,6 +41,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateQuranAudioSources, getFallbackQuranSources, QuranAudioSource } from '@/utils/quranAudio';
+import { trackPomodoroUsage } from '@/utils/analytics';
+import { useTimeTracking } from '@/hooks/useAnalytics';
 
 // Types
 interface Task {
@@ -84,6 +86,9 @@ type SessionType = 'work' | 'short-break' | 'long-break';
 const PomodoroTimer: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Track time spent on this page
+  useTimeTracking('pomodoro_timer');
 
   // Timer states
   const [minutes, setMinutes] = useState(25);
@@ -290,6 +295,12 @@ const PomodoroTimer: React.FC = () => {
 
   const handleSessionComplete = () => {
     setIsActive(false);
+
+    // Track session completion
+    const sessionDuration = sessionType === 'work' ? settings.workDuration :
+                           sessionType === 'short-break' ? settings.shortBreakDuration :
+                           settings.longBreakDuration;
+    trackPomodoroUsage('complete', sessionDuration);
 
     // Play notification
     if (settings.notificationsEnabled) {
@@ -669,6 +680,12 @@ const PomodoroTimer: React.FC = () => {
 
     setIsActive(true);
 
+    // Track timer start
+    const sessionDuration = sessionType === 'work' ? settings.workDuration :
+                           sessionType === 'short-break' ? settings.shortBreakDuration :
+                           settings.longBreakDuration;
+    trackPomodoroUsage('start', sessionDuration);
+
     // Start audio if selected and not silence
     if (selectedAudio && selectedAudio !== 'silence') {
       const selectedSource = audioSources.find(a => a.id === selectedAudio);
@@ -690,6 +707,9 @@ const PomodoroTimer: React.FC = () => {
   const pauseTimer = () => {
     setIsActive(false);
 
+    // Track timer pause
+    trackPomodoroUsage('pause');
+
     // Stop all audio
     stopGeneratedAudio();
     if (audioRef.current) {
@@ -706,6 +726,9 @@ const PomodoroTimer: React.FC = () => {
                     settings.longBreakDuration;
     setMinutes(duration);
     setSeconds(0);
+
+    // Track timer reset
+    trackPomodoroUsage('reset');
 
     // Stop all audio
     stopGeneratedAudio();
