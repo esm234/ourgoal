@@ -37,8 +37,25 @@ export const initGA = () => {
 // Track page views (for SPA navigation)
 export const trackPageView = (path: string, title?: string) => {
   if (typeof window !== 'undefined' && window.gtag) {
+    console.log('📊 Tracking page view:', path, title); // Debug log
+
+    // Send page_view event
+    window.gtag('event', 'page_view', {
+      page_title: title || document.title,
+      page_location: window.location.href,
+      page_path: path,
+    });
+
+    // Also update config for proper tracking
     window.gtag('config', GA_MEASUREMENT_ID, {
       page_path: path,
+      page_title: title || document.title,
+    });
+
+    // Send custom event for better tracking
+    window.gtag('event', 'custom_page_view', {
+      event_category: 'navigation',
+      event_label: path,
       page_title: title || document.title,
     });
   }
@@ -67,7 +84,7 @@ export const trackFileDownload = (
   fileCategory: string
 ) => {
   trackEvent('file_download', 'engagement', `${fileCategory}_${fileName}`, 1);
-  
+
   // Also track as a conversion event
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'file_download_conversion', {
@@ -84,7 +101,7 @@ export const trackCalculatorUsage = (
   inputValues?: Record<string, any>
 ) => {
   trackEvent('calculator_usage', 'engagement', calculationType, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'calculator_conversion', {
       calculator_type: calculationType,
@@ -99,7 +116,7 @@ export const trackStudyPlanGeneration = (
   planDetails?: Record<string, any>
 ) => {
   trackEvent('study_plan_generated', 'engagement', planType, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'study_plan_conversion', {
       plan_type: planType,
@@ -111,7 +128,7 @@ export const trackStudyPlanGeneration = (
 // Track user registration
 export const trackUserRegistration = (method: string = 'email') => {
   trackEvent('sign_up', 'user_engagement', method, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'sign_up', {
       method: method,
@@ -122,7 +139,7 @@ export const trackUserRegistration = (method: string = 'email') => {
 // Track user login
 export const trackUserLogin = (method: string = 'email') => {
   trackEvent('login', 'user_engagement', method, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'login', {
       method: method,
@@ -133,7 +150,7 @@ export const trackUserLogin = (method: string = 'email') => {
 // Track search queries
 export const trackSearch = (searchTerm: string, category?: string) => {
   trackEvent('search', 'engagement', searchTerm, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'search', {
       search_term: searchTerm,
@@ -149,7 +166,7 @@ export const trackEventParticipation = (
   action: 'start' | 'complete' | 'abandon'
 ) => {
   trackEvent(`event_${action}`, 'weekly_events', eventName, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', `weekly_event_${action}`, {
       event_id: eventId,
@@ -164,7 +181,7 @@ export const trackPomodoroUsage = (
   duration?: number
 ) => {
   trackEvent(`pomodoro_${action}`, 'productivity', action, duration);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', `pomodoro_${action}`, {
       timer_duration: duration,
@@ -178,7 +195,7 @@ export const trackFormSubmission = (
   success: boolean = true
 ) => {
   trackEvent('form_submit', 'engagement', formName, success ? 1 : 0);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'form_submit', {
       form_name: formName,
@@ -205,7 +222,7 @@ export const trackTimeOnPage = (pageName: string, timeSpent: number) => {
 // Track errors
 export const trackError = (errorType: string, errorMessage: string) => {
   trackEvent('error', 'technical', errorType, 1);
-  
+
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'exception', {
       description: errorMessage,
