@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getTimeRemainingInSaudiTime } from '@/utils/timezone';
 import {
   WeeklyEvent,
   EventParticipation,
@@ -318,23 +319,18 @@ export const useEventTimer = (event: WeeklyEvent | null) => {
     if (!event) return;
 
     const updateTimer = () => {
-      const now = new Date();
-      const startTime = new Date(event.start_time);
-      const endTime = new Date(startTime.getTime() + event.duration_minutes * 60000);
+      const timeInfo = getTimeRemainingInSaudiTime(event.start_time, event.duration_minutes);
 
-      const timeToStart = startTime.getTime() - now.getTime();
-      const timeToEnd = endTime.getTime() - now.getTime();
+      setHasStarted(timeInfo.hasStarted);
+      setHasEnded(timeInfo.hasEnded);
+      setIsActive(timeInfo.isActive && event.is_enabled);
 
-      setHasStarted(now >= startTime);
-      setHasEnded(now > endTime);
-      setIsActive(now >= startTime && now <= endTime && event.is_enabled);
-
-      if (now < startTime) {
+      if (!timeInfo.hasStarted) {
         // Event hasn't started yet
-        setTimeRemaining(Math.max(0, Math.floor(timeToStart / 1000)));
-      } else if (now <= endTime && event.is_enabled) {
+        setTimeRemaining(timeInfo.timeToStart);
+      } else if (timeInfo.isActive && event.is_enabled) {
         // Event is active
-        setTimeRemaining(Math.max(0, Math.floor(timeToEnd / 1000)));
+        setTimeRemaining(timeInfo.timeToEnd);
       } else {
         // Event has ended
         setTimeRemaining(0);
@@ -440,6 +436,30 @@ export const useAdminWeeklyEvents = () => {
     }
   }, [loadEvents]);
 
+  // Change event status (finished to upcoming, etc.)
+  const changeEventStatus = useCallback(async (eventId: number, newStatus: 'upcoming' | 'active' | 'finished'): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('weekly_events')
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', eventId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Reload events after update
+      await loadEvents();
+      return true;
+    } catch (err) {
+      console.error('Error changing event status:', err);
+      return false;
+    }
+  }, [loadEvents]);
+
   // Load events on mount
   useEffect(() => {
     loadEvents();
@@ -452,6 +472,7 @@ export const useAdminWeeklyEvents = () => {
     loadEvents,
     getEventsByStatus,
     deleteEvent,
-    toggleEventStatus
+    toggleEventStatus,
+    changeEventStatus
   };
 };

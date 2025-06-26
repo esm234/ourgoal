@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Calendar,
   Clock,
@@ -11,7 +11,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Eye,
   Settings,
   BarChart3,
   Target,
@@ -20,12 +19,12 @@ import {
   Play,
   Pause,
   CheckCircle,
-  AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  RotateCcw,
+  RefreshCw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatSaudiDate, formatSaudiTime } from '@/utils/timezone';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAdminWeeklyEvents } from '@/hooks/useWeeklyEvents';
@@ -33,16 +32,12 @@ import {
   WeeklyEvent,
   getEventStatusLabel,
   getCategoryLabel,
-  formatDuration,
-  formatTimeRemaining,
-  isEventActive,
-  isEventUpcoming,
-  isEventFinished
+  formatDuration
 } from '@/types/weeklyEvents';
 
 const AdminWeeklyEvents: React.FC = () => {
   const navigate = useNavigate();
-  const { events, loading, getEventsByStatus, deleteEvent, toggleEventStatus } = useAdminWeeklyEvents();
+  const { events, loading, getEventsByStatus, deleteEvent, toggleEventStatus, changeEventStatus } = useAdminWeeklyEvents();
   const [selectedTab, setSelectedTab] = useState<'all' | 'upcoming' | 'active' | 'finished'>('all');
 
   const allEvents = events;
@@ -100,6 +95,27 @@ const AdminWeeklyEvents: React.FC = () => {
       }
     } catch (error) {
       toast.error('حدث خطأ في تحديث حالة الفعالية');
+    }
+  };
+
+  const handleChangeEventStatus = async (eventId: number, newStatus: 'upcoming' | 'active' | 'finished') => {
+    const statusLabels = {
+      upcoming: 'قادم',
+      active: 'نشط',
+      finished: 'منتهي'
+    };
+
+    if (confirm(`هل أنت متأكد من تغيير حالة الفعالية إلى "${statusLabels[newStatus]}"؟`)) {
+      try {
+        const success = await changeEventStatus(eventId, newStatus);
+        if (success) {
+          toast.success(`تم تغيير حالة الفعالية إلى "${statusLabels[newStatus]}" بنجاح`);
+        } else {
+          toast.error('حدث خطأ في تغيير حالة الفعالية');
+        }
+      } catch (error) {
+        toast.error('حدث خطأ في تغيير حالة الفعالية');
+      }
     }
   };
 
@@ -256,6 +272,7 @@ const AdminWeeklyEvents: React.FC = () => {
                     onViewResults={handleViewResults}
                     onDelete={handleDeleteEvent}
                     onToggleStatus={handleToggleEventStatus}
+                    onChangeStatus={handleChangeEventStatus}
                   />
                 ))
               )}
@@ -276,6 +293,7 @@ interface AdminEventCardProps {
   onViewResults: (eventId: number) => void;
   onDelete: (eventId: number) => void;
   onToggleStatus: (eventId: number, currentStatus: boolean) => void;
+  onChangeStatus: (eventId: number, newStatus: 'upcoming' | 'active' | 'finished') => void;
 }
 
 const AdminEventCard: React.FC<AdminEventCardProps> = ({
@@ -285,7 +303,8 @@ const AdminEventCard: React.FC<AdminEventCardProps> = ({
   onManageQuestions,
   onViewResults,
   onDelete,
-  onToggleStatus
+  onToggleStatus,
+  onChangeStatus
 }) => {
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -347,11 +366,11 @@ const AdminEventCard: React.FC<AdminEventCardProps> = ({
           <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              <span>{format(new Date(event.start_time), 'dd/MM/yyyy', { locale: ar })}</span>
+              <span>{formatSaudiDate(event.start_time, { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
-              <span>{format(new Date(event.start_time), 'HH:mm', { locale: ar })}</span>
+              <span>{formatSaudiTime(event.start_time)}</span>
             </div>
             <div className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-primary" />
@@ -418,6 +437,46 @@ const AdminEventCard: React.FC<AdminEventCardProps> = ({
               <Trash2 className="w-4 h-4 mr-2" />
               حذف
             </Button>
+          </div>
+
+          {/* Status Change Buttons */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="text-xs text-muted-foreground mb-2">تغيير حالة الفعالية:</div>
+            <div className="flex gap-2 flex-wrap">
+              {event.status !== 'upcoming' && (
+                <Button
+                  onClick={() => onChangeStatus(event.id, 'upcoming')}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  قادم
+                </Button>
+              )}
+              {event.status !== 'active' && (
+                <Button
+                  onClick={() => onChangeStatus(event.id, 'active')}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <RefreshCw className="w-3 h-3 mr-1" />
+                  نشط
+                </Button>
+              )}
+              {event.status !== 'finished' && (
+                <Button
+                  onClick={() => onChangeStatus(event.id, 'finished')}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  منتهي
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

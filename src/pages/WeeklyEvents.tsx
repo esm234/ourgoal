@@ -23,6 +23,7 @@ import {
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { formatSaudiDate, formatSaudiTime } from '@/utils/timezone';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useWeeklyEvents, useEventTimer } from '@/hooks/useWeeklyEvents';
@@ -339,13 +340,13 @@ const EventCard: React.FC<EventCardProps> = ({ event, type, index }) => {
               <div className="flex items-center gap-2 text-sm mb-2">
                 <Calendar className="w-4 h-4 text-primary" />
                 <span className="font-medium">
-                  {format(new Date(event.start_time), 'EEEE، dd MMMM yyyy', { locale: ar })}
+                  {formatSaudiDate(event.start_time, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="w-4 h-4 text-primary" />
                 <span>
-                  {format(new Date(event.start_time), 'HH:mm', { locale: ar })}
+                  {formatSaudiTime(event.start_time)}
                 </span>
                 {type === 'active' && timeRemaining > 0 && (
                   <span className="mr-auto text-green-600 font-bold">
