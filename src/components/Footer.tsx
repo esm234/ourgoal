@@ -217,9 +217,7 @@ const Footer = () => {
                   © {new Date().getFullYear()} منصة اور جول. جميع الحقوق محفوظة.
                 </span>
               </div>
-              <span className="text-muted-foreground text-sm">
-                تم التطوير بواسطة إسلام
-              </span>
+           
             </div>
 
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
