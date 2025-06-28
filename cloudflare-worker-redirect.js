@@ -1,4 +1,4 @@
-// Cloudflare Worker for domain redirect
+// Cloudflare Worker for domain redirect and SPA handling
 // This should be deployed as a Worker and bound to ourgoal.pages.dev
 
 addEventListener('fetch', event => {
@@ -15,6 +15,23 @@ async function handleRequest(request) {
     
     // Return 301 permanent redirect
     return Response.redirect(newUrl, 301)
+  }
+  
+  // Handle SPA routes for direct navigation
+  if (url.hostname === 'ourgoal.site' && !url.pathname.includes('.') && !url.pathname.startsWith('/api/')) {
+    // Check if the request is for an HTML page (not an asset)
+    const accept = request.headers.get('accept') || ''
+    if (accept.includes('text/html')) {
+      // Try to fetch the requested path
+      const response = await fetch(request)
+      
+      // If we get a 404, serve the index.html instead
+      if (response.status === 404) {
+        return fetch(new Request(`https://ourgoal.site/index.html`, request))
+      }
+      
+      return response
+    }
   }
   
   // For any other requests, fetch normally

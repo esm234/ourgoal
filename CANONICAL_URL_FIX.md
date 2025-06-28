@@ -95,3 +95,103 @@ curl -I https://ourgoal.pages.dev/
 2. تأكد إن مفيش mixed content (HTTP/HTTPS)
 3. تأكد إن الـ sitemap محدث
 4. اطلب إعادة فهرسة يدوياً لكل صفحة مهمة
+
+# إصلاح مشكلة الروابط المباشرة في تطبيق React مع Cloudflare Pages
+
+## المشكلة
+
+عند محاولة الوصول إلى صفحات التطبيق مباشرة عبر URL (مثل `https://ourgoal.site/developer`)، يظهر خطأ "Offline - Please check your connection" أو صفحة 404. هذه مشكلة شائعة في تطبيقات الويب أحادية الصفحة (SPA) المستضافة على Cloudflare Pages.
+
+## السبب
+
+تطبيقات React تستخدم client-side routing، لكن عند الوصول المباشر إلى مسار غير الصفحة الرئيسية، يحاول الخادم البحث عن ملف فعلي بهذا المسار. وبما أن هذه الملفات غير موجودة فعلياً (لأنها مسارات افتراضية)، يتم إرجاع خطأ 404.
+
+## الحلول
+
+### 1. تحديث ملف _redirects
+
+تأكد من أن ملف `public/_redirects` يحتوي على جميع المسارات المطلوبة:
+
+```
+# Specific routes that need special handling
+/developer                /index.html   200
+# ... other routes ...
+
+# Fallback for all other routes - MUST BE LAST
+/*    /index.html   200
+```
+
+### 2. استخدام Cloudflare Worker
+
+يمكن استخدام Cloudflare Worker للتعامل مع طلبات الصفحات مباشرة:
+
+```js
+// cloudflare-worker-redirect.js
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request))
+})
+
+async function handleRequest(request) {
+  const url = new URL(request.url)
+  
+  // Handle domain redirects
+  if (url.hostname === 'ourgoal.pages.dev') {
+    const newUrl = `https://ourgoal.site${url.pathname}${url.search}${url.hash}`
+    return Response.redirect(newUrl, 301)
+  }
+  
+  // Handle SPA routes for direct navigation
+  if (url.hostname === 'ourgoal.site' && !url.pathname.includes('.') && !url.pathname.startsWith('/api/')) {
+    const accept = request.headers.get('accept') || ''
+    if (accept.includes('text/html')) {
+      const response = await fetch(request)
+      if (response.status === 404) {
+        return fetch(new Request(`https://ourgoal.site/index.html`, request))
+      }
+      return response
+    }
+  }
+  
+  return fetch(request)
+}
+```
+
+### 3. إعداد Cloudflare Pages Rules
+
+في لوحة تحكم Cloudflare Pages:
+
+1. اذهب إلى Rules > Page Rules
+2. أضف قاعدة جديدة:
+   - URL pattern: `https://ourgoal.site/*`
+   - Setting: "Forwarding URL"
+   - Status Code: 200
+   - Destination URL: `https://ourgoal.site/index.html`
+3. استثنِ الملفات الثابتة (assets) من هذه القاعدة
+
+### 4. تعديل إعدادات _headers
+
+أضف إلى ملف `public/_headers`:
+
+```
+/*
+  Link: </index.html>; rel=preload; as=document
+```
+
+## كيفية تنفيذ الحل
+
+1. قم بتحديث ملف `_redirects` أولاً (الحل الأبسط)
+2. إذا لم يعمل، قم بنشر Cloudflare Worker المحدث
+3. تأكد من أن إعدادات Cloudflare Pages تسمح بـ "SPA Routing"
+4. اختبر الوصول المباشر إلى الصفحات مثل `/developer`
+
+## اختبار الحل
+
+1. قم بمسح ذاكرة التخزين المؤقت (cache) للمتصفح
+2. جرب الوصول مباشرة إلى `https://ourgoal.site/developer`
+3. تأكد من أن الصفحة تعمل بشكل صحيح
+
+## ملاحظات إضافية
+
+- قد تحتاج إلى انتظار انتشار التغييرات (15-60 دقيقة)
+- يمكن استخدام وضع التصفح الخفي لتجنب مشاكل التخزين المؤقت
+- تأكد من تحديث جميع المسارات الجديدة في ملف `_redirects`
