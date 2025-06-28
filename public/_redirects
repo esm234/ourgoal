@@ -34,6 +34,7 @@
 /pomodoro                 /index.html   200
 /leaderboard              /index.html   200
 /events                   /index.html   200
+/developer                /index.html   200
 
 # Fallback for all other routes - MUST BE LAST
 /*    /index.html   200

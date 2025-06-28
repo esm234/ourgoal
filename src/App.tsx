@@ -34,6 +34,7 @@ import EventPreview from "@/pages/EventPreview";
 import AdminCreateQuestion from "@/pages/AdminCreateQuestion";
 import AdminEditQuestion from "@/pages/AdminEditQuestion";
 import PomodoroTimer from "@/pages/PomodoroTimer";
+import Developer from "@/pages/Developer";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
@@ -73,6 +74,7 @@ const App = () => {
               <Route path="/auth-callback" element={<RedirectHandler />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/developer" element={<Developer />} />
               <Route path="/study-plan" element={
                 <ProtectedRoute>
                   <StudyPlan />
