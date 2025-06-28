@@ -12,8 +12,7 @@
   # Performance headers
   X-DNS-Prefetch-Control: on
   
-  # SPA routing support
-  Link: </index.html>; rel=preload; as=document
+
 
 # Static assets caching
 /assets/*
@@ -77,8 +76,7 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /admin*
   Cache-Control: no-cache, no-store, must-revalidate
-/developer*
-  Cache-Control: no-cache, no-store, must-revalidate
+
 
 # Service Worker - NO CACHE
 /sw.js
