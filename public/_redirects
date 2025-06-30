@@ -1,1 +1,48 @@
+# Cloudflare Pages redirects for React Router SPA
+# This file will be copied to the build output
+
+
+# Static assets - serve directly
+/assets/*  /assets/:splat  200
+/audio/*   /audio/:splat   200
+/new-favicon.jpg  /new-favicon.jpg  200
+/manifest.json    /manifest.json    200
+/sw.js           /sw.js            200
+
+# API routes - if any
+/api/*    /api/:splat     404
+
+# Specific routes that need special handling (explicit)
+/files                    /index.html   200
+/files/                   /index.html   200
+/files/*                  /index.html   200
+/local-file-details/*     /index.html   200
+/pdf/*                    /index.html   200
+/courses                  /index.html   200
+/courses/                 /index.html   200
+/courses/*                /index.html   200
+/profile                  /index.html   200
+/profile/                 /index.html   200
+/profile/*                /index.html   200
+/admin                    /index.html   200
+/admin/                   /index.html   200
+/admin/*                  /index.html   200
+/study-plan               /index.html   200
+/study-plan/              /index.html   200
+/study-plan/*             /index.html   200
+/plan-details/*           /index.html   200
+/weekly-events            /index.html   200
+/weekly-events/           /index.html   200
+/weekly-events/*          /index.html   200
+/login                    /index.html   200
+/welcome                  /index.html   200
+/equivalency-calculator   /index.html   200
+/forgot-password          /index.html   200
+/reset-password           /index.html   200
+/pomodoro                 /index.html   200
+/faq                      /index.html   200
+/mock-exam                /index.html   200
+
+# Fallback for all other routes - MUST BE LAST
+/*    /index.html   200
 
