@@ -40,7 +40,8 @@ import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
 import RedirectHandler from "@/components/RedirectHandler";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
-
+import MockExam from "@/pages/MockExam";
+import MockExamExam from './pages/MockExamExam';
 // Set this to true to enable maintenance mode
 const MAINTENANCE_MODE =  false;
 
@@ -164,7 +165,8 @@ const App = () => {
                   <AdminEditQuestion />
                 </ProtectedRoute>
               } />
-
+  <Route path="/mock-exam" element={<MockExam />} />
+              <Route path="/mock-exam/exam" element={<MockExamExam />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
