@@ -33,8 +33,7 @@ initCacheManagement();
 // Register service worker
 registerServiceWorker();
 
-// Initialize console protection
-initConsoleProtection();
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
