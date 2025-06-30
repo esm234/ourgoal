@@ -19,6 +19,7 @@ Allow: /study-plan
 Allow: /files
 Allow: /faq
 Allow: /pomodoro
+Allow: /mock-exam
 
 # File categories
 Allow: /files/verbal
