@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { initCacheManagement, registerServiceWorker } from './utils/cacheUtils'
 import { autoRestoreOnLoad } from './utils/dataBackup'
-
+import { initConsoleProtection } from './utils/consoleProtection'
 
 // Handle Chrome extension errors
 if (typeof window !== 'undefined' && 'chrome' in window) {
@@ -29,7 +29,8 @@ autoRestoreOnLoad();
 
 // Initialize cache management
 initCacheManagement();
-
+// Initialize console protection
+initConsoleProtection();
 // Register service worker
 registerServiceWorker();
 
