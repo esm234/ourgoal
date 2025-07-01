@@ -53,35 +53,14 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // NEVER cache HTML pages - always fetch from network
-  if (event.request.headers.get('accept')?.includes('text/html') ||
-      url.pathname === '/' ||
-      url.pathname.endsWith('.html') ||
-      event.request.mode === 'navigate') {
-
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Add no-cache headers to HTML responses
-          const newHeaders = new Headers(response.headers);
-          newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-          newHeaders.set('Pragma', 'no-cache');
-          newHeaders.set('Expires', '0');
-
-          return new Response(response.body, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: newHeaders
-          });
-        })
-        .catch(() => {
-          // Simple offline fallback
-          return new Response('Offline - Please check your connection', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' }
-          });
-        })
-    );
+  // NEVER handle HTML pages - let the browser/network handle it
+  if (
+    event.request.headers.get('accept')?.includes('text/html') ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('.html') ||
+    event.request.mode === 'navigate'
+  ) {
+    // Do nothing, let the browser handle it
     return;
   }
 
