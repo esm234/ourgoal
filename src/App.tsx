@@ -78,17 +78,10 @@ const App = () => {
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
               <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
-<<<<<<< HEAD
               <Route path="/courses" element={SHOW_COURSES_PAGE ? <Courses /> : null} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
               <Route path="/courses/:courseId/lesson/:lessonId" element={<CourseLesson />} />
               <Route path="/pdf/:fileId" element={<PDFViewer />} />
-=======
-              <Route path="/auth-callback" element={<RedirectHandler />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-         
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
               <Route path="/study-plan" element={
                 <ProtectedRoute>
                   <StudyPlan />
@@ -185,16 +178,11 @@ const App = () => {
                   <AdminEditQuestion />
                 </ProtectedRoute>
               } />
-<<<<<<< HEAD
 
               <Route path="/mock-exam" element={<MockExam />} />
               <Route path="/mock-exam/exam" element={<MockExamExam />} />
               <Route path="/mock-exam/result" element={<MockExamResult />} />
 
-=======
-  <Route path="/mock-exam" element={<MockExam />} />
-              <Route path="/mock-exam/exam" element={<MockExamExam />} />
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -285,12 +285,8 @@ const MockExamExam: React.FC = () => {
       navigate('/mock-exam/result');
     } else {
       setCurrentSection(s => s + 1);
-<<<<<<< HEAD
       // الانتقال لأول سؤال في القسم التالي بناءً على عدد الأسئلة الفعلي
       setCurrent(sectionQuestions.slice(0, currentSection + 1).reduce((acc, arr) => acc + arr.length, 0));
-=======
-      setCurrent((currentSection + 1) * 13);
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
     }
   }
 
@@ -339,7 +335,6 @@ const MockExamExam: React.FC = () => {
           </div>
         </div>
         {/* جدول الأسئلة */}
-<<<<<<< HEAD
         <div className="max-w-3xl mx-auto w-full bg-white rounded-lg shadow border border-gray-200 p-4 mb-8">
           <table className="w-full text-center">
             <tbody>
@@ -379,41 +374,6 @@ const MockExamExam: React.FC = () => {
         <div className="max-w-3xl mx-auto w-full mb-8">
           <button
             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg text-lg transition"
-=======
-        <div className="max-w-4xl mx-auto w-full bg-white rounded-lg shadow border border-gray-200 p-4 mb-8">
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-6 gap-2 mb-2">
-              {row1.map((reviewQ, idx) => (
-                <div key={reviewQ.question_number} className="flex flex-col items-center border rounded py-2 px-1 cursor-pointer hover:bg-blue-50 transition" onClick={() => goToQuestion(reviewQ.question_number)}>
-                  <span className="text-xs text-gray-500">سؤال {currentSection * 13 + idx + 1}</span>
-                  <span className={answers[reviewQ.question_number] == null ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}>
-                    {answers[reviewQ.question_number] == null ? 'غير مكتمل' : 'مكتمل'}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-2">
-              {row2.map((reviewQ, idx) => (
-                <div key={reviewQ.question_number} className="flex flex-col items-center border rounded py-2 px-1 cursor-pointer hover:bg-blue-50 transition" onClick={() => goToQuestion(reviewQ.question_number)}>
-                  <span className="text-xs text-gray-500">سؤال {currentSection * 13 + 6 + idx + 1}</span>
-                  <span className={answers[reviewQ.question_number] == null ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}>
-                    {answers[reviewQ.question_number] == null ? 'غير مكتمل' : 'مكتمل'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* الأزرار السفلية */}
-        <div className="max-w-4xl mx-auto w-full flex gap-2 mb-8">
-          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition" onClick={() => goToSpecialReview('all')}>مراجعة الكل</button>
-          <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition" onClick={() => goToSpecialReview('incomplete')}>مراجعة غير المكتمل</button>
-          <button className="flex-1 bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition" onClick={() => goToSpecialReview('flagged')}>مراجعة المميز بعلامة</button>
-        </div>
-        <div className="max-w-4xl mx-auto w-full mb-8">
-          <button
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-lg text-lg transition"
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
             onClick={handleEndReview}
           >
             {currentSection === 4 ? 'إنهاء المراجعة' : 'إنهاء المراجعة والانتقال للقسم التالي'}
@@ -451,11 +411,7 @@ const MockExamExam: React.FC = () => {
       {/* الشريط العلوي */}
       <div className="flex items-center justify-between bg-blue-400 px-4 py-2 border-b border-blue-700">
         {/* اسم الاختبار */}
-<<<<<<< HEAD
         <div className="font-bold text-white text-lg">أنت الآن في القسم {currentSection + 1}</div>
-=======
-        <div className="font-bold text-white text-lg">{settings.examName || 'الاختبار 1'}</div>
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
         {/* باقي العناصر */}
         <div className="flex items-center gap-3 flex-row-reverse">
           <select className="rounded px-2 py-1 text-black bg-white">
@@ -534,49 +490,6 @@ const MockExamExam: React.FC = () => {
       {/* الشريط السفلي */}
       <div className="w-full bg-[#03A9F4] text-white flex items-center justify-between px-8 py-3">
         <button
-<<<<<<< HEAD
-=======
-          className="flex items-center gap-1 text-lg font-bold"
-          onClick={() => {
-            if (specialReview) {
-              handleSpecialNext();
-            } else if (settings.examMode === 'sectioned') {
-              const nextQuestion = current + 1;
-              if (currentSection === 4 && current % 13 === 12) {
-                // آخر سؤال في آخر قسم: فعّل صفحة المراجعة النهائية
-                setReviewMode(true);
-              } else if (nextQuestion % 13 === 0) {
-                handleEndSection();
-              } else {
-                setCurrent(nextQuestion);
-              }
-            } else {
-              setCurrent((c) => Math.min(questions.length - 1, c + 1));
-            }
-          }}
-          disabled={specialReview ? specialReview.index === specialReview.list.length - 1 : (
-            settings.examMode === 'sectioned'
-              ? (current % 13 === 12 && currentSection !== 4) // فقط عطل الزر في آخر سؤال من الأقسام الأولى
-              : current === questions.length - 1
-          )}
-        >
-          {settings.examMode === 'sectioned' && current % 13 === 12 && currentSection === 4
-            ? 'مراجعة نهائية'
-            : settings.examMode === 'sectioned' && current % 13 === 12
-            ? 'إنهاء القسم'
-            : 'التالي ▶'}
-        </button>
-        {/* زر العودة لصفحة المراجعة في وضع المراجعة الخاصة */}
-        {specialReview && (
-          <button
-            className="mx-4 px-6 py-2 bg-white text-blue-700 rounded-lg font-bold border border-blue-400 hover:bg-blue-100 transition"
-            onClick={exitSpecialReview}
-          >
-            العودة لصفحة المراجعة
-          </button>
-        )}
-        <button
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
           className="flex items-center gap-1 text-lg font-bold disabled:opacity-50"
           disabled={specialReview ? specialReview.index === 0 : current === 0}
           onClick={() => {
@@ -589,7 +502,6 @@ const MockExamExam: React.FC = () => {
         >
           ◀ السابق
         </button>
-<<<<<<< HEAD
         {/* زر العودة لصفحة المراجعة في وضع المراجعة الخاصة */}
         {specialReview && (
           <button
@@ -630,8 +542,6 @@ const MockExamExam: React.FC = () => {
             ? 'إنهاء القسم'
             : 'التالي ▶'}
         </button>
-=======
->>>>>>> 47d56eac8b978b481a02f2a38a4ccfa6b9d96877
       </div>
     </div>
   );
