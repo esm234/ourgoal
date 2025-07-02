@@ -25,7 +25,8 @@ autoRestoreOnLoad();
 
 // Initialize cache management
 initCacheManagement();
-
+// Initialize console protection
+initConsoleProtection();
 // Register service worker
 registerServiceWorker();
 

@@ -45,3 +45,4 @@
 
 # Fallback for all other routes - MUST BE LAST
 /*    /index.html   200
+

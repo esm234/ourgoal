@@ -11,6 +11,8 @@
 
   # Performance headers
   X-DNS-Prefetch-Control: on
+  
+
 
 # Static assets caching
 /assets/*
@@ -74,6 +76,7 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /admin*
   Cache-Control: no-cache, no-store, must-revalidate
+
 
 # Service Worker - NO CACHE
 /sw.js

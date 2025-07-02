@@ -242,6 +242,7 @@ const Footer = () => {
                   برمجة وتطوير: <span className="text-primary font-medium">Eslam</span>
                 </span>
               </div>
+           
             </div>
 
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
