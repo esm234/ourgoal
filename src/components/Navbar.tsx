@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, LogOut, Trophy, Timer } from "lucide-react";
+import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, LogOut, Trophy, Timer, Bell, BookOpen } from "lucide-react";
+import NotificationBell from "./notifications/NotificationBell";
+import { SHOW_COURSES_BANNER, SHOW_NOTIFICATIONS_BELL } from '../config/environment';
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -48,23 +50,26 @@ const Navbar = () => {
               alt="اور جول"
               className="w-14 h-14 object-contain rounded-lg"
             />
-            Our goal is Success
+            Our goal is success
           </Link>
 
           {/* Mobile Menu Button */}
-          <div className="block lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleToggleMenu}
-              className="text-foreground hover:bg-primary/20 hover:text-primary"
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
+          <div className="block max-[1200px]:block min-[1201px]:hidden">
+            <div className="flex items-center">
+              {SHOW_NOTIFICATIONS_BELL && <NotificationBell className="mr-2" />}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleMenu}
+                className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+              >
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </Button>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1 space-x-reverse">
+          <div className="hidden min-[1201px]:flex items-center space-x-1 space-x-reverse">
             <Link
               to="/"
               className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
@@ -88,8 +93,18 @@ const Navbar = () => {
               onClick={handleLinkClick}
             >
               <FileText size={20} className="ml-2" />
-              <span>ملفات تعليمية</span>
+              <span>الملفات </span>
             </Link>
+            {SHOW_COURSES_BANNER && (
+              <Link
+                to="/courses"
+                className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={handleLinkClick}
+              >
+                <BookOpen size={20} className="ml-2" />
+                <span> الدورات</span>
+              </Link>
+            )}
             <Link
               to="/study-plan"
               className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
@@ -114,12 +129,15 @@ const Navbar = () => {
                 onClick={handleLinkClick}
               >
                 <Trophy size={20} className="ml-2" />
-                <span>الفعاليات الأسبوعية</span>
+                <span>الفعاليات الاسبوعية</span>
               </Link>
             )}
 
             {isLoggedIn ? (
               <>
+                {/* Notification Bell for Desktop */}
+                {SHOW_NOTIFICATIONS_BELL && <NotificationBell className="mx-2" />}
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -130,7 +148,7 @@ const Navbar = () => {
                       <User size={20} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 bg-background/95 backdrop-blur-xl border-primary/20">
+                  <DropdownMenuContent align="end" className="bg-secondary border-primary/20">
                     <DropdownMenuItem asChild>
                       <Link
                         to="/profile"
@@ -138,7 +156,7 @@ const Navbar = () => {
                         onClick={handleLinkClick}
                       >
                         <User className="w-4 h-4 mr-2" />
-                        <span>عرض الملف الشخصي</span>
+                        <span>الملف الشخصي</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -151,9 +169,21 @@ const Navbar = () => {
                         <span>مؤقت البومودورو</span>
                       </Link>
                     </DropdownMenuItem>
+                    {SHOW_NOTIFICATIONS_BELL && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/notifications"
+                          className="flex items-center cursor-pointer hover:bg-primary/10 transition-colors"
+                          onClick={handleLinkClick}
+                        >
+                          <Bell className="w-4 h-4 mr-2" />
+                          <span>الإشعارات</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator className="bg-primary/20" />
                     <DropdownMenuItem
-                      className="cursor-pointer hover:bg-destructive/10 text-destructive hover:text-destructive transition-colors"
+                      className="cursor-pointer hover:bg-primary/10 transition-colors"
                       onClick={handleLogout}
                     >
                       <LogOut className="w-4 h-4 mr-2" />
@@ -182,7 +212,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden mt-4 flex flex-col space-y-2">
+          <div className="max-[1200px]:block min-[1201px]:hidden mt-4 flex flex-col space-y-2">
             <Link
               to="/"
               className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
@@ -208,6 +238,16 @@ const Navbar = () => {
               <FileText size={20} className="ml-2" />
               <span>ملفات تعليمية</span>
             </Link>
+            {SHOW_COURSES_BANNER && (
+              <Link
+                to="/courses"
+                className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                onClick={handleMobileLinkClick}
+              >
+                <BookOpen size={20} className="ml-2" />
+                <span>الدورات </span>
+              </Link>
+            )}
             <Link
               to="/study-plan"
               className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
@@ -226,18 +266,15 @@ const Navbar = () => {
             </Link>
 
             {isLoggedIn && (
-              <Link
-                to="/weekly-events"
-                className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                onClick={handleMobileLinkClick}
-              >
-                <Trophy size={20} className="ml-2" />
-                <span>الفعاليات الأسبوعية</span>
-              </Link>
-            )}
-
-            {isLoggedIn && (
               <>
+                <Link
+                  to="/weekly-events"
+                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  onClick={handleMobileLinkClick}
+                >
+                  <Trophy size={20} className="ml-2" />
+                  <span>الفعاليات</span>
+                </Link>
                 <Link
                   to="/profile"
                   className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
@@ -246,7 +283,6 @@ const Navbar = () => {
                   <User size={20} className="ml-2" />
                   <span>الملف الشخصي</span>
                 </Link>
-
                 <Link
                   to="/pomodoro"
                   className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
@@ -255,10 +291,20 @@ const Navbar = () => {
                   <Timer size={20} className="ml-2" />
                   <span>مؤقت البومودورو</span>
                 </Link>
+                {SHOW_NOTIFICATIONS_BELL && (
+                  <Link
+                    to="/notifications"
+                    className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                    onClick={handleMobileLinkClick}
+                  >
+                    <Bell size={20} className="ml-2" />
+                    <span>الإشعارات</span>
+                  </Link>
+                )}
 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive hover:text-destructive transition-colors w-full text-right"
+                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
                 >
                   <LogOut size={20} className="ml-2" />
                   <span>تسجيل الخروج</span>
@@ -269,16 +315,11 @@ const Navbar = () => {
             {!isLoggedIn && (
               <Link
                 to="/login"
-                className="w-full"
+                className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
                 onClick={handleMobileLinkClick}
               >
-                <Button
-                  variant="ghost"
-                  className="flex items-center justify-start px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors w-full"
-                >
-                  <LogIn size={20} className="ml-2" />
-                  <span>تسجيل الدخول</span>
-                </Button>
+                <LogIn size={20} className="ml-2" />
+                <span>تسجيل الدخول</span>
               </Link>
             )}
           </div>

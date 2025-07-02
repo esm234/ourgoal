@@ -231,6 +231,64 @@ export const trackError = (errorType: string, errorMessage: string) => {
   }
 };
 
+// Track video play events
+export const trackVideoPlay = (
+  videoId: string,
+  videoTitle?: string,
+  courseId?: string
+) => {
+  trackEvent('video_play', 'engagement', `${courseId || 'unknown'}_${videoId}`, 1);
+
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'video_play', {
+      video_id: videoId,
+      video_title: videoTitle,
+      course_id: courseId,
+    });
+  }
+};
+
+// Track video completion events
+export const trackVideoComplete = (
+  videoId: string,
+  courseId?: string,
+  videoTitle?: string
+) => {
+  trackEvent('video_complete', 'engagement', `${courseId || 'unknown'}_${videoId}`, 1);
+
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'video_complete', {
+      video_id: videoId,
+      course_id: courseId,
+      video_title: videoTitle,
+    });
+  }
+};
+
+// Track video progress events
+export const trackVideoProgress = (
+  videoId: string,
+  currentTime: number,
+  courseId?: string,
+  totalDuration?: number
+) => {
+  const progressPercent = totalDuration ? Math.round((currentTime / totalDuration) * 100) : 0;
+
+  // Only track at certain milestones (25%, 50%, 75%)
+  if (progressPercent === 25 || progressPercent === 50 || progressPercent === 75) {
+    trackEvent('video_progress', 'engagement', `${courseId || 'unknown'}_${videoId}_${progressPercent}%`, progressPercent);
+
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'video_progress', {
+        video_id: videoId,
+        course_id: courseId,
+        progress_percent: progressPercent,
+        current_time: currentTime,
+      });
+    }
+  }
+};
+
 // Track custom conversions
 export const trackConversion = (
   conversionName: string,
@@ -245,4 +303,27 @@ export const trackConversion = (
       transaction_id: `${conversionName}_${Date.now()}`,
     });
   }
+};
+
+// Get enrollment statistics (mock implementation)
+export const getEnrollmentStats = async () => {
+  // This is a mock implementation - in a real app, you would fetch this from your analytics API
+  return {
+    totalEnrollments: 1250,
+    monthlyEnrollments: 180,
+    weeklyEnrollments: 45,
+    dailyEnrollments: 8,
+    topCourses: [
+      { courseId: 'the-last-dance', name: 'The Last Dance', enrollments: 450 },
+      { courseId: 'math-basics', name: 'أساسيات الرياضيات', enrollments: 320 },
+      { courseId: 'arabic-grammar', name: 'قواعد اللغة العربية', enrollments: 280 },
+    ],
+    enrollmentTrend: [
+      { date: '2024-01-01', enrollments: 25 },
+      { date: '2024-01-02', enrollments: 30 },
+      { date: '2024-01-03', enrollments: 28 },
+      { date: '2024-01-04', enrollments: 35 },
+      { date: '2024-01-05', enrollments: 40 },
+    ]
+  };
 };

@@ -68,83 +68,26 @@ const SEO: React.FC<SEOProps> = ({
       "itemListElement": [
         {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "SAR",
-          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Course",
             "name": "خطة دراسية مخصصة",
-            "description": "خطط دراسية مخصصة لاختبار القدرات",
-            "provider": {
-              "@type": "EducationalOrganization",
-              "name": "اور جول - Our Goal",
-              "url": siteUrl
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "SAR",
-              "availability": "https://schema.org/InStock"
-            },
-            "hasCourseInstance": {
-              "@type": "CourseInstance",
-              "courseMode": "online",
-              "courseWorkload": "PT2H"
-            }
+            "description": "خطط دراسية مخصصة لاختبار القدرات"
           }
         },
         {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "SAR",
-          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Course",
             "name": "حاسبة المعادلة",
-            "description": "حاسبة لتحويل درجات اختبار القدرات",
-            "provider": {
-              "@type": "EducationalOrganization",
-              "name": "اور جول - Our Goal",
-              "url": siteUrl
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "SAR",
-              "availability": "https://schema.org/InStock"
-            },
-            "hasCourseInstance": {
-              "@type": "CourseInstance",
-              "courseMode": "online",
-              "courseWorkload": "PT1H"
-            }
+            "description": "حاسبة لتحويل درجات اختبار القدرات"
           }
         },
         {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "SAR",
-          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Course",
             "name": "ملفات تدريبية",
-            "description": "ملفات ومواد تدريبية لاختبار القدرات",
-            "provider": {
-              "@type": "EducationalOrganization",
-              "name": "اور جول - Our Goal",
-              "url": siteUrl
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "SAR",
-              "availability": "https://schema.org/InStock"
-            },
-            "hasCourseInstance": {
-              "@type": "CourseInstance",
-              "courseMode": "online",
-              "courseWorkload": "PT3H"
-            }
+            "description": "ملفات ومواد تدريبية لاختبار القدرات"
           }
         }
       ]
@@ -161,14 +104,14 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="keywords" content={keywords} />
       <meta name="author" content={author} />
       <link rel="canonical" href={canonicalUrl} />
-      
+
       {/* Language and Direction */}
       <html lang="ar" dir="rtl" />
-      
+
       {/* Robots */}
       {noIndex && <meta name="robots" content="noindex,nofollow" />}
       {!noIndex && <meta name="robots" content="index,follow" />}
-      
+
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
@@ -181,7 +124,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta property="og:site_name" content="اور جول - Our Goal" />
       <meta property="og:locale" content="ar_SA" />
       <meta property="og:locale:alternate" content="en_US" />
-      
+
       {/* Article specific Open Graph tags */}
       {type === 'article' && (
         <>
@@ -194,7 +137,7 @@ const SEO: React.FC<SEOProps> = ({
           ))}
         </>
       )}
-      
+
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
@@ -203,7 +146,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:image:alt" content={title} />
       <meta name="twitter:site" content="@ourgoal" />
       <meta name="twitter:creator" content="@ourgoal" />
-      
+
       {/* Additional SEO Meta Tags */}
       <meta name="theme-color" content="#3b82f6" />
       <meta name="msapplication-TileColor" content="#3b82f6" />
@@ -212,23 +155,23 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="format-detection" content="telephone=no" />
-      
+
       {/* Geo Tags for Saudi Arabia */}
       <meta name="geo.region" content="SA" />
       <meta name="geo.country" content="Saudi Arabia" />
       <meta name="ICBM" content="24.7136,46.6753" />
       <meta name="geo.position" content="24.7136;46.6753" />
-      
+
       {/* Structured Data */}
       <script type="application/ld+json">
         {JSON.stringify(finalStructuredData)}
       </script>
-      
+
       {/* Preconnect to external domains for performance */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link rel="preconnect" href="https://cdn.gpteng.co" />
-      
+
       {/* DNS Prefetch */}
       <link rel="dns-prefetch" href="//t.me" />
       <link rel="dns-prefetch" href="//telegram.org" />

@@ -14,6 +14,7 @@ import {
   Send
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SHOW_COURSES_PAGE } from '../config/environment';
 
 const Footer = () => {
   return (
@@ -208,13 +209,37 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="border-t border-primary/10 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
                   <Lightbulb className="w-3 h-3 text-black" />
                 </div>
                 <span className="text-muted-foreground text-sm">
                   © {new Date().getFullYear()} منصة اور جول. جميع الحقوق محفوظة.
+                </span>
+                {/* المصباح الزخرفي يتحول إلى زر إذا كانت صفحة الكورسات مفعلة */}
+                {SHOW_COURSES_PAGE ? (
+                  <Link
+                    to="/courses"
+                    className="w-6 h-6 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-200 border border-primary/30"
+                    title="الدورة الشاملة"
+                  >
+                    <Lightbulb className="w-3 h-3 text-black" />
+                  </Link>
+                ) : (
+                  <div className="w-6 h-6 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
+                    <Lightbulb className="w-3 h-3 text-black" />
+                  </div>
+                )}
+              </div>
+
+              {/* Developer Credit */}
+              <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20">
+                <div className="w-4 h-4 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-black">E</span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  برمجة وتطوير: <span className="text-primary font-medium">Eslam</span>
                 </span>
               </div>
             </div>

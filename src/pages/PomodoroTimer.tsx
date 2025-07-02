@@ -35,14 +35,25 @@ import {
   Coffee,
   Brain,
   Zap,
-  Award
+  Award,
+  SkipForward,
+  Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateQuranAudioSources, getFallbackQuranSources, QuranAudioSource } from '@/utils/quranAudio';
-import { trackPomodoroUsage } from '@/utils/analytics';
-import { useTimeTracking } from '@/hooks/useAnalytics';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
 
 // Types
 interface Task {
@@ -87,20 +98,18 @@ const PomodoroTimer: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Track time spent on this page
-  useTimeTracking('pomodoro_timer');
-
   // Timer states
-  const [minutes, setMinutes] = useState(25);
-  const [seconds, setSeconds] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [sessionType, setSessionType] = useState<SessionType>('work');
-  const [sessionCount, setSessionCount] = useState(0);
+  const [minutes, setMinutes] = useState<number>(25);
+  const [seconds, setSeconds] = useState<number>(0);
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const [sessionType, setSessionType] = useState<'work' | 'short-break' | 'long-break'>('work');
+  const [sessionCount, setSessionCount] = useState<number>(0);
   const [currentTaskId, setCurrentTaskId] = useState<string>('');
+  const [currentTask, setCurrentTask] = useState<Task | null>(null);
+  const [isAddingTask, setIsAddingTask] = useState<boolean>(false);
 
   // Task management
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [taskInput, setTaskInput] = useState('');
 
   // Audio states
@@ -296,12 +305,6 @@ const PomodoroTimer: React.FC = () => {
   const handleSessionComplete = () => {
     setIsActive(false);
 
-    // Track session completion
-    const sessionDuration = sessionType === 'work' ? settings.workDuration :
-                           sessionType === 'short-break' ? settings.shortBreakDuration :
-                           settings.longBreakDuration;
-    trackPomodoroUsage('complete', sessionDuration);
-
     // Play notification
     if (settings.notificationsEnabled) {
       showNotification();
@@ -386,6 +389,8 @@ const PomodoroTimer: React.FC = () => {
 
   const getDailyStats = () => {
     const last7Days = [];
+    let cumulativeSessions = 0;
+    
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -395,11 +400,24 @@ const PomodoroTimer: React.FC = () => {
         calendar: 'gregory'
       });
 
-      const sessionsForDay = i === 0 ? sessionCount : Math.floor(Math.random() * 8);
+      // حساب عدد الجلسات لهذا اليوم
+      const sessionsForDay = tasks.reduce((total, task) => {
+        const taskDate = new Date(task.completedAt);
+        if (
+          taskDate.getDate() === date.getDate() &&
+          taskDate.getMonth() === date.getMonth() &&
+          taskDate.getFullYear() === date.getFullYear()
+        ) {
+          return total + Math.floor(task.sessions);
+        }
+        return total;
+      }, 0);
+
+      cumulativeSessions += sessionsForDay;
 
       last7Days.push({
         date: dateStr,
-        sessions: sessionsForDay
+        sessions: Math.floor(cumulativeSessions)
       });
     }
     return last7Days;
@@ -455,24 +473,35 @@ const PomodoroTimer: React.FC = () => {
   };
 
   // Task management functions
-  const startNewTask = () => {
-    if (!taskInput.trim()) return;
-
+  const addTask = (name: string) => {
+    if (!name.trim()) return;
+    
     const newTask: Task = {
       id: Date.now().toString(),
-      name: taskInput.trim(),
+      name: name.trim(),
+      isCompleted: false,
       sessions: 0,
       totalTime: 0,
-      completedAt: new Date(),
-      isCompleted: false
+      completedAt: new Date()
     };
-
-    setTasks(prev => [newTask, ...prev]);
-    setCurrentTask(newTask);
-    setCurrentTaskId(newTask.id);
+    
+    // إضافة المهمة الجديدة إلى القائمة
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+    
+    // حفظ المهام في localStorage مباشرة
+    localStorage.setItem('pomodoro-tasks', JSON.stringify(updatedTasks));
+    
+    // تعيين المهمة الحالية إذا لم تكن هناك مهمة
+    if (!currentTask) {
+      setCurrentTaskId(newTask.id);
+      setCurrentTask(newTask);
+    }
+    
+    // مسح حقل الإدخال
     setTaskInput('');
-
-    toast.success('تم إنشاء مهمة جديدة!');
+    
+    toast.success(`تم إضافة مهمة: ${newTask.name}`);
   };
 
   const selectExistingTask = (task: Task) => {
@@ -506,12 +535,19 @@ const PomodoroTimer: React.FC = () => {
       completedAt: new Date()
     };
 
-    setTasks(prev => prev.map(task =>
+    // تحديث قائمة المهام
+    const updatedTasks = tasks.map(task =>
       task.id === currentTask.id ? completedTask : task
-    ));
+    );
+    setTasks(updatedTasks);
 
+    // حفظ المهام في localStorage مباشرة
+    localStorage.setItem('pomodoro-tasks', JSON.stringify(updatedTasks));
+
+    // إعادة تعيين المتغيرات
     setCurrentTask(null);
     setCurrentTaskId('');
+    setTaskInput('');
     setIsActive(false);
 
     toast.success(`🎉 تم إكمال المهمة: ${completedTask.name}!`, {
@@ -680,12 +716,6 @@ const PomodoroTimer: React.FC = () => {
 
     setIsActive(true);
 
-    // Track timer start
-    const sessionDuration = sessionType === 'work' ? settings.workDuration :
-                           sessionType === 'short-break' ? settings.shortBreakDuration :
-                           settings.longBreakDuration;
-    trackPomodoroUsage('start', sessionDuration);
-
     // Start audio if selected and not silence
     if (selectedAudio && selectedAudio !== 'silence') {
       const selectedSource = audioSources.find(a => a.id === selectedAudio);
@@ -707,9 +737,6 @@ const PomodoroTimer: React.FC = () => {
   const pauseTimer = () => {
     setIsActive(false);
 
-    // Track timer pause
-    trackPomodoroUsage('pause');
-
     // Stop all audio
     stopGeneratedAudio();
     if (audioRef.current) {
@@ -727,9 +754,6 @@ const PomodoroTimer: React.FC = () => {
     setMinutes(duration);
     setSeconds(0);
 
-    // Track timer reset
-    trackPomodoroUsage('reset');
-
     // Stop all audio
     stopGeneratedAudio();
     if (audioRef.current) {
@@ -738,6 +762,29 @@ const PomodoroTimer: React.FC = () => {
     }
 
     toast.info('تم إعادة تعيين المؤقت');
+  };
+
+  // إضافة دالة لتخطي جلسة الراحة
+  const skipBreak = () => {
+    if (sessionType === 'short-break' || sessionType === 'long-break') {
+      setIsActive(false);
+      setMinutes(settings.workDuration);
+      setSeconds(0);
+      setSessionType('work');
+      
+      // بدء العمل تلقائياً إذا كان الإعداد مفعلاً
+      if (settings.autoStartPomodoros && currentTask) {
+        setTimeout(() => {
+          setIsActive(true);
+        }, 300); // تأخير قصير للتأكد من تحديث الواجهة أولاً
+      }
+      
+      toast.success("تم تخطي الراحة", {
+        description: settings.autoStartPomodoros && currentTask 
+          ? "تم الانتقال إلى جلسة عمل جديدة وبدأت تلقائياً"
+          : "تم الانتقال إلى جلسة عمل جديدة"
+      });
+    }
   };
 
   // Settings functions
@@ -914,7 +961,7 @@ const PomodoroTimer: React.FC = () => {
                             <span className="hidden sm:inline">إعادة تعيين</span>
                             <span className="sm:hidden">إعادة</span>
                           </Button>
-
+                          
                           {sessionType === 'work' && currentTask && (
                             <Button
                               onClick={completeTask}
@@ -924,6 +971,19 @@ const PomodoroTimer: React.FC = () => {
                               <CheckCircle className="w-5 h-5 mr-2" />
                               <span className="hidden sm:inline">إنهاء المهمة</span>
                               <span className="sm:hidden">إنهاء</span>
+                            </Button>
+                          )}
+                          
+                          {/* زر تخطي الراحة - يظهر فقط خلال جلسات الراحة */}
+                          {(sessionType === 'short-break' || sessionType === 'long-break') && (
+                            <Button
+                              onClick={skipBreak}
+                              size="lg"
+                              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 sm:px-6 flex-1 sm:flex-none"
+                            >
+                              <SkipForward className="w-5 h-5 mr-2" />
+                              <span className="hidden sm:inline">تخطي الراحة</span>
+                              <span className="sm:hidden">تخطي</span>
                             </Button>
                           )}
                         </div>
@@ -946,11 +1006,11 @@ const PomodoroTimer: React.FC = () => {
                             placeholder="اكتب اسم المهمة..."
                             value={taskInput}
                             onChange={(e) => setTaskInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && startNewTask()}
+                            onKeyPress={(e) => e.key === 'Enter' && taskInput.trim() && addTask(taskInput.trim())}
                             className="flex-1"
                           />
                           <Button
-                            onClick={startNewTask}
+                            onClick={() => taskInput.trim() && addTask(taskInput.trim())}
                             disabled={!taskInput.trim()}
                             className="w-full sm:w-auto px-6"
                           >
@@ -1346,8 +1406,10 @@ const PomodoroTimer: React.FC = () => {
                             ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
                             : 'bg-card/50 border-border hover:bg-card hover:border-border/80 hover:shadow-md'
                         }`}>
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-foreground text-base">{task.name}</h3>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1 text-right ml-20">
+                              <h3 className="font-medium text-foreground text-base">{task.name}</h3>
+                            </div>
                             <Button
                               size="sm"
                               onClick={() => selectExistingTask(task)}
@@ -1360,6 +1422,7 @@ const PomodoroTimer: React.FC = () => {
                               {currentTask?.id === task.id ? 'جاري العمل' : 'اختيار'}
                             </Button>
                           </div>
+
                           <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-1">
                               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
@@ -1406,40 +1469,46 @@ const PomodoroTimer: React.FC = () => {
                         لم تكمل أي مهمة بعد
                       </p>
                     ) : (
-                      tasks.filter(t => t.isCompleted).map((task) => (
-                        <div key={task.id} className="relative p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl space-y-3 hover:from-green-500/15 hover:to-emerald-500/15 transition-all duration-300">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-foreground text-base">{task.name}</h3>
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                              <CheckCircle className="w-5 h-5 text-green-500" />
+                      tasks
+                        .filter(t => t.isCompleted)
+                        .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
+                        .map((task) => (
+                          <div key={task.id} className="relative p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl space-y-3 hover:from-green-500/15 hover:to-emerald-500/15 transition-all duration-300">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex-1 text-right ml-20">
+                                <h3 className="font-medium text-foreground text-base">{task.name}</h3>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                              <span className="text-foreground/80">{task.sessions} جلسة</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-                              <span className="text-foreground/80">{task.totalTime} دقيقة</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                              <span className="text-foreground/80" title={formatDate(task.completedAt)}>
-                                {formatRelativeTime(task.completedAt)}
-                              </span>
-                            </div>
-                          </div>
 
-                          {/* Success badge */}
-                          <div className="absolute top-2 left-2">
-                            <div className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full font-medium">
-                              مكتملة
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                <span className="text-foreground/80">{task.sessions} جلسة</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                                <span className="text-foreground/80">{task.totalTime} دقيقة</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                                <span className="text-foreground/80" title={formatDate(task.completedAt)}>
+                                  {formatRelativeTime(task.completedAt)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Success badge */}
+                            <div className="absolute top-2 left-2">
+                              <div className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full font-medium">
+                                مكتملة
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))
+                        ))
                     )}
                   </CardContent>
                 </Card>
@@ -1484,27 +1553,37 @@ const PomodoroTimer: React.FC = () => {
               </div>
 
               {/* Detailed Stats */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>الإنتاجية اليومية</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {getDailyStats().map((day, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm">{day.date}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">{day.sessions} جلسة</span>
-                            <div className="w-20 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-primary h-2 rounded-full"
-                                style={{ width: `${(day.sessions / Math.max(...getDailyStats().map(d => d.sessions))) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={getDailyStats()}
+                          margin={{
+                            top: 20,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis tickFormatter={(value) => Math.floor(value)} />
+                          <Tooltip formatter={(value) => [Math.floor(Number(value)), 'جلسة']} />
+                          <Line 
+                            type="monotone" 
+                            dataKey="sessions" 
+                            stroke="#FFD700" 
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: "#FFD700" }}
+                            activeDot={{ r: 6, fill: "#FFD700" }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>

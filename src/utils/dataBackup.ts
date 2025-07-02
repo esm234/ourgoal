@@ -50,7 +50,14 @@ const PRESERVE_KEYS = [
   // App settings
   'app-version',
   'first-visit',
-  'tutorial-completed'
+  'tutorial-completed',
+  
+  // Notifications data
+  'ourgoal_local_notifications',
+  'ourgoal_system_notifications',
+  'ourgoal_notification_settings',
+  'ourgoal_notification_stats',
+  'ourgoal_update_notification_shown'
 ];
 
 export const backupImportantData = (): BackupData => {

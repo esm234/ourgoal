@@ -1,0 +1,229 @@
+/* أنماط مخصصة لمشغل الفيديو */
+.plyr {
+    --plyr-color-main: #3b82f6;
+    --plyr-video-control-color: #ffffff;
+    --plyr-video-control-color-hover: #3b82f6;
+    --plyr-video-control-background-hover: rgba(255, 255, 255, 0.2);
+    --plyr-audio-control-background-hover: rgba(255, 255, 255, 0.2);
+    --plyr-audio-control-color: #ffffff;
+    --plyr-audio-control-color-hover: #3b82f6;
+    --plyr-badge-background: #3b82f6;
+    --plyr-badge-text-color: #ffffff;
+    --plyr-badge-border-radius: 4px;
+    --plyr-tooltip-background: rgba(0, 0, 0, 0.8);
+    --plyr-tooltip-color: #ffffff;
+    --plyr-tooltip-padding: 8px;
+    --plyr-tooltip-radius: 4px;
+    --plyr-tooltip-arrow-size: 5px;
+    --plyr-font-family: 'Noto Sans Arabic', sans-serif;
+    --plyr-font-size-base: 14px;
+    --plyr-font-size-small: 12px;
+    --plyr-font-size-large: 16px;
+    --plyr-font-weight-regular: 400;
+    --plyr-font-weight-bold: 700;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  
+  
+  
+  
+  
+  
+  /* تحسين مظهر شريط التقدم */
+  .plyr__progress__buffer,
+  .plyr__progress input[type='range'] {
+    direction: ltr;
+  }
+  
+  /* تخصيص مظهر أزرار التحكم */
+  .plyr__control {
+    border-radius: 50%;
+    transition: background 0.3s ease, color 0.3s ease, opacity 0.3s ease;
+  }
+  
+  .plyr__control:hover {
+    background-color: var(--plyr-video-control-background-hover);
+    color: var(--plyr-video-control-color-hover);
+  }
+  
+  /* تحسين مظهر زر التشغيل الكبير */
+  .plyr__control--overlaid {
+    background: rgba(59, 130, 246, 0.8);
+    border: 0;
+    border-radius: 50%;
+    color: #ffffff;
+    padding: 15px;
+    transition: background 0.3s ease;
+  }
+  
+  .plyr__control--overlaid:hover {
+    background: rgba(59, 130, 246, 1);
+  }
+  
+  /* تخصيص مظهر شريط الوقت */
+  .plyr__time {
+    font-family: var(--plyr-font-family);
+    font-size: var(--plyr-font-size-small);
+    padding: 0 5px;
+  }
+  
+  /* تحسين مظهر عناصر التحكم في الصوت */
+  .plyr__volume {
+    min-width: 60px;
+  }
+  
+  /* تخصيص مظهر التلميحات */
+  .plyr__tooltip {
+    font-family: var(--plyr-font-family);
+    font-size: var(--plyr-font-size-small);
+  }
+  
+  /* تحسين مظهر قائمة الإعدادات - شكل تقليدي */
+  .plyr__menu__container {
+    font-family: var(--plyr-font-family);
+    border-radius: 4px;
+  }
+  
+  /* تصحيح اتجاه النص في القوائم */
+  .plyr__menu__container .plyr__control {
+    text-align: right;
+  }
+  
+  /* تخصيص مظهر وضع ملء الشاشة */
+  .plyr--fullscreen-active {
+    background: #000;
+  }
+  
+  /* تحسين مظهر زر الخروج من وضع ملء الشاشة */
+  .plyr--fullscreen-active .plyr__control[data-plyr="exitfullscreen"] {
+    display: block;
+  }
+  
+  /* ضمان ظهور عناصر التحكم في وضع ملء الشاشة */
+  .plyr--fullscreen-active .plyr__controls {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+  }
+  
+  /* ضمان عمل عناصر التحكم في وضع ملء الشاشة */
+  .plyr--fullscreen-active .plyr__control {
+    display: inline-flex !important;
+    opacity: 1 !important;
+  }
+  
+  /* منع النقر المزدوج على الفيديو */
+  .plyr__video-wrapper {
+    pointer-events: none;
+  }
+  
+  .plyr__controls {
+    pointer-events: auto;
+  }
+  
+  .plyr__control {
+    pointer-events: auto;
+  }
+  
+  /* تحسين مظهر عناصر التحكم عند التمرير فوقها */
+  .plyr--video .plyr__controls:hover {
+    opacity: 1;
+  }
+  
+  /* تحسين مظهر شريط التقدم عند التمرير فوقه */
+  .plyr--video .plyr__progress__container:hover .plyr__progress__buffer,
+  .plyr--video .plyr__progress__container:hover .plyr__progress input[type='range'] {
+    height: 6px;
+    margin-top: -2px;
+  }
+  
+  /* تصحيح مظهر مشغل الفيديو في وضع الهاتف */
+  @media (max-width: 768px) {
+    .plyr__volume {
+      display: none;
+    }
+  
+    .plyr__controls {
+      padding: 8px;
+    }
+  
+    .plyr__control {
+      padding: 8px;
+    }
+  
+    /* إصلاح مشكلة ملء الشاشة على الأجهزة المحمولة */
+    .plyr--fullscreen-fallback.plyr--fullscreen-active {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+      z-index: 10000 !important;
+    }
+  }
+  
+  /* إعدادات خاصة بالآيفون لملء الشاشة */
+  @supports (-webkit-appearance: none) {
+    /* فرض إظهار زر ملء الشاشة في الآيفون */
+    .plyr__control[data-plyr="fullscreen"] {
+      display: inline-flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+  
+    /* للآيفون، استخدم المشغل الأصلي */
+    .plyr video::-webkit-media-controls-fullscreen-button {
+      display: block !important;
+    }
+  
+    .plyr video {
+      -webkit-playsinline: true;
+      -webkit-appearance: none;
+    }
+  
+    /* ضمان عمل ملء الشاشة على Safari */
+    .plyr--fullscreen-active video {
+      object-fit: contain;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+  }
+  
+  /* فرض إظهار زر ملء الشاشة على جميع الأجهزة المحمولة */
+  @media (max-width: 768px) {
+    .plyr__control[data-plyr="fullscreen"] {
+      display: inline-flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+  }
+  
+  /* فرض إظهار زر ملء الشاشة بشكل عام */
+  .plyr__control[data-plyr="fullscreen"] {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* إزالة أي إخفاء محتمل من Plyr */
+  .plyr__controls .plyr__control[data-plyr="fullscreen"][hidden] {
+    display: inline-flex !important;
+  }
+  
+  .plyr__controls .plyr__control[data-plyr="fullscreen"][style*="display: none"] {
+    display: inline-flex !important;
+  }
+  
+  /* تحسين مظهر مشغل يوتيوب */
+  .plyr__video-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  

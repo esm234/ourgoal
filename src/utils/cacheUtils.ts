@@ -85,7 +85,7 @@ export const hasCachedVersion = async (url: string): Promise<boolean> => {
 export const initCacheManagement = (): void => {
   // Add version parameter to prevent caching
   const version = Date.now();
-  
+
   // Update document title with version for debugging
   if (process.env.NODE_ENV === 'development') {
     document.title += ` (v${version})`;
@@ -108,15 +108,15 @@ export const initCacheManagement = (): void => {
   // Check for updates every 5 minutes
   setInterval(async () => {
     try {
-      const response = await fetch('/', { 
+      const response = await fetch('/', {
         method: 'HEAD',
         cache: 'no-cache'
       });
-      
+
       if (response.ok) {
         const lastModified = response.headers.get('last-modified');
         const storedLastModified = localStorage.getItem('lastModified');
-        
+
         if (lastModified && storedLastModified && lastModified !== storedLastModified) {
           console.log('New version detected, clearing caches...');
           await clearAllCaches();
@@ -133,6 +133,58 @@ export const initCacheManagement = (): void => {
       console.error('Error checking for updates:', error);
     }
   }, 5 * 60 * 1000); // Check every 5 minutes
+};
+
+/**
+ * Get cached video URL with cache busting
+ */
+export const getCachedVideoUrl = (videoUrl: string, courseId?: string, lessonId?: string): string => {
+  if (!videoUrl) return '';
+
+  // Add cache busting parameters for video URLs
+  const separator = videoUrl.includes('?') ? '&' : '?';
+  const timestamp = Date.now();
+  const cacheKey = courseId && lessonId ? `${courseId}_${lessonId}` : 'video';
+
+  return `${videoUrl}${separator}_cb=${timestamp}&_key=${cacheKey}`;
+};
+
+/**
+ * Save video playback time to localStorage
+ */
+export const saveVideoTime = (courseId: string, lessonId: string, currentTime: number): void => {
+  try {
+    const key = `course_${courseId}_lesson_${lessonId}_time`;
+    localStorage.setItem(key, currentTime.toString());
+  } catch (error) {
+    console.error('Error saving video time:', error);
+  }
+};
+
+/**
+ * Get saved video playback time from localStorage
+ */
+export const getSavedVideoTime = (courseId: string, lessonId: string): number => {
+  try {
+    const key = `course_${courseId}_lesson_${lessonId}_time`;
+    const savedTime = localStorage.getItem(key);
+    return savedTime ? parseFloat(savedTime) : 0;
+  } catch (error) {
+    console.error('Error getting saved video time:', error);
+    return 0;
+  }
+};
+
+/**
+ * Clear saved video time from localStorage
+ */
+export const clearSavedVideoTime = (courseId: string, lessonId: string): void => {
+  try {
+    const key = `course_${courseId}_lesson_${lessonId}_time`;
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error('Error clearing saved video time:', error);
+  }
 };
 
 /**

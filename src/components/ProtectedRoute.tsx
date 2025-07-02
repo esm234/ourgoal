@@ -20,6 +20,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
 
   // If not logged in, redirect to login page with the return url
   if (!isLoggedIn) {
+    // حفظ المسار الحالي للعودة إليه بعد تسجيل الدخول
+    sessionStorage.setItem('redirectPath', location.pathname + location.search);
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 

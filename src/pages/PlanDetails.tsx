@@ -86,6 +86,15 @@ const PlanDetails: React.FC = () => {
 
     // إذا تم إكمال الخطة للتو (لم تكن مكتملة من قبل)
     if (isNowCompleted && !wasJustCompleted) {
+      // إضافة إشعار محلي عند إكمال الخطة
+      import('@/services/localNotifications').then(module => {
+        const { localNotificationService } = module;
+        localNotificationService.addPlanCompletedNotification({
+          planId: planId || '',
+          planTitle: plan.name
+        });
+      });
+      
       setWasJustCompleted(true);
       setShowCertificate(true);
     }

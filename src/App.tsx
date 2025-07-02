@@ -21,8 +21,6 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import FAQ from "@/pages/FAQ";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
 import WeeklyEvents from "@/pages/WeeklyEvents";
 import AdminWeeklyEvents from "@/pages/AdminWeeklyEvents";
 import AdminCreateEvent from "@/pages/AdminCreateEvent";
@@ -38,7 +36,16 @@ import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
 import RedirectHandler from "@/components/RedirectHandler";
-import AnalyticsTracker from "@/components/AnalyticsTracker";
+import Courses from "@/pages/Courses";
+import CourseDetails from "@/pages/CourseDetails";
+import CourseLesson from "@/pages/CourseLesson";
+import PDFViewer from "@/pages/PDFViewer";
+import NotificationsPage from "@/pages/notifications";
+import MockExam from "@/pages/MockExam";
+import MockExamExam from './pages/MockExamExam';
+import MockExamResult from './pages/MockExamResult';
+import { SHOW_COURSES_PAGE, SHOW_NOTIFICATIONS_PAGE } from './config/environment';
+
 
 // Set this to true to enable maintenance mode
 const MAINTENANCE_MODE =  false;
@@ -62,17 +69,18 @@ const App = () => {
               preloadFonts={['https://fonts.gstatic.com/s/tajawal/v9/Iura6YBj_oCad4k1l_6gLg.woff2']}
             />
             <BrowserRouter>
-              <AnalyticsTracker />
               <ScrollToTop />
+              <RedirectHandler />
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
               <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
-              <Route path="/auth-callback" element={<RedirectHandler />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
+              <Route path="/courses" element={SHOW_COURSES_PAGE ? <Courses /> : null} />
+              <Route path="/courses/:courseId" element={<CourseDetails />} />
+              <Route path="/courses/:courseId/lesson/:lessonId" element={<CourseLesson />} />
+              <Route path="/pdf/:fileId" element={<PDFViewer />} />
               <Route path="/study-plan" element={
                 <ProtectedRoute>
                   <StudyPlan />
@@ -98,6 +106,14 @@ const App = () => {
                   <PomodoroTimer />
                 </ProtectedRoute>
               } />
+              {SHOW_NOTIFICATIONS_PAGE && (
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <NotificationsPage />
+                  </ProtectedRoute>
+                } />
+              )}
+
               <Route path="/faq" element={<FAQ />} />
               <Route path="/weekly-events" element={
                 <ProtectedRoute>
@@ -129,8 +145,7 @@ const App = () => {
                 </ProtectedRoute>
               } />
 
-
-
+        
 
               <Route path="/admin/weekly-events" element={
                 <ProtectedRoute adminOnly={true}>
@@ -162,6 +177,10 @@ const App = () => {
                   <AdminEditQuestion />
                 </ProtectedRoute>
               } />
+
+              <Route path="/mock-exam" element={<MockExam />} />
+              <Route path="/mock-exam/exam" element={<MockExamExam />} />
+              <Route path="/mock-exam/result" element={<MockExamResult />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

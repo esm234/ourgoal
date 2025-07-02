@@ -15,10 +15,11 @@ Allow: /
 
 # Important public pages
 Allow: /equivalency-calculator
-Allow: /study-plan
 Allow: /files
 Allow: /faq
-Allow: /pomodoro
+Allow: /courses
+Allow: /pdf/
+Allow: /local-file-details/
 
 # File categories
 Allow: /files/verbal
@@ -34,6 +35,9 @@ Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /login
 Disallow: /signup
+Disallow: /study-plan
+Disallow: /pomodoro
+Disallow: /weekly-events
 
 # Disallow API endpoints if any
 Disallow: /api/

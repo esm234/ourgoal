@@ -50,7 +50,22 @@ const Login = () => {
   const [isFacebookLoading, setIsFacebookLoading] = useState(false);
 
   // Get the page the user was trying to access before being redirected to login
-  const from = location.state?.from || "/";
+  const getRedirectPath = () => {
+    // أولاً، تحقق من sessionStorage
+    const savedPath = sessionStorage.getItem('redirectPath');
+    if (savedPath && savedPath !== '/login' && savedPath !== '/signup') {
+      return savedPath;
+    }
+
+    // ثانياً، تحقق من location state
+    const fromState = location.state?.from;
+    if (fromState && fromState !== '/login' && fromState !== '/signup') {
+      return fromState;
+    }
+
+    // افتراضياً، اذهب إلى الصفحة الرئيسية
+    return "/";
+  };
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -71,9 +86,12 @@ const Login = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate(from);
+      const redirectPath = getRedirectPath();
+      // مسح المسار المحفوظ
+      sessionStorage.removeItem('redirectPath');
+      navigate(redirectPath);
     }
-  }, [isLoggedIn, navigate, from]);
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = async (data: z.infer<typeof loginSchema>) => {
     setIsSubmitting(true);
@@ -86,7 +104,9 @@ const Login = () => {
         toast({
           title: "تم تسجيل الدخول بنجاح",
         });
-        navigate(from);
+        const redirectPath = getRedirectPath();
+        sessionStorage.removeItem('redirectPath');
+        navigate(redirectPath);
       }
     } catch (error: any) {
       toast({
@@ -195,7 +215,7 @@ const Login = () => {
                       </svg>
                       Google
                     </Button>
-                    
+
                     <Button
                       type="button"
                       variant="outline"
@@ -209,7 +229,7 @@ const Login = () => {
                       Facebook
                     </Button>
                   </div>
-                  
+
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-border"></span>
@@ -218,7 +238,7 @@ const Login = () => {
                       <span className="bg-background px-2 text-muted-foreground">أو</span>
                     </div>
                   </div>
-                  
+
                   <Form {...loginForm}>
                     <form
                       onSubmit={loginForm.handleSubmit(handleLogin)}
@@ -253,7 +273,7 @@ const Login = () => {
                         render={({ field }) => (
                           <FormItem className="text-right">
                             <div className="flex items-center justify-between">
-                              
+
                               <FormLabel>كلمة المرور</FormLabel>
                             </div>
                             <FormControl>
@@ -307,7 +327,7 @@ const Login = () => {
                       </svg>
                       Google
                     </Button>
-                    
+
                     <Button
                       type="button"
                       variant="outline"
@@ -321,7 +341,7 @@ const Login = () => {
                       Facebook
                     </Button>
                   </div>
-                  
+
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-border"></span>
@@ -330,7 +350,7 @@ const Login = () => {
                       <span className="bg-background px-2 text-muted-foreground">أو</span>
                     </div>
                   </div>
-                  
+
                   <Form {...signupForm}>
                     <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
                       <FormField

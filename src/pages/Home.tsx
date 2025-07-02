@@ -15,8 +15,72 @@ import {
   FileText,
   Target
 } from "lucide-react";
+import { useEffect } from "react";
+import { addSystemUpdateNotification } from "@/services/localNotifications";
+import { SHOW_COURSES_BANNER } from '../config/environment';
+
+// مفتاح التخزين المحلي للإشعارات
+const NOTIFICATIONS_STORAGE_KEY = 'ourgoal_local_notifications';
+
+// رقم الإصدار الحالي
+const CURRENT_VERSION = '2.5.0';
+
+// مفتاح لتتبع ما إذا تم عرض إشعار التحديث
+const UPDATE_NOTIFICATION_SHOWN_KEY = 'ourgoal_update_notification_shown';
 
 const Home = () => {
+  // إضافة إشعار تحديث النظام مرة واحدة فقط
+  useEffect(() => {
+    // التحقق مما إذا كان قد تم عرض الإشعار بالفعل
+    const updateNotificationShown = localStorage.getItem(UPDATE_NOTIFICATION_SHOWN_KEY);
+    
+    // إذا كان الإشعار قد تم عرضه بالفعل، لا تعرضه مرة أخرى
+    if (updateNotificationShown === CURRENT_VERSION) {
+      return;
+    }
+    
+    // التحقق من وجود إشعار بنفس الإصدار في localStorage
+    const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+    
+    let hasVersionNotification = false;
+    
+    if (storedNotifications) {
+      try {
+        const notifications = JSON.parse(storedNotifications);
+        
+        // التحقق من وجود إشعار تحديث بنفس الإصدار
+        hasVersionNotification = notifications.some(
+          (notification: any) => 
+            notification.type === 'system' && 
+            notification.metadata?.category === 'update' &&
+            notification.metadata?.version === CURRENT_VERSION
+        );
+      } catch (error) {
+        console.error('خطأ في تحليل الإشعارات المخزنة:', error);
+      }
+    }
+    
+    // إذا لم يكن هناك إشعار بنفس الإصدار، أضف واحدًا
+    if (!hasVersionNotification) {
+      addSystemUpdateNotification(
+        'تحديث جديد: إصدار 2.5.0', // عنوان الإشعار
+        'تم إطلاق تحديث جديد للنظام يتضمن العديد من الميزات والتحسينات الجديدة. انقر لعرض التفاصيل.', // وصف الإشعار
+        [
+          'إضافة صفحة دورات واضافة دورة the last dance - دورة تاسيس لفظي',
+          'تحديث نظام البومودورو مع إضافة إحصائيات متقدمة',
+          'اضافة نظام اشعارات',
+          'تحسينات في الأداء وإصلاح مشكلات متعددة',
+          'دعم وضع الظلام الكامل في جميع صفحات التطبيق'
+        ], // قائمة الميزات الجديدة
+        '2.5.0', // رقم الإصدار
+        'high' // أولوية الإشعار
+      );
+    }
+    
+    // تسجيل أن الإشعار قد تم عرضه
+    localStorage.setItem(UPDATE_NOTIFICATION_SHOWN_KEY, CURRENT_VERSION);
+  }, []); // تنفيذ مرة واحدة فقط عند تحميل المكون
+
   const homeStructuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -39,83 +103,26 @@ const Home = () => {
         "itemListElement": [
           {
             "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "SAR",
-            "availability": "https://schema.org/InStock",
             "itemOffered": {
               "@type": "Course",
               "name": "حاسبة المعادلة",
-              "description": "حاسبة لتحويل درجات اختبار القدرات إلى معدل تقديري",
-              "provider": {
-                "@type": "EducationalOrganization",
-                "name": "اور جول - Our Goal",
-                "url": "https://ourgoal.site"
-              },
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "SAR",
-                "availability": "https://schema.org/InStock"
-              },
-              "hasCourseInstance": {
-                "@type": "CourseInstance",
-                "courseMode": "online",
-                "courseWorkload": "PT1H"
-              }
+              "description": "حاسبة لتحويل درجات اختبار القدرات إلى معدل تقديري"
             }
           },
           {
             "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "SAR",
-            "availability": "https://schema.org/InStock",
             "itemOffered": {
               "@type": "Course",
               "name": "خطة دراسية مخصصة",
-              "description": "مولد خطط دراسية ذكية لاختبار القدرات",
-              "provider": {
-                "@type": "EducationalOrganization",
-                "name": "اور جول - Our Goal",
-                "url": "https://ourgoal.site"
-              },
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "SAR",
-                "availability": "https://schema.org/InStock"
-              },
-              "hasCourseInstance": {
-                "@type": "CourseInstance",
-                "courseMode": "online",
-                "courseWorkload": "PT2H"
-              }
+              "description": "مولد خطط دراسية ذكية لاختبار القدرات"
             }
           },
           {
             "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "SAR",
-            "availability": "https://schema.org/InStock",
             "itemOffered": {
               "@type": "Course",
               "name": "ملفات تدريبية",
-              "description": "مواد تعليمية شاملة للقسمين الكمي واللفظي",
-              "provider": {
-                "@type": "EducationalOrganization",
-                "name": "اور جول - Our Goal",
-                "url": "https://ourgoal.site"
-              },
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "SAR",
-                "availability": "https://schema.org/InStock"
-              },
-              "hasCourseInstance": {
-                "@type": "CourseInstance",
-                "courseMode": "online",
-                "courseWorkload": "PT3H"
-              }
+              "description": "مواد تعليمية شاملة للقسمين الكمي واللفظي"
             }
           }
         ]
@@ -133,6 +140,59 @@ const Home = () => {
         type="website"
         structuredData={homeStructuredData}
       />
+      {/* Course Announcement Banner */}
+      {SHOW_COURSES_BANNER && (
+        <section className="relative py-10 flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20">
+          <div className="absolute inset-0">
+            <div className="absolute top-0 right-20 w-72 h-72 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 left-20 w-72 h-72 bg-gradient-to-r from-purple-500/30 to-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="bg-gradient-to-r from-blue-600/90 via-purple-600/90 to-blue-600/90 rounded-3xl shadow-2xl shadow-blue-500/20 backdrop-blur-sm border border-white/10 overflow-hidden">
+              <div className="grid md:grid-cols-5 items-center">
+                <div className="md:col-span-3 p-8 md:p-10">
+                  <Badge className="bg-white/20 text-white border-0 mb-4 px-4 py-1">🔥 جديد</Badge>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">دورة The Last Dance للقدرات اللفظية</h2>
+                  <p className="text-white/80 mb-6 text-lg">دورة تأسيسية متخصصة في القدرات اللفظية، مصممة لتكون رحلتك الأخيرة نحو الإتقان الكامل. تغطي جميع أنواع الأسئلة اللفظية بطريقة عملية ومبسطة.</p>
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <CheckCircle className="w-5 h-5 text-green-300" />
+                      <span className="text-white text-sm">مجاني 100%</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <CheckCircle className="w-5 h-5 text-green-300" />
+                      <span className="text-white text-sm">فيديوهات شرح</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <CheckCircle className="w-5 h-5 text-green-300" />
+                      <span className="text-white text-sm">ملفات PDF</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <CheckCircle className="w-5 h-5 text-green-300" />
+                      <span className="text-white text-sm">اختبارات تفاعلية</span>
+                    </div>
+                  </div>
+                  <Link to="/courses/the-last-dance">
+                    <Button size="lg" className="bg-white text-blue-600 hover:bg-white/90 font-bold px-8 py-6 rounded-xl text-lg">
+                      <Target className="w-5 h-5 mr-2" />
+                      استكشف الدورة الآن
+                    </Button>
+                  </Link>
+                </div>
+                <div className="md:col-span-2 bg-gradient-to-br from-blue-700/50 to-purple-700/50 p-6 md:p-10 h-full flex items-center justify-center">
+                  <img
+                    src="/photo_٢٠٢٥-٠٦-١٤_١٨-٣٣-٤٢.jpg"
+                    alt="The Last Dance Course - دورة التأسيس اللفظي الشاملة"
+                    className="rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-500 border-2 border-white/20 max-w-full h-auto"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Modern Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
         {/* Animated Background Elements */}
