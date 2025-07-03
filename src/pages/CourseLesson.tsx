@@ -334,7 +334,7 @@ const CourseLesson = () => {
             title: 'شرح استيعاب المقروء',
             type: 'PDF',
             size: '4.2 MB',
-            url: '/pdfs/the-last-dance/reading-comprehension.pdf'
+            url: 'https://drive.google.com/uc?export=download&id=1RRqYjbdPDYA77n2XHExYQ8Zn46_bL5jq'
           }
         ],
         tests: [
