@@ -53,8 +53,8 @@ export const getResetPasswordUrl = () => ENV.resetPasswordUrl;
 
 // متغيرات تحكم في ظهور الكورسات
 export const SHOW_COURSES_PAGE = true; // إذا كان false يتم إخفاء صفحة الكورسات فقط
-export const SHOW_COURSES_BANNER = false; // إذا كان false يتم إخفاء البانر وزر الكورسات في النافبار والهيدر
+export const SHOW_COURSES_BANNER = true; // إذا كان false يتم إخفاء البانر وزر الكورسات في النافبار والهيدر
 
 // متغيرات تحكم في ظهور الإشعارات
-export const SHOW_NOTIFICATIONS_PAGE = false; // إذا كان false يتم إخفاء صفحة الإشعارات فقط
-export const SHOW_NOTIFICATIONS_BELL = false; // إذا كان false يتم إخفاء جرس الإشعارات وزر الإشعارات في النافبار والهيدر
+export const SHOW_NOTIFICATIONS_PAGE = true; // إذا كان false يتم إخفاء صفحة الإشعارات فقط
+export const SHOW_NOTIFICATIONS_BELL = true; // إذا كان false يتم إخفاء جرس الإشعارات وزر الإشعارات في النافبار والهيدر
