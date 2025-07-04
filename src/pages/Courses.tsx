@@ -522,7 +522,7 @@ const Courses: React.FC = () => {
                   transition={{ duration: 0.6, delay: 1.6 }}
                   className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
                 >
-                  انضم إلى آلاف الطلاب الذين حققوا أهدافهم في اختبار القدرات مع دوراتنا المجانية المتخصصة
+                  انضم إلى آلاف الطلاب الذين حققوا أهدافهم في اختبار القدرات مع منصتنا المجانية المتخصصة
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
