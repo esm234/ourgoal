@@ -1275,9 +1275,7 @@ const CourseDetails = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open('https://drive.google.com/uc?
-export=download&id=1ScYBNowt-
-ANDXSwyTiwckk5P118Zy76NS', '_blank')}
+                          onClick={() => window.open('https://drive.google.com/uc?export=download&id=1ScYBNowt-ANDXSwyTiwckk5P118Zy76NS', '_blank')}
                           className="flex items-center gap-2"
                         >
                           <FileDown className="w-4 h-4" />
