@@ -41,10 +41,10 @@ import {
   MessageCircle,
   Headphones,
   AlertTriangle,
-  Link,            // للتناظر اللفظي
-  TextCursorInput,  // لإكمال الجمل
-  AlertCircle,      // للخطأ السياقي
-  BookOpen,         // لاستيعاب المقروء
+  Link,
+  TextCursorInput,
+  AlertCircle,
+  BookOpen,
   Asterisk,
   Replace 
 } from 'lucide-react';
@@ -492,7 +492,7 @@ const CourseDetails = () => {
             icon: TextCursorInput,
             gradient: 'from-green-500 to-emerald-500',
             tests: [
-           {
+              {
                 id: 'completion-1',
                 title: 'الاختبار الأول',
                 description: 'اختبار إكمال الجمل - ١',
@@ -649,8 +649,6 @@ const CourseDetails = () => {
       .then(success => {
         if (success) {
           // تحديث عدد المشتركين فوراً
-          // Enrollment successful
-
           toast.success("تم الاشتراك في الدورة بنجاح!");
         } else {
           toast.error("حدث خطأ أثناء الاشتراك، يرجى المحاولة مرة أخرى");
@@ -670,7 +668,6 @@ const CourseDetails = () => {
     if (courseId) {
       // استخدام الدالة الجديدة للحصول على الدرس التالي غير المكتمل
       const nextLessonId = getNextUncompletedLesson(courseId);
-
       // التنقل إلى الدرس التالي غير المكتمل
       navigate(`/courses/${courseId}/lesson/${nextLessonId}`);
     }
@@ -784,7 +781,7 @@ const CourseDetails = () => {
                     </div>
                   </div>
 
-                  {/* Course Stats - Moved to after the image */}
+                  {/* Course Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-6">
                     <div className={`p-4 rounded-xl bg-gradient-to-br ${course.bgGradient} border ${course.borderColor}`}>
                       <div className="flex items-center gap-3">
@@ -828,8 +825,6 @@ const CourseDetails = () => {
                           مجاني 100% 🎉
                         </Badge>
                       </div>
-
-
 
                       {/* Materials Count */}
                       <div className={`grid gap-3 md:gap-4 mb-6 ${
@@ -1027,7 +1022,7 @@ const CourseDetails = () => {
                           </p>
                         </CardHeader>
                         <CardContent className="relative z-10">
-                          {/* Removed the long description paragraph from here as well */}
+                          {/* Removed the long description paragraph */}
                         </CardContent>
                       </Card>
                     </motion.div>
@@ -1248,6 +1243,49 @@ const CourseDetails = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
                 >
+                  {/* Comprehensive File Section */}
+                  <Card className="bg-gradient-to-br from-green-600/10 to-emerald-600/10 border border-green-600/30 rounded-3xl overflow-hidden relative mb-8">
+                    <div className="absolute top-4 right-4 opacity-20">
+                      <FileDown className="w-16 h-16 md:w-20 md:h-20 text-green-600" />
+                    </div>
+                    <CardHeader className="relative z-10">
+                      <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center">
+                          <FileDown className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                        </div>
+                        الملف الشامل
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="relative z-10">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-xl"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 flex items-center justify-center">
+                            <FileDown className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">ملف شامل لجميع أقسام الدورة</h4>
+                            <p className="text-sm text-muted-foreground">10.5 MB</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://drive.google.com/uc?export=download&id=example-comprehensive-file-id', '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <FileDown className="w-4 h-4" />
+                          تحميل
+                        </Button>
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Individual Files Section */}
                   <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-3xl overflow-hidden relative">
                     <div className="absolute top-4 right-4 opacity-20">
                       <FileDown className="w-16 h-16 md:w-20 md:h-20 text-green-500" />
@@ -1257,7 +1295,7 @@ const CourseDetails = () => {
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
                           <FileDown className="w-5 h-5 md:w-6 md:h-6 text-white" />
                         </div>
-                        ملفات الدورة
+                        ملفات الأقسام
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="relative z-10">
@@ -1381,18 +1419,18 @@ const CourseDetails = () => {
                     <CardContent className="relative z-10">
                       <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                         {getDynamicFeatures(course).map((feature, index) => (
-                        <motion.div
+                          <motion.div
                             key={index}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.4, delay: index * 0.1 }}
                             className="flex items-start gap-3 md:gap-4 p-4 bg-background/50 rounded-2xl"
-                        >
+                          >
                             <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                               <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-white" />
-                          </div>
+                            </div>
                             <span className="text-sm md:text-base text-muted-foreground leading-relaxed">{feature}</span>
-                        </motion.div>
+                          </motion.div>
                         ))}
                       </div>
                     </CardContent>
