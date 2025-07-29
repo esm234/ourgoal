@@ -411,7 +411,7 @@ export const localFiles: LocalFile[] = [
     title: "متشابهات الكمي",
     description: "ملف المتشابهات في ثوبة الجديد🫡\n\nو اخيرا و بما أن الملف نال اعجابكم حدثناه للبنك ١٠٠ ، مش بس كدا !\nلا و كمان غيرنا التصميم و عدلنا كتير عشان نسهل عليكم مذاكرتكم و تستمتعوا بشكل و جوده اقوى☝️🏻\n\nياريت متنسوناش في دعواتكم🤍",
     category: "quantitative",
-    file_url: "https://drive.google.com/uc?export=download&id=1vZwXL3VU5qu79Qv7HweA1MhyjGrmC4os,
+    file_url: "https://drive.google.com/uc?export=download&id=1vZwXL3VU5qu79Qv7HweA1MhyjGrmC4os",
     file_size: "11 MB",
     downloads: 3245,
     created_at: getMay26WithTime(11, 15),
