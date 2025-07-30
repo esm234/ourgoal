@@ -9,7 +9,9 @@ import {
   Clock,
   Lightbulb,
   CheckCircle,
-  LucideIcon
+  LucideIcon,
+  Play,
+  Pause
 } from "lucide-react";
 
 // تعريف نوع البيانات للميزة
@@ -104,6 +106,7 @@ const adsData: AdData[] = [
 const AdsSlider: React.FC<AdsSliderProps> = ({ showExamAd = true, showCoursesBanner = true }) => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
+  const [progress, setProgress] = useState<number>(0);
 
   // تحديد الإعلانات المعروضة
   const activeAds = adsData.filter(ad => {
@@ -115,82 +118,147 @@ const AdsSlider: React.FC<AdsSliderProps> = ({ showExamAd = true, showCoursesBan
   // إذا لم تكن هناك إعلانات لعرضها
   if (activeAds.length === 0) return null;
 
-  // التبديل التلقائي كل 10 ثواني
+  // التبديل التلقائي مع progress bar
   useEffect(() => {
     if (!isAutoPlaying || activeAds.length <= 1) return;
 
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % activeAds.length);
-    }, 10000); // 10 ثواني
+    const duration = 8000; // 8 ثواني
+    const interval = 50; // تحديث كل 50ms
+    const increment = (interval / duration) * 100;
 
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, activeAds.length]);
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          setCurrentSlide(current => (current + 1) % activeAds.length);
+          return 0;
+        }
+        return prev + increment;
+      });
+    }, interval);
+
+    return () => clearInterval(progressInterval);
+  }, [isAutoPlaying, activeAds.length, currentSlide]);
 
   const handleSlideChange = (index: number): void => {
     setCurrentSlide(index);
-    setIsAutoPlaying(false); // إيقاف التشغيل التلقائي عند التدخل اليدوي
-    // إعادة تشغيل التلقائي بعد 30 ثانية
-    setTimeout(() => setIsAutoPlaying(true), 30000);
+    setProgress(0);
+    setIsAutoPlaying(false);
+    // إعادة تشغيل التلقائي بعد 15 ثانية
+    setTimeout(() => setIsAutoPlaying(true), 15000);
+  };
+
+  const toggleAutoPlay = (): void => {
+    setIsAutoPlaying(!isAutoPlaying);
+    if (isAutoPlaying) {
+      setProgress(0);
+    }
   };
 
   const currentAd = activeAds[currentSlide];
 
   return (
     <section className="relative py-16 flex items-center justify-center overflow-hidden">
-      {/* خلفية متحركة مع تأثيرات بصرية */}
+      {/* خلفية متحركة مع تأثيرات بصرية محسنة */}
       <div className={`absolute inset-0 bg-gradient-to-br ${currentAd.colors.primary} transition-all duration-1000`}>
-        {/* نمط نقاط مبسط */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(156, 146, 172, 0.15) 1px, transparent 0)',
-          backgroundSize: '30px 30px'
+        {/* شبكة نقاط ديناميكية */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(156, 146, 172, 0.3) 1px, transparent 0)`,
+          backgroundSize: '40px 40px',
+          animation: 'float 20s ease-in-out infinite'
         }}></div>
         
-        {/* كرات متحركة في الخلفية */}
-        <div className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-r from-purple-500/15 to-pink-500/15 rounded-full blur-3xl animate-bounce slow"></div>
-        <div className="absolute bottom-10 left-1/3 w-64 h-64 bg-gradient-to-r from-indigo-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        {/* كرات متحركة محسنة */}
+        <div className="absolute top-10 left-10 w-80 h-80 bg-gradient-to-r from-cyan-500/25 to-blue-500/25 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-bounce" style={{animationDuration: '6s'}}></div>
+        <div className="absolute bottom-10 left-1/3 w-72 h-72 bg-gradient-to-r from-indigo-500/25 to-cyan-500/25 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
         
-        {/* خطوط هندسية متحركة */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10">
-          <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
-          <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse delay-500"></div>
-          <div className="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-pulse delay-1000"></div>
+        {/* موجات متحركة */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-1/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"></div>
+          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute top-3/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400/60 to-transparent animate-pulse" style={{animationDelay: '2s'}}></div>
+        </div>
+
+        {/* تأثير الجسيمات المتحركة */}
+        <div className="absolute inset-0">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white/40 rounded-full animate-ping"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${2 + Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
         </div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="relative">
-          {/* الحاوية الرئيسية بتصميم عصري ثلاثي الأبعاد */}
-          <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-[2rem] border border-white/20 shadow-2xl shadow-black/20 overflow-hidden">
-            {/* تأثير الإضاءة العلوية */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+          {/* الحاوية الرئيسية مع تحسينات بصرية */}
+          <div className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/25 shadow-2xl shadow-black/30 overflow-hidden">
+            {/* تأثير الإضاءة العلوية المحسن */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+            <div className="absolute top-0 left-1/4 right-1/4 h-20 bg-gradient-to-b from-white/10 to-transparent blur-xl"></div>
+            
+            {/* Progress Bar للتوقيت */}
+            {activeAds.length > 1 && (
+              <div className="absolute top-0 left-0 right-0 z-20">
+                <div className="h-1 bg-black/20 backdrop-blur-sm">
+                  <div 
+                    className={`h-full bg-gradient-to-r ${currentAd.colors.accent} transition-all duration-75 ease-linear relative overflow-hidden`}
+                    style={{ width: `${progress}%` }}
+                  >
+                    {/* تأثير الوميض على شريط التقدم */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                  </div>
+                </div>
+                
+                {/* مؤشر التحكم في التشغيل */}
+                <div className="absolute top-4 right-6">
+                  <button
+                    onClick={toggleAutoPlay}
+                    className="group flex items-center justify-center w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full border border-white/20 transition-all duration-300 hover:scale-110"
+                  >
+                    {isAutoPlaying ? (
+                      <Pause className="w-4 h-4 text-white group-hover:text-cyan-300 transition-colors" />
+                    ) : (
+                      <Play className="w-4 h-4 text-white group-hover:text-cyan-300 transition-colors ml-0.5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
             
             {/* محتوى الـ Slider */}
-            <div className="grid lg:grid-cols-2 items-center min-h-[600px]">
+            <div className="grid lg:grid-cols-2 items-center min-h-[600px] pt-4">
               {/* القسم الأيسر - المحتوى */}
               <div className="relative p-8 lg:p-12 xl:p-16">
-                {/* شارة العلامة التجارية */}
-                <div className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 backdrop-blur-sm transition-all duration-500">
+                {/* شارة العلامة التجارية محسنة */}
+                <div className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/40 backdrop-blur-sm transition-all duration-500 hover:scale-105">
                   <div className="relative flex items-center">
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full absolute animate-pulse"></div>
+                    <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-ping"></div>
+                    <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full absolute animate-pulse"></div>
                   </div>
-                  <span className="text-cyan-300 font-bold text-sm tracking-wide">{currentAd.badge}</span>
-                  <Badge className={`${currentAd.badgeType === 'beta' ? 'bg-cyan-500/30 text-cyan-100' : 'bg-orange-500/30 text-orange-100'} border-0 text-xs px-2 py-1 animate-pulse`}>
+                  <span className="text-cyan-200 font-bold text-sm tracking-wide">{currentAd.badge}</span>
+                  <Badge className={`${currentAd.badgeType === 'beta' ? 'bg-cyan-500/40 text-cyan-100' : 'bg-orange-500/40 text-orange-100'} border-0 text-xs px-3 py-1 animate-pulse`}>
                     {currentAd.badgeType === 'beta' ? 'Beta' : 'New'}
                   </Badge>
                 </div>
 
-                {/* العنوان الرئيسي بتأثير متدرج */}
+                {/* العنوان الرئيسي مع تأثيرات محسنة */}
                 <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black mb-6 leading-tight">
-                  <span className="block text-white mb-2">{currentAd.subtitle}</span>
-                  <span className={`block text-transparent bg-gradient-to-r ${currentAd.colors.accent} bg-clip-text animate-gradient`}>
+                  <span className="block text-white mb-2 drop-shadow-lg">{currentAd.subtitle}</span>
+                  <span className={`block text-transparent bg-gradient-to-r ${currentAd.colors.accent} bg-clip-text animate-gradient drop-shadow-lg`}>
                     {currentAd.id === 'exam-simulator' ? 'التفاعلي' : 'اللفظية'}
                   </span>
                 </h2>
 
-                {/* الوصف */}
-                <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-lg">
+                {/* الوصف محسن */}
+                                <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-lg">
                   {currentAd.description}
                 </p>
 
@@ -350,16 +418,6 @@ const AdsSlider: React.FC<AdsSliderProps> = ({ showExamAd = true, showCoursesBan
                 )}
               </button>
             ))}
-          </div>
-        )}
-
-        {/* مؤشر التشغيل التلقائي */}
-        {activeAds.length > 1 && (
-          <div className="flex justify-center mt-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-full text-white text-sm">
-              <div className={`w-2 h-2 rounded-full ${isAutoPlaying ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
-              <span>{isAutoPlaying ? 'تشغيل تلقائي' : 'مؤقف مؤقتاً'}</span>
-            </div>
           </div>
         )}
       </div>
