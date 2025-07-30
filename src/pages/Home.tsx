@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import EventsSection from "@/components/EventsSection";
+import AdsSlider from "@/components/AdsSlider";
 import {
   ArrowRight,
   Calculator,
@@ -292,87 +293,23 @@ const Home = () => {
                           <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse delay-200"></div>
                           <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse delay-400"></div>
                         </div>
-                        
-                        {/* شارة "معاينة" */}
-                        <div className="absolute bottom-4 left-4 px-3 py-1 bg-black/50 backdrop-blur-sm text-white text-xs rounded-full border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                          معاينة المحاكي
-                        </div>
-                      </div>
+return (
+    <Layout>
+      <SEO
+        title="اور جول - Our Goal | منصة تعليمية لاختبار القدرات"
+        description="منصة تعليمية متخصصة في مساعدة الطلاب على التحضير لاختبار القدرات العامة. نوفر خطط دراسية مخصصة، ملفات تدريبية، وحاسبة المعادلة لضمان نجاحك."
+        keywords="اختبار القدرات, قدرات, تدريب, دراسة, منصة تعليمية, اور جول, Our Goal, قياس, اختبارات, تحضير, خطة دراسية, حاسبة المعادلة, ملفات تدريبية, مجتمع تعليمي"
+        url="/"
+        type="website"
+        structuredData={homeStructuredData}
+      />
 
-                      {/* تأثيرات الإضاءة المحيطة */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-1000"></div>
-                    </div>
+      {/* نظام Slider للإعلانات الجديد */}
+      <AdsSlider 
+        showExamAd={SHOW_EXAM_SIMULATOR_AD} 
+        showCoursesBanner={SHOW_COURSES_BANNER} 
+      />
 
-                    {/* عناصر تزيينية طائفة */}
-                    <div className="absolute top-10 right-10 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                    <div className="absolute bottom-16 left-8 w-1 h-1 bg-purple-400 rounded-full animate-pulse delay-500"></div>
-                    <div className="absolute top-1/3 left-4 w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce delay-1000"></div>
-                  </div>
-                </div>
-
-                {/* شريط الحالة السفلي */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-50"></div>
-              </div>
-
-              {/* تأثير الظل السفلي */}
-              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 h-6 bg-black/20 blur-xl rounded-full"></div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Course Announcement Banner */}
-      {SHOW_COURSES_BANNER && (
-        <section className="relative py-10 flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20">
-          <div className="absolute inset-0">
-            <div className="absolute top-0 right-20 w-72 h-72 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-0 left-20 w-72 h-72 bg-gradient-to-r from-purple-500/30 to-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
-          </div>
-
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="bg-gradient-to-r from-blue-600/90 via-purple-600/90 to-blue-600/90 rounded-3xl shadow-2xl shadow-blue-500/20 backdrop-blur-sm border border-white/10 overflow-hidden">
-              <div className="grid md:grid-cols-5 items-center">
-                <div className="md:col-span-3 p-8 md:p-10">
-                  <Badge className="bg-white/20 text-white border-0 mb-4 px-4 py-1">🔥 جديد</Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">دورة The Last Dance للقدرات اللفظية</h2>
-                  <p className="text-white/80 mb-6 text-lg">دورة تأسيسية متخصصة في القدرات اللفظية، مصممة لتكون رحلتك الأخيرة نحو الإتقان الكامل. تغطي جميع أنواع الأسئلة اللفظية بطريقة عملية ومبسطة.</p>
-                  <div className="flex flex-wrap gap-4 mb-6">
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-                      <CheckCircle className="w-5 h-5 text-green-300" />
-                      <span className="text-white text-sm">مجاني 100%</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-                      <CheckCircle className="w-5 h-5 text-green-300" />
-                      <span className="text-white text-sm">فيديوهات شرح</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-                      <CheckCircle className="w-5 h-5 text-green-300" />
-                      <span className="text-white text-sm">ملفات PDF</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-                      <CheckCircle className="w-5 h-5 text-green-300" />
-                      <span className="text-white text-sm">اختبارات تفاعلية</span>
-                    </div>
-                  </div>
-                  <Link to="/courses/the-last-dance">
-                    <Button size="lg" className="bg-white text-blue-600 hover:bg-white/90 font-bold px-8 py-6 rounded-xl text-lg">
-                      <Target className="w-5 h-5 mr-2" />
-                      استكشف الدورة الآن
-                    </Button>
-                  </Link>
-                </div>
-                <div className="md:col-span-2 bg-gradient-to-br from-blue-700/50 to-purple-700/50 p-6 md:p-10 h-full flex items-center justify-center">
-                  <img
-                    src="/photo_٢٠٢٥-٠٦-١٤_١٨-٣٣-٤٢.jpg"
-                    alt="The Last Dance Course - دورة التأسيس اللفظي الشاملة"
-                    className="rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-500 border-2 border-white/20 max-w-full h-auto"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Modern Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
