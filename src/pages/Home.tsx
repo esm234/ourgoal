@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -13,9 +14,10 @@ import {
   Star,
   CheckCircle,
   FileText,
-  Target
+  Target,
+  Brain, // Added for Exam Simulator
+  Zap // Added for Exam Simulator
 } from "lucide-react";
-import { useEffect } from "react";
 import { addSystemUpdateNotification } from "@/services/localNotifications";
 import { SHOW_COURSES_BANNER } from '../config/environment';
 
@@ -27,6 +29,9 @@ const CURRENT_VERSION = '2.5.0';
 
 // مفتاح لتتبع ما إذا تم عرض إشعار التحديث
 const UPDATE_NOTIFICATION_SHOWN_KEY = 'ourgoal_update_notification_shown';
+
+// متغير لإظهار إعلان محاكي الاختبار
+const SHOW_EXAM_SIMULATOR_AD = true; // غيّر إلى true لإظهار الإعلان (تم تعديله بناءً على طلبك)
 
 const Home = () => {
   // إضافة إشعار تحديث النظام مرة واحدة فقط
@@ -140,6 +145,65 @@ const Home = () => {
         type="website"
         structuredData={homeStructuredData}
       />
+
+      {/* إعلان محاكي الاختبار */}
+      {SHOW_EXAM_SIMULATOR_AD && (
+        <section className="relative py-10 flex items-center justify-center overflow-hidden bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20">
+          <div className="absolute inset-0">
+            <div className="absolute top-0 right-20 w-72 h-72 bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 left-20 w-72 h-72 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-3xl animate-pulse"></div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="bg-gradient-to-r from-indigo-600/90 via-purple-600/90 to-pink-600/90 rounded-3xl shadow-2xl shadow-indigo-500/20 backdrop-blur-sm border border-white/10 overflow-hidden">
+              <div className="grid md:grid-cols-5 items-center">
+                <div className="md:col-span-3 p-8 md:p-10">
+                  <Badge className="bg-white/20 text-white border-0 mb-4 px-4 py-1 animate-pulse">🚀 قريباً</Badge>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">محاكي اختبار القدرات التفاعلي</h2>
+                  <p className="text-white/80 mb-6 text-lg">تجربة محاكاة حقيقية لاختبار القدرات مع نظام تقييم ذكي وتحليل شامل للأداء. استعد للاختبار بأفضل طريقة ممكنة.</p>
+                  <div className="flex flex-wrap gap-4 mb-6">
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <Brain className="w-5 h-5 text-cyan-300" />
+                      <span className="text-white text-sm">محاكاة واقعية</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <Zap className="w-5 h-5 text-cyan-300" />
+                      <span className="text-white text-sm">تقييم فوري</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <Target className="w-5 h-5 text-cyan-300" />
+                      <span className="text-white text-sm">تحليل مفصل</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                      <CheckCircle className="w-5 h-5 text-cyan-300" />
+                      <span className="text-white text-sm">مجاني بالكامل</span>
+                    </div>
+                  </div>
+                  <Button 
+                    disabled 
+                    size="lg" 
+                    className="bg-white/20 text-white cursor-not-allowed font-bold px-8 py-6 rounded-xl text-lg opacity-75"
+                  >
+                    <Brain className="w-5 h-5 mr-2" />
+                    قريباً جداً...
+                  </Button>
+                  <p className="text-white/60 text-sm mt-3">سيتم إطلاق المحاكي قريباً، ترقبوا الإعلان!</p>
+                </div>
+                <div className="md:col-span-2 bg-gradient-to-br from-indigo-700/50 to-purple-700/50 p-6 md:p-10 h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-48 h-48 mx-auto mb-4 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+                      <div className="text-6xl">🧠</div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">تجربة تفاعلية</h3>
+                    <p className="text-white/80 text-sm">محاكاة دقيقة لبيئة الاختبار الحقيقي</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Course Announcement Banner */}
       {SHOW_COURSES_BANNER && (
         <section className="relative py-10 flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20">
