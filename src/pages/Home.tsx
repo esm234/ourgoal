@@ -236,6 +236,100 @@ const Home = () => {
                           <div className="text-white font-bold text-sm">مجاني</div>
                           <div className="text-gray-400 text-xs">بدون أي رسوم</div>
                         </div>
+      {SHOW_EXAM_SIMULATOR_AD && (
+        <section className="relative py-16 flex items-center justify-center overflow-hidden">
+          {/* خلفية متحركة مع تأثيرات بصرية */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.03%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+            
+            {/* كرات متحركة في الخلفية */}
+            <div className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-r from-purple-500/15 to-pink-500/15 rounded-full blur-3xl animate-bounce slow"></div>
+            <div className="absolute bottom-10 left-1/3 w-64 h-64 bg-gradient-to-r from-indigo-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            
+            {/* خطوط هندسية متحركة */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse delay-500"></div>
+              <div className="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-pulse delay-1000"></div>
+            </div>
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="relative">
+              {/* الحاوية الرئيسية بتصميم عصري ثلاثي الأبعاد */}
+              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-[2rem] border border-white/20 shadow-2xl shadow-black/20 overflow-hidden">
+                {/* تأثير الإضاءة العلوية */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                
+                <div className="grid lg:grid-cols-2 items-center min-h-[600px]">
+                  {/* القسم الأيسر - المحتوى */}
+                  <div className="relative p-8 lg:p-12 xl:p-16">
+                    {/* شارة "قريباً" متحركة */}
+                    <div className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 backdrop-blur-sm">
+                      <div className="relative flex items-center">
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full absolute animate-pulse"></div>
+                      </div>
+                      <span className="text-cyan-300 font-bold text-sm tracking-wide">🚀 COMING SOON</span>
+                      <Badge className="bg-cyan-500/30 text-cyan-100 border-0 text-xs px-2 py-1 animate-pulse">
+                        Beta
+                      </Badge>
+                    </div>
+
+                    {/* العنوان الرئيسي بتأثير متدرج */}
+                    <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black mb-6 leading-tight">
+                      <span className="block text-white mb-2">محاكي الاختبار</span>
+                      <span className="block text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text animate-gradient">
+                        التفاعلي
+                      </span>
+                    </h2>
+
+                    {/* الوصف */}
+                    <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-lg">
+                      تجربة محاكاة واقعية لاختبار القدرات مع تقييم ذكي وتحليل مفصل لنقاط القوة والضعف لديك.
+                    </p>
+
+                    {/* المميزات بتصميم بطاقات صغيرة */}
+                    <div className="grid grid-cols-2 gap-4 mb-10">
+                      <div className="group flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                        <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                          <Brain className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-sm">محاكاة واقعية</div>
+                          <div className="text-gray-400 text-xs">بيئة الاختبار الحقيقية</div>
+                        </div>
+                      </div>
+
+                      <div className="group flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                          <Zap className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-sm">تقييم فوري</div>
+                          <div className="text-gray-400 text-xs">نتائج لحظية</div>
+                        </div>
+                      </div>
+
+                      <div className="group flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                          <Target className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-sm">تحليل ذكي</div>
+                          <div className="text-gray-400 text-xs">إحصائيات مفصلة</div>
+                        </div>
+                      </div>
+
+                      <div className="group flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-sm">مجاني</div>
+                          <div className="text-gray-400 text-xs">بدون أي رسوم</div>
+                        </div>
                       </div>
                     </div>
 
