@@ -8,11 +8,47 @@ import {
   Zap,
   Clock,
   Lightbulb,
-  CheckCircle
+  CheckCircle,
+  LucideIcon
 } from "lucide-react";
 
+// تعريف نوع البيانات للميزة
+interface Feature {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+}
+
+// تعريف نوع البيانات للإعلان
+interface AdData {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  badge: string;
+  badgeType: 'beta' | 'new';
+  buttonText: string;
+  buttonDisabled: boolean;
+  features: Feature[];
+  colors: {
+    primary: string;
+    accent: string;
+    button: string;
+  };
+  linkTo: string | null;
+  external: boolean;
+}
+
+// تعريف props للمكون
+interface AdsSliderProps {
+  showExamAd?: boolean;
+  showCoursesBanner?: boolean;
+}
+
 // بيانات الإعلانات
-const adsData = [
+const adsData: AdData[] = [
   {
     id: 'exam-simulator',
     title: 'محاكي الاختبار التفاعلي',
@@ -65,9 +101,9 @@ const adsData = [
   }
 ];
 
-const AdsSlider = ({ showExamAd = true, showCoursesBanner = true }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+const AdsSlider: React.FC<AdsSliderProps> = ({ showExamAd = true, showCoursesBanner = true }) => {
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(true);
 
   // تحديد الإعلانات المعروضة
   const activeAds = adsData.filter(ad => {
@@ -90,7 +126,7 @@ const AdsSlider = ({ showExamAd = true, showCoursesBanner = true }) => {
     return () => clearInterval(interval);
   }, [isAutoPlaying, activeAds.length]);
 
-  const handleSlideChange = (index) => {
+  const handleSlideChange = (index: number): void => {
     setCurrentSlide(index);
     setIsAutoPlaying(false); // إيقاف التشغيل التلقائي عند التدخل اليدوي
     // إعادة تشغيل التلقائي بعد 30 ثانية
