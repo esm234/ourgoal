@@ -17,8 +17,8 @@ import {
   Target,
   Brain,
   Zap,
-  Clock, // إضافة أيقونة جديدة قد تكون مفيدة للتصميم
-  Lightbulb // إضافة أيقونة جديدة قد تكون مفيدة للتصميم
+  Clock,
+  Lightbulb
 } from "lucide-react";
 import { addSystemUpdateNotification } from "@/services/localNotifications";
 import { SHOW_COURSES_BANNER } from '../config/environment';
@@ -33,20 +33,16 @@ const CURRENT_VERSION = '2.5.0';
 const UPDATE_NOTIFICATION_SHOWN_KEY = 'ourgoal_update_notification_shown';
 
 // متغير لإظهار إعلان محاكي الاختبار
-const SHOW_EXAM_SIMULATOR_AD = true; // غيّر إلى true لإظهار الإعلان
+const SHOW_EXAM_SIMULATOR_AD = true;
 
 const Home = () => {
-  // إضافة إشعار تحديث النظام مرة واحدة فقط
   useEffect(() => {
-    // التحقق مما إذا كان قد تم عرض الإشعار بالفعل
     const updateNotificationShown = localStorage.getItem(UPDATE_NOTIFICATION_SHOWN_KEY);
     
-    // إذا كان الإشعار قد تم عرضه بالفعل، لا تعرضه مرة أخرى
     if (updateNotificationShown === CURRENT_VERSION) {
       return;
     }
     
-    // التحقق من وجود إشعار بنفس الإصدار في localStorage
     const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
     
     let hasVersionNotification = false;
@@ -55,7 +51,6 @@ const Home = () => {
       try {
         const notifications = JSON.parse(storedNotifications);
         
-        // التحقق من وجود إشعار تحديث بنفس الإصدار
         hasVersionNotification = notifications.some(
           (notification: any) => 
             notification.type === 'system' && 
@@ -67,26 +62,24 @@ const Home = () => {
       }
     }
     
-    // إذا لم يكن هناك إشعار بنفس الإصدار، أضف واحدًا
     if (!hasVersionNotification) {
       addSystemUpdateNotification(
-        'تحديث جديد: إصدار 2.5.0', // عنوان الإشعار
-        'تم إطلاق تحديث جديد للنظام يتضمن العديد من الميزات والتحسينات الجديدة. انقر لعرض التفاصيل.', // وصف الإشعار
+        'تحديث جديد: إصدار 2.5.0',
+        'تم إطلاق تحديث جديد للنظام يتضمن العديد من الميزات والتحسينات الجديدة. انقر لعرض التفاصيل.',
         [
           'إضافة صفحة دورات واضافة دورة the last dance - دورة تاسيس لفظي',
           'تحديث نظام البومودورو مع إضافة إحصائيات متقدمة',
           'اضافة نظام اشعارات',
           'تحسينات في الأداء وإصلاح مشكلات متعددة',
           'دعم وضع الظلام الكامل في جميع صفحات التطبيق'
-        ], // قائمة الميزات الجديدة
-        '2.5.0', // رقم الإصدار
-        'high' // أولوية الإشعار
+        ],
+        '2.5.0',
+        'high'
       );
     }
     
-    // تسجيل أن الإشعار قد تم عرضه
     localStorage.setItem(UPDATE_NOTIFICATION_SHOWN_KEY, CURRENT_VERSION);
-  }, []); // تنفيذ مرة واحدة فقط عند تحميل المكون
+  }, []);
 
   const homeStructuredData = {
     "@context": "https://schema.org",
@@ -548,7 +541,7 @@ const Home = () => {
                   </div>
                 </div>
               </Card>
-            </Link>
+            </a> {/* <--- تم تصحيح هذا السطر من </Link> إلى </a> */}
           </div>
 
           {/* Study Plan Generator - Featured Section */}
