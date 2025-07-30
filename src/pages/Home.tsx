@@ -15,8 +15,10 @@ import {
   CheckCircle,
   FileText,
   Target,
-  Brain, // Added for Exam Simulator
-  Zap // Added for Exam Simulator
+  Brain,
+  Zap,
+  Clock, // إضافة أيقونة جديدة قد تكون مفيدة للتصميم
+  Lightbulb // إضافة أيقونة جديدة قد تكون مفيدة للتصميم
 } from "lucide-react";
 import { addSystemUpdateNotification } from "@/services/localNotifications";
 import { SHOW_COURSES_BANNER } from '../config/environment';
@@ -31,7 +33,7 @@ const CURRENT_VERSION = '2.5.0';
 const UPDATE_NOTIFICATION_SHOWN_KEY = 'ourgoal_update_notification_shown';
 
 // متغير لإظهار إعلان محاكي الاختبار
-const SHOW_EXAM_SIMULATOR_AD = true; // غيّر إلى true لإظهار الإعلان (تم تعديله بناءً على طلبك)
+const SHOW_EXAM_SIMULATOR_AD = true; // غيّر إلى true لإظهار الإعلان
 
 const Home = () => {
   // إضافة إشعار تحديث النظام مرة واحدة فقط
@@ -146,57 +148,61 @@ const Home = () => {
         structuredData={homeStructuredData}
       />
 
-      {/* إعلان محاكي الاختبار */}
+      {/* إعلان محاكي الاختبار - تصميم جديد مع صورة */}
       {SHOW_EXAM_SIMULATOR_AD && (
-        <section className="relative py-10 flex items-center justify-center overflow-hidden bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20">
-          <div className="absolute inset-0">
-            <div className="absolute top-0 right-20 w-72 h-72 bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-0 left-20 w-72 h-72 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-3xl animate-pulse"></div>
+        <section className="relative py-12 flex items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-700/10 via-purple-700/10 to-pink-700/10">
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute top-0 right-20 w-80 h-80 bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 left-20 w-80 h-80 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
           </div>
 
           <div className="container mx-auto px-4 relative z-10">
-            <div className="bg-gradient-to-r from-indigo-600/90 via-purple-600/90 to-pink-600/90 rounded-3xl shadow-2xl shadow-indigo-500/20 backdrop-blur-sm border border-white/10 overflow-hidden">
+            <div className="bg-gradient-to-br from-indigo-800/90 via-purple-800/90 to-pink-800/90 rounded-3xl shadow-2xl shadow-purple-500/30 backdrop-blur-sm border border-white/10 overflow-hidden transform transition-all duration-500 hover:scale-[1.01]">
               <div className="grid md:grid-cols-5 items-center">
-                <div className="md:col-span-3 p-8 md:p-10">
-                  <Badge className="bg-white/20 text-white border-0 mb-4 px-4 py-1 animate-pulse">🚀 قريباً</Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">محاكي اختبار القدرات التفاعلي</h2>
-                  <p className="text-white/80 mb-6 text-lg">تجربة محاكاة حقيقية لاختبار القدرات مع نظام تقييم ذكي وتحليل شامل للأداء. استعد للاختبار بأفضل طريقة ممكنة.</p>
-                  <div className="flex flex-wrap gap-4 mb-6">
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                <div className="md:col-span-3 p-8 md:p-12">
+                  <Badge className="bg-white/20 text-white border-0 mb-4 px-4 py-1 text-sm animate-pulse">🚀 قريباً جداً</Badge>
+                  <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+                    محاكي اختبار القدرات <br className="hidden md:inline"/> التفاعلي
+                  </h2>
+                  <p className="text-white/80 mb-8 text-lg max-w-lg">
+                    استعد لاختبار القدرات بتجربة محاكاة واقعية، مع تقييم فوري وتحليل شامل لأدائك لمساعدتك على تحقيق أعلى الدرجات.
+                  </p>
+                  <div className="flex flex-wrap gap-4 mb-8">
+                    <div className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full text-white text-sm font-medium">
                       <Brain className="w-5 h-5 text-cyan-300" />
-                      <span className="text-white text-sm">محاكاة واقعية</span>
+                      محاكاة واقعية
                     </div>
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                    <div className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full text-white text-sm font-medium">
                       <Zap className="w-5 h-5 text-cyan-300" />
-                      <span className="text-white text-sm">تقييم فوري</span>
+                      تقييم فوري
                     </div>
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                    <div className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full text-white text-sm font-medium">
                       <Target className="w-5 h-5 text-cyan-300" />
-                      <span className="text-white text-sm">تحليل مفصل</span>
+                      تحليل مفصل
                     </div>
-                    <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+                    <div className="flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full text-white text-sm font-medium">
                       <CheckCircle className="w-5 h-5 text-cyan-300" />
-                      <span className="text-white text-sm">مجاني بالكامل</span>
+                      مجاني بالكامل
                     </div>
                   </div>
                   <Button 
                     disabled 
                     size="lg" 
-                    className="bg-white/20 text-white cursor-not-allowed font-bold px-8 py-6 rounded-xl text-lg opacity-75"
+                    className="bg-white/20 text-white cursor-not-allowed font-bold px-10 py-6 rounded-xl text-xl opacity-75 shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    <Brain className="w-5 h-5 mr-2" />
-                    قريباً جداً...
+                    <Clock className="w-6 h-6 mr-3" />
+                    قريباً جداً... ترقبوا!
                   </Button>
-                  <p className="text-white/60 text-sm mt-3">سيتم إطلاق المحاكي قريباً، ترقبوا الإعلان!</p>
+                  <p className="text-white/60 text-sm mt-4">
+                    نعمل بجد لإطلاق هذه الميزة الرائعة. تابعونا للمزيد من التحديثات!
+                  </p>
                 </div>
-                <div className="md:col-span-2 bg-gradient-to-br from-indigo-700/50 to-purple-700/50 p-6 md:p-10 h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-48 h-48 mx-auto mb-4 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                      <div className="text-6xl">🧠</div>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">تجربة تفاعلية</h3>
-                    <p className="text-white/80 text-sm">محاكاة دقيقة لبيئة الاختبار الحقيقي</p>
-                  </div>
+                <div className="md:col-span-2 p-6 md:p-10 h-full flex items-center justify-center bg-gradient-to-tl from-indigo-900/50 to-purple-900/50 rounded-r-3xl">
+                  <img
+                    src="/Screenshot_٢٠٢٥٠٧٢٩_١٥٠٢٢٢_Chrome.jpg"
+                    alt="Exam Simulator Preview"
+                    className="rounded-2xl shadow-2xl border-4 border-white/20 transform hover:scale-105 transition-transform duration-700 ease-out max-w-full h-auto"
+                  />
                 </div>
               </div>
             </div>
@@ -542,7 +548,7 @@ const Home = () => {
                   </div>
                 </div>
               </Card>
-            </a>
+            </Link>
           </div>
 
           {/* Study Plan Generator - Featured Section */}
@@ -569,149 +575,149 @@ const Home = () => {
                 <div className="flex items-center gap-3 text-primary font-bold text-lg group-hover:gap-4 transition-all duration-300">
                   <span>أنشئ خطتك الآن</span>
                   <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-4 h-4 text-black" />
+                      <ArrowRight className="w-4 h-4 text-black" />
+                    </div>
+                  </div>
+
+                  {/* Feature Stats */}
+                  <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">ذكي</div>
+                      <div className="text-xs text-muted-foreground">توزيع تلقائي</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">مخصص</div>
+                      <div className="text-xs text-muted-foreground">حسب وقتك</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">منظم</div>
+                      <div className="text-xs text-muted-foreground">خطة واضحة</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">قابل للتصدير</div>
+                      <div className="text-xs text-muted-foreground">احفظ خطتك</div>
+                    </div>
                   </div>
                 </div>
+              </Card>
+            </Link>
+          </div>
+        </section>
 
-                {/* Feature Stats */}
-                <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">ذكي</div>
-                    <div className="text-xs text-muted-foreground">توزيع تلقائي</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">مخصص</div>
-                    <div className="text-xs text-muted-foreground">حسب وقتك</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">منظم</div>
-                    <div className="text-xs text-muted-foreground">خطة واضحة</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">قابل للتصدير</div>
-                    <div className="text-xs text-muted-foreground">احفظ خطتك</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        </div>
-      </section>
+        {/* Events Section */}
+        <EventsSection />
 
-      {/* Events Section */}
-      <EventsSection />
-
-      {/* Success Stories & CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          {/* Community Success */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
-              نجاحات <span className="text-transparent bg-gradient-to-r from-primary to-accent bg-clip-text">مجتمعنا</span>
-            </h2>
-            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-              مجتمع متعاون من الطلاب والخريجين، نساعد بعضنا البعض في تحقيق الأهداف الأكاديمية
-            </p>
+        {/* Success Stories & CTA Section */}
+        <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl"></div>
           </div>
 
-          {/* Community Metrics */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">+23.7k</div>
-              <div className="text-muted-foreground">طالب في المجتمع</div>
-            </Card>
+          <div className="container mx-auto relative z-10">
+            {/* Community Success */}
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
+                نجاحات <span className="text-transparent bg-gradient-to-r from-primary to-accent bg-clip-text">مجتمعنا</span>
+              </h2>
+              <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+                مجتمع متعاون من الطلاب والخريجين، نساعد بعضنا البعض في تحقيق الأهداف الأكاديمية
+              </p>
+            </div>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">+100</div>
-              <div className="text-muted-foreground">ملف لفظي وكمي</div>
-            </Card>
+            {/* Community Metrics */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">+23.7k</div>
+                <div className="text-muted-foreground">طالب في المجتمع</div>
+              </Card>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Star className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">مجاني</div>
-              <div className="text-muted-foreground">بالكامل</div>
-            </Card>
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">+100</div>
+                <div className="text-muted-foreground">ملف لفظي وكمي</div>
+              </Card>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Calculator className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">دقيق</div>
-              <div className="text-muted-foreground">حاسبة المعادلة</div>
-            </Card>
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Star className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">مجاني</div>
+                <div className="text-muted-foreground">بالكامل</div>
+              </Card>
+
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Calculator className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">دقيق</div>
+                <div className="text-muted-foreground">حاسبة المعادلة</div>
+              </Card>
+            </div>
+
+            {/* Final CTA */}
+            <div className="text-center">
+              <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-3xl">
+                <div className="mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Users className="w-10 h-10 text-black" />
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+                    انضم لمجتمعنا المتعاون اليوم
+                  </h3>
+                  <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                    كن جزءاً من مجتمع متعاون، نساعد بعضنا البعض في الدراسة والتحضير الأكاديمي ونشارك التجارب والنصائح
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <a
+                    href="https://linktr.ee/Our_goal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black rounded-xl shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105">
+                      <Users className="w-5 h-5 ml-2" />
+                      انضم للمجتمع الآن
+                    </Button>
+                  </a>
+
+                  <Link to="/files" className="group">
+                    <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
+                      <FileText className="w-5 h-5 ml-2" />
+                      تصفح الملفات
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Community Indicators */}
+                <div className="flex items-center justify-center gap-8 mt-8 pt-8 border-t border-primary/10">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="w-5 h-5 text-primary" />
+                    <span>مجتمع متعاون</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Star className="w-5 h-5 text-primary" />
+                    <span>تجارب حقيقية</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                    <span>دعم شامل</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
+        </section>
 
-          {/* Final CTA */}
-          <div className="text-center">
-            <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-3xl">
-              <div className="mb-8">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-10 h-10 text-black" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                  انضم لمجتمعنا المتعاون اليوم
-                </h3>
-                <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  كن جزءاً من مجتمع متعاون، نساعد بعضنا البعض في الدراسة والتحضير الأكاديمي ونشارك التجارب والنصائح
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="https://linktr.ee/Our_goal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black rounded-xl shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105">
-                    <Users className="w-5 h-5 ml-2" />
-                    انضم للمجتمع الآن
-                  </Button>
-                </a>
-
-                <Link to="/files" className="group">
-                  <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
-                    <FileText className="w-5 h-5 ml-2" />
-                    تصفح الملفات
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Community Indicators */}
-              <div className="flex items-center justify-center gap-8 mt-8 pt-8 border-t border-primary/10">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-5 h-5 text-primary" />
-                  <span>مجتمع متعاون</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Star className="w-5 h-5 text-primary" />
-                  <span>تجارب حقيقية</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle className="w-5 h-5 text-primary" />
-                  <span>دعم شامل</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-    </Layout>
-  );
-};
+      </Layout>
+    );
+  };
 
 export default Home;
