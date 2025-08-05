@@ -567,7 +567,7 @@ const EquivalencyCalculator = () => {
     if (isNaN(hsPercentage) || isNaN(qScore)) {
       toast({
         title: "خطأ في البيانات",
-        description: "يرجى إدخال قيم صحيحة للنسبة ودرجة القياس",
+        description: "يرجى إدخال قيم صحيحة للنسبة ودرجة القدرات",
         variant: "destructive"
       });
       return;
@@ -584,8 +584,8 @@ const EquivalencyCalculator = () => {
 
     if (qScore < 0 || qScore > 100) {
       toast({
-        title: "خطأ في درجة القياس",
-        description: "يجب أن تكون درجة القياس بين 0 و 100",
+        title: "خطأ في درجة القدرات",
+        description: "يجب أن تكون درجة القدرات بين 0 و 100",
         variant: "destructive"
       });
       return;
@@ -960,7 +960,7 @@ const EquivalencyCalculator = () => {
                     </div>
                     <div className="text-center p-4 bg-primary/5 border border-primary/20 rounded-xl">
                       <Target className="w-8 h-8 text-primary mx-auto mb-2" />
-                      <div className="text-sm text-muted-foreground mb-1">درجة القياس</div>
+                      <div className="text-sm text-muted-foreground mb-1">درجة القدرات</div>
                       <div className="text-2xl font-bold text-foreground">{qiyasScore}</div>
                     </div>
                     <div className="text-center p-4 bg-primary/5 border border-primary/20 rounded-xl">
