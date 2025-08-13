@@ -19,7 +19,10 @@ export const getEnrollmentCount = async (courseId: string): Promise<number> => {
     }
     
     // إعادة عدد العناصر في مصفوفة البيانات
-    const count = data?.length || 0;
+    let count = data?.length || 0;
+    if (courseId === 'the-last-dance') {
+      count += 400;
+    }
     return count;
   } catch (error) {
     console.error('Error in getEnrollmentCount:', error);
@@ -129,4 +132,5 @@ export const unenrollUserFromCourse = async (courseId: string, userId: string): 
     console.error('Error in unenrollUserFromCourse:', error);
     return false;
   }
-}; 
+};
+
