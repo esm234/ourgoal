@@ -71,7 +71,7 @@ const adsData: AdData[] = [
     colors: {
       primary: 'from-slate-900 via-purple-900 to-slate-900',
       accent: 'from-cyan-400 via-blue-400 to-purple-400',
-      button: 'from-gray-600 to-gray-700'
+      button: 'from-white to-white'
     },
     linkTo: "exam.ourgoal.site",
     external: true
@@ -284,7 +284,7 @@ const AdsSlider: React.FC<AdsSliderProps> = ({ showExamAd = true, showCoursesBan
                       <a href={`https://${currentAd.linkTo}`} target="_blank" rel="noopener noreferrer">
                         <Button 
                           size="lg" 
-                          className={`group relative px-8 py-4 bg-gradient-to-r ${currentAd.colors.button} ${currentAd.id === 'last-dance-course' ? 'text-blue-600 hover:bg-white/90' : 'text-gray-300 cursor-not-allowed'} rounded-xl text-lg font-bold overflow-hidden`}
+                          className={`group relative px-8 py-4 bg-gradient-to-r ${currentAd.colors.button} text-blue-600 hover:bg-white/90 hover:scale-105 rounded-xl text-lg font-bold overflow-hidden transition-all duration-300`}
                           disabled={currentAd.buttonDisabled}
                         >
                           {!currentAd.buttonDisabled && (
@@ -302,7 +302,7 @@ const AdsSlider: React.FC<AdsSliderProps> = ({ showExamAd = true, showCoursesBan
                       <Link to={currentAd.linkTo}>
                         <Button 
                           size="lg" 
-                          className={`group relative px-8 py-4 bg-gradient-to-r ${currentAd.colors.button} ${currentAd.id === 'last-dance-course' ? 'text-blue-600 hover:bg-white/90' : 'text-gray-300 cursor-not-allowed'} rounded-xl text-lg font-bold overflow-hidden`}
+                          className={`group relative px-8 py-4 bg-gradient-to-r ${currentAd.colors.button} text-blue-600 hover:bg-white/90 hover:scale-105 rounded-xl text-lg font-bold overflow-hidden transition-all duration-300`}
                           disabled={currentAd.buttonDisabled}
                         >
                           {!currentAd.buttonDisabled && (
