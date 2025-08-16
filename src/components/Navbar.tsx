@@ -1,11 +1,37 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Calculator, LogIn, Menu, X, FileText, Target, User, HelpCircle, LogOut, Trophy, Timer, Bell, BookOpen, GraduationCap } from "lucide-react";
+import {
+  Home,
+  Calculator,
+  LogIn,
+  Menu,
+  X,
+  FileText,
+  Target,
+  User,
+  HelpCircle,
+  LogOut,
+  Trophy,
+  Timer,
+  Bell,
+  BookOpen,
+  GraduationCap,
+  MonitorPlay,
+} from "lucide-react";
 import NotificationBell from "./notifications/NotificationBell";
-import { SHOW_COURSES_BANNER, SHOW_NOTIFICATIONS_BELL } from '../config/environment';
+import {
+  SHOW_COURSES_BANNER,
+  SHOW_NOTIFICATIONS_BELL,
+} from "../config/environment";
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -16,16 +42,10 @@ const Navbar = () => {
   };
 
   const handleLinkClick = () => {
-    // Scroll to top when navigation link is clicked
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleMobileLinkClick = () => {
-    // Close mobile menu and scroll to top
     setIsMobileMenuOpen(false);
     handleLinkClick();
   };
@@ -36,19 +56,27 @@ const Navbar = () => {
       setIsMobileMenuOpen(false);
       handleLinkClick();
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error("Error logging out:", error);
     }
   };
+
+  const linkClasses =
+    "flex items-center px-4 py-2 mx-1 rounded-md hover:bg-primary/10 hover:text-primary transition-colors text-sm font-medium";
 
   return (
     <nav className="bg-secondary py-4 px-6 shadow-md border-b border-primary/20">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-primary" onClick={handleLinkClick}>
+          {/* Logo */}
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-xl font-bold text-primary"
+            onClick={handleLinkClick}
+          >
             <img
               src="https://lh7-us.googleusercontent.com/d7hBCrZA_3y0BdJCEoFFXi8tGUcMNF5BzrJUvfJAwE22sCigDAhos0MacvrlSxtlA1woVP0wooNtrZxVOOQHhjK1oGOnCfsY638wT9a3yGV8CTGJ1--a7mSmMdb6gTjZcCsPvp-ClDd2HzPQqIrqXDEx5ns4T5M9x5mUc9lgrA2mei02TV1aQCNv0yx0cyTS-qfk192H?key=-6GPA2o9SRVVzzH5bmoicQ"
               alt="اور جول"
-              className="w-14 h-14 object-contain rounded-lg"
+              className="w-12 h-12 object-contain rounded-lg"
             />
             Our goal is success
           </Link>
@@ -70,36 +98,43 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden min-[1201px]:flex items-center space-x-1 space-x-reverse">
-            <Link
-              to="/"
-              className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-              onClick={handleLinkClick}
-            >
+            <Link to="/" className={linkClasses} onClick={handleLinkClick}>
               <Home size={20} className="ml-2" />
               <span>الرئيسية</span>
             </Link>
 
             <Link
               to="/equivalency-calculator"
-              className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+              className={linkClasses}
               onClick={handleLinkClick}
             >
               <Calculator size={20} className="ml-2" />
               <span>حاسبة المعادلة</span>
             </Link>
 
+            {/* New External Link */}
+            <a
+              href="https://exam.ourgoal.site"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClasses}
+            >
+              <MonitorPlay size={20} className="ml-2" />
+              <span>المحاكي</span>
+            </a>
+
             {/* Educational Resources Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                >
+                <Button variant="ghost" className={linkClasses}>
                   <GraduationCap size={20} className="ml-2" />
                   <span>المصادر التعليمية</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-secondary border-primary/20">
+              <DropdownMenuContent
+                align="end"
+                className="bg-secondary border-primary/20"
+              >
                 <DropdownMenuItem asChild>
                   <Link
                     to="/files"
@@ -137,7 +172,7 @@ const Navbar = () => {
 
             <Link
               to="/study-plan"
-              className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+              className={linkClasses}
               onClick={handleLinkClick}
             >
               <Target size={20} className="ml-2" />
@@ -147,7 +182,7 @@ const Navbar = () => {
             {isLoggedIn && (
               <Link
                 to="/weekly-events"
-                className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                className={linkClasses}
                 onClick={handleLinkClick}
               >
                 <Trophy size={20} className="ml-2" />
@@ -157,9 +192,9 @@ const Navbar = () => {
 
             {isLoggedIn ? (
               <>
-                {/* Notification Bell for Desktop */}
-                {SHOW_NOTIFICATIONS_BELL && <NotificationBell className="mx-2" />}
-                
+                {SHOW_NOTIFICATIONS_BELL && (
+                  <NotificationBell className="mx-2" />
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -170,7 +205,10 @@ const Navbar = () => {
                       <User size={20} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-secondary border-primary/20">
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-secondary border-primary/20"
+                  >
                     <DropdownMenuItem asChild>
                       <Link
                         to="/profile"
@@ -214,46 +252,46 @@ const Navbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
-            ) : null}
-
-            <div className="flex items-center">
-              {!isLoggedIn && (
-                <Link to="/login" onClick={handleLinkClick}>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center px-3 py-2 mx-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    <LogIn size={20} className="ml-2" />
-                    <span>تسجيل الدخول</span>
-                  </Button>
-                </Link>
-              )}
-            </div>
+            ) : (
+              <Link to="/login" onClick={handleLinkClick}>
+                <Button variant="ghost" className={linkClasses}>
+                  <LogIn size={20} className="ml-2" />
+                  <span>تسجيل الدخول</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="max-[1200px]:block min-[1201px]:hidden mt-4 flex flex-col space-y-2">
-            <Link
-              to="/"
-              className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
-              onClick={handleMobileLinkClick}
-            >
+            <Link to="/" className={linkClasses} onClick={handleMobileLinkClick}>
               <Home size={20} className="ml-2" />
               <span>الرئيسية</span>
             </Link>
 
             <Link
               to="/equivalency-calculator"
-              className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+              className={linkClasses}
               onClick={handleMobileLinkClick}
             >
               <Calculator size={20} className="ml-2" />
               <span>حاسبة المعادلة</span>
             </Link>
 
-            {/* Mobile Educational Resources Section */}
+            {/* External Link Mobile */}
+            <a
+              href="https://exam.ourgoal.site"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClasses}
+            >
+              <MonitorPlay size={20} className="ml-2" />
+              <span>المحاكي</span>
+            </a>
+
+            {/* Educational Resources */}
             <div className="pl-4 border-l-2 border-primary/20">
               <div className="flex items-center px-3 py-2 text-primary font-medium">
                 <GraduationCap size={20} className="ml-2" />
@@ -261,7 +299,7 @@ const Navbar = () => {
               </div>
               <Link
                 to="/files"
-                className="flex items-center px-3 py-2 pr-6 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                className={linkClasses + " pr-6"}
                 onClick={handleMobileLinkClick}
               >
                 <FileText size={18} className="ml-2" />
@@ -270,7 +308,7 @@ const Navbar = () => {
               {SHOW_COURSES_BANNER && (
                 <Link
                   to="/courses"
-                  className="flex items-center px-3 py-2 pr-6 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  className={linkClasses + " pr-6"}
                   onClick={handleMobileLinkClick}
                 >
                   <BookOpen size={18} className="ml-2" />
@@ -279,7 +317,7 @@ const Navbar = () => {
               )}
               <Link
                 to="/faq"
-                className="flex items-center px-3 py-2 pr-6 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                className={linkClasses + " pr-6"}
                 onClick={handleMobileLinkClick}
               >
                 <HelpCircle size={18} className="ml-2" />
@@ -289,7 +327,7 @@ const Navbar = () => {
 
             <Link
               to="/study-plan"
-              className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+              className={linkClasses}
               onClick={handleMobileLinkClick}
             >
               <Target size={20} className="ml-2" />
@@ -300,7 +338,7 @@ const Navbar = () => {
               <>
                 <Link
                   to="/weekly-events"
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  className={linkClasses}
                   onClick={handleMobileLinkClick}
                 >
                   <Trophy size={20} className="ml-2" />
@@ -308,7 +346,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/profile"
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  className={linkClasses}
                   onClick={handleMobileLinkClick}
                 >
                   <User size={20} className="ml-2" />
@@ -316,7 +354,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/pomodoro"
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  className={linkClasses}
                   onClick={handleMobileLinkClick}
                 >
                   <Timer size={20} className="ml-2" />
@@ -325,7 +363,7 @@ const Navbar = () => {
                 {SHOW_NOTIFICATIONS_BELL && (
                   <Link
                     to="/notifications"
-                    className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                    className={linkClasses}
                     onClick={handleMobileLinkClick}
                   >
                     <Bell size={20} className="ml-2" />
@@ -335,7 +373,7 @@ const Navbar = () => {
 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                  className={linkClasses}
                 >
                   <LogOut size={20} className="ml-2" />
                   <span>تسجيل الخروج</span>
@@ -346,7 +384,7 @@ const Navbar = () => {
             {!isLoggedIn && (
               <Link
                 to="/login"
-                className="flex items-center px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                className={linkClasses}
                 onClick={handleMobileLinkClick}
               >
                 <LogIn size={20} className="ml-2" />
