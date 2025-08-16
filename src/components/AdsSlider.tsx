@@ -59,7 +59,7 @@ const adsData: AdData[] = [
     image: '/Screenshot_٢٠٢٥٠٧٢٩_١٥٠٢٢٢_Chrome.jpg',
     imageAlt: 'معاينة محاكي اختبار القدرات - تجربة تفاعلية واقعية',
     badge: 'جديد 🔥',
-    badgeType: 'beta',
+    badgeType: 'new',
     buttonText: ' استكشف المحاكي الان',
     buttonDisabled: false,
     features: [
@@ -73,8 +73,8 @@ const adsData: AdData[] = [
       accent: 'from-cyan-400 via-blue-400 to-purple-400',
       button: 'from-gray-600 to-gray-700'
     },
-    linkTo: null,
-    external: false
+    linkTo: "exam.ourgoal.site",
+    external: true
   },
   {
     id: 'last-dance-course',
