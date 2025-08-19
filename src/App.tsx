@@ -32,7 +32,7 @@ import EventPreview from "@/pages/EventPreview";
 import AdminCreateQuestion from "@/pages/AdminCreateQuestion";
 import AdminEditQuestion from "@/pages/AdminEditQuestion";
 import PomodoroTimer from "@/pages/PomodoroTimer";
-import Event25 from "@/pages/Event";
+import Event from "@/pages/Event";
 import MaintenancePage from "@/components/MaintenancePage";
 import ScrollToTop from "@/components/ScrollToTop";
 import SEOPerformance from "@/components/SEOPerformance";
