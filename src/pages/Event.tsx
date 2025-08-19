@@ -97,7 +97,7 @@ const Event = () => {
               className="max-w-4xl mx-auto"
             >
               <img
-                src="/event-images/official-event-photo.jpeg"
+                src="/event-images/official-event-photo.jpg"
                 alt="الصورة الرسمية لفعالية Our Goal 2025"
                 className="w-full rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 border border-border"
               />
