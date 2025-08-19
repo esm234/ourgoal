@@ -10,28 +10,28 @@ const Event = () => {
     {
       name: "الدكتور أحمد زهرة",
       title: "سبيكرز الديفينت",
-      image: "/event-images/dr-ahmed-zahra.jpg",
+      image: "dr-ahmed-zahra.jpg",
       description: "خبير في مجال التعليم والتطوير الشخصي"
     },
     {
       name: "الأستاذ إيهاب عبد العظيم",
       title: "الداعم الرسمي لور جول",
-      image: "/event-images/ehab-abdelazim.jpg",
+      image: "ehab-abdelazim.jpg",
       description: "مؤسس ومطور منصة Our Goal التعليمية"
     },
     {
       name: "عبد الرحمن عبد المنعم",
       title: "قيام محتوى لليفينت",
-      image: "/event-images/abdelrahman-abdelmoneim.jpg",
+      image: "abdelrahman-abdelmoneim.jpg",
       description: "منشئ محتوى ومؤثر في المجال التعليمي"
     }
   ];
 
   const eventGallery = [
-    "/event-images/official-event-photo.jpg",
-    "/event-images/dr-ahmed-zahra.jpg",
-    "/event-images/ehab-abdelazim.jpg",
-    "/event-images/abdelrahman-abdelmoneim.jpg"
+    "official-event-photo.jpg",
+    "dr-ahmed-zahra.jpg",
+    "ehab-abdelazim.jpg",
+    "abdelrahman-abdelmoneim.jpg"
   ];
 
   return (
@@ -97,7 +97,7 @@ const Event = () => {
               className="max-w-4xl mx-auto"
             >
               <img
-                src="/event-images/official-event-photo.jpg"
+                src="official-event-photo.jpg"
                 alt="الصورة الرسمية لفعالية Our Goal 2025"
                 className="w-full rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 border border-border"
               />
