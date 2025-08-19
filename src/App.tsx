@@ -184,7 +184,7 @@ const App = () => {
               <Route path="/mock-exam/result" element={<MockExamResult />} />
 
               <Route path="*" element={<NotFound />} />
-                <Route path="/Event" element={<event25 />} />
+                <Route path="/Ourgoalevent" element={<Event />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>
