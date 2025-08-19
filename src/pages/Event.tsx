@@ -10,28 +10,28 @@ const Event = () => {
     {
       name: "الدكتور أحمد زهرة",
       title: "سبيكرز الديفينت",
-      image: "/event-images/dr-ahmed-zahra.jpeg",
+      image: "/event-images/dr-ahmed-zahra.jpg",
       description: "خبير في مجال التعليم والتطوير الشخصي"
     },
     {
       name: "الأستاذ إيهاب عبد العظيم",
       title: "الداعم الرسمي لور جول",
-      image: "/event-images/ehab-abdelazim.jpeg",
+      image: "/event-images/ehab-abdelazim.jpg",
       description: "مؤسس ومطور منصة Our Goal التعليمية"
     },
     {
       name: "عبد الرحمن عبد المنعم",
       title: "قيام محتوى لليفينت",
-      image: "/event-images/abdelrahman-abdelmoneim.jpeg",
+      image: "/event-images/abdelrahman-abdelmoneim.jpg",
       description: "منشئ محتوى ومؤثر في المجال التعليمي"
     }
   ];
 
   const eventGallery = [
-    "/event-images/official-event-photo.jpeg",
-    "/event-images/dr-ahmed-zahra.jpeg",
-    "/event-images/ehab-abdelazim.jpeg",
-    "/event-images/abdelrahman-abdelmoneim.jpeg"
+    "/event-images/official-event-photo.jpg",
+    "/event-images/dr-ahmed-zahra.jpg",
+    "/event-images/ehab-abdelazim.jpg",
+    "/event-images/abdelrahman-abdelmoneim.jpg"
   ];
 
   return (
@@ -66,7 +66,7 @@ const Event = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-6 h-6" />
-                  <span>المملكة العربية السعودية</span>
+                  <span>مصر</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-6 h-6" />
