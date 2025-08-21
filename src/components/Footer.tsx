@@ -220,7 +220,7 @@ const Footer = () => {
                 {/* المصباح الزخرفي يتحول إلى زر إذا كانت صفحة الكورسات مفعلة */}
                 {SHOW_COURSES_PAGE ? (
                   <Link
-                    to="/Ourgoalevent"
+                    to="/Homenew"
                     className="w-6 h-6 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-200 border border-primary/30"
                     title="الدورة الشاملة"
                   >
