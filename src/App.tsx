@@ -45,6 +45,7 @@ import NotificationsPage from "@/pages/notifications";
 import MockExam from "@/pages/MockExam";
 import MockExamExam from './pages/MockExamExam';
 import MockExamResult from './pages/MockExamResult';
+import Homenew from './pages/Homenew';
 import { SHOW_COURSES_PAGE, SHOW_NOTIFICATIONS_PAGE } from './config/environment';
 
 
@@ -74,6 +75,7 @@ const App = () => {
               <RedirectHandler />
               <Routes>
               <Route path="/" element={<Home />} />
+                             <Route path="Homenew" element={<Homenew />} /> 
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
