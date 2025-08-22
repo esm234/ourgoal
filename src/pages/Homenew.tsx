@@ -325,8 +325,7 @@ return (
           </div>
         </div>
       </section>
-
-      {/* ⭐⭐⭐ قسم أفضل شخصيات المجتمع لعام 2025 - التصميم الفشيخ ⭐⭐⭐ */}
+      {/* ⭐⭐⭐ قسم أفضل شخصيات المجتمع لعام 2025 - التصميم المبسط ⭐⭐⭐ */}
       <section className="py-32 px-4 relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
         {/* خلفية متحركة رائعة */}
         <div className="absolute inset-0">
@@ -397,7 +396,7 @@ return (
             </div>
           </div>
 
-          {/* شبكة البطاقات الفخمة - 2x2 */}
+          {/* شبكة البطاقات المبسطة - 2x2 */}
           <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
             {topMembers.map((member, index) => (
               <div
@@ -425,12 +424,12 @@ return (
 
                   {/* المحتوى */}
                   <div className="relative z-10">
-                    <div className="flex items-start gap-6">
-                      {/* الصورة مع إطار فخم */}
-                      <div className="relative">
-                        <div className={`absolute inset-0 bg-gradient-to-r ${member.borderColor} rounded-full blur-md opacity-50 animate-pulse`}></div>
-                        <div className={`relative w-32 h-32 bg-gradient-to-r ${member.borderColor} p-1 rounded-full`}>
-                          <div className="w-full h-full bg-card rounded-full overflow-hidden">
+                    <div className="flex flex-col items-center text-center">
+                      {/* الصورة المستطيلة مع إطار فخم */}
+                      <div className="relative mb-6">
+                        <div className={`absolute inset-0 bg-gradient-to-r ${member.borderColor} rounded-2xl blur-md opacity-50 animate-pulse`}></div>
+                        <div className={`relative w-48 h-32 bg-gradient-to-r ${member.borderColor} p-1 rounded-2xl`}>
+                          <div className="w-full h-full bg-card rounded-xl overflow-hidden">
                             <img 
                               src={member.image} 
                               alt={member.name}
@@ -445,65 +444,37 @@ return (
                       </div>
 
                       {/* معلومات العضو */}
-                      <div className="flex-1">
-                        <h3 className="text-3xl font-black mb-2 text-foreground">
+                      <div className="w-full">
+                        <h3 className="text-3xl font-black mb-3 text-foreground">
                           {member.name}
                         </h3>
+                        
                         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${member.color} mb-4`}>
                           <member.icon className="w-5 h-5 text-black" />
                           <span className="text-black font-bold text-sm">{member.role}</span>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed mb-6">
+                        
+                        <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
                           {member.achievement}
                         </p>
 
-                        {/* الإحصائيات الرائعة */}
-                        <div className="grid grid-cols-2 gap-3">
-                          {Object.entries(member.stats).map(([key, value], i) => (
-                            <div 
-                              key={i}
-                              className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl p-3 border border-primary/10 hover:border-primary/30 transition-all duration-300"
-                            >
-                              <div className={`text-xl font-black bg-gradient-to-r ${member.color} bg-clip-text text-transparent`}>
-                                {value}
-                              </div>
-                              <div className="text-xs text-muted-foreground capitalize">
-                                {key === 'helps' ? 'مساعدات' :
-                                 key === 'posts' ? 'منشورات' :
-                                 key === 'likes' ? 'إعجابات' :
-                                 key === 'rating' ? 'التقييم' :
-                                 key === 'discussions' ? 'نقاشات' :
-                                 key === 'solutions' ? 'حلول' :
-                                 key === 'upvotes' ? 'تصويتات' :
-                                 key === 'files' ? 'ملفات' :
-                                 key === 'downloads' ? 'تحميلات' :
-                                 key === 'quality' ? 'الجودة' :
-                                 key === 'helped' ? 'ساعد' :
-                                 key === 'thanks' ? 'شكر' :
-                                 key === 'impact' ? 'التأثير' : key}
-                              </div>
+                        {/* شريط التميز */}
+                        <div className={`pt-6 border-t border-primary/10`}>
+                          <div className="flex items-center justify-center gap-4 mb-4">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* شريط التميز */}
-                    <div className={`mt-6 pt-6 border-t border-primary/10`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <span className="text-sm text-muted-foreground">عضو متميز</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">عضو متميز</span>
+                          
+                          <Badge className={`bg-gradient-to-r ${member.color} text-black border-0 font-bold px-4 py-2`}>
+                            بطل 2025
+                          </Badge>
                         </div>
-                        <Badge className={`bg-gradient-to-r ${member.color} text-black border-0 font-bold`}>
-                          بطل 2025
-                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -529,6 +500,7 @@ return (
               </div>
             ))}
           </div>
+
           {/* رسالة تحفيزية */}
           <div className="text-center mt-20">
             <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 rounded-3xl relative overflow-hidden">
@@ -576,7 +548,7 @@ return (
                     <Sparkles className="w-5 h-5 text-yellow-500" />
                     <span>كن متميزاً</span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                     <Heart className="w-5 h-5 text-pink-500" />
                     <span>ساعد الآخرين</span>
                   </div>
@@ -590,6 +562,13 @@ return (
           </div>
         </div>
       </section>
+
+
+
+                
+
+
+
 
       {/* Beautiful Features Section */}
       <section className="py-32 px-4 relative overflow-hidden">
