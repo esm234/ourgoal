@@ -54,7 +54,7 @@ const Home = () => {
   id: 1,
   name: "محمد عصام",
   role: "أفضل مسؤول لعام 2025",
-  image: "https://lh7-rt.googleusercontent.com/formsz/AN7BsVDSIsGO2RFSIjDsJvmu5OVAzxQUaXEzRIHC9PqSAobxGMPs0b4R_jJHtiYbj_ub2gSeG59-h-PtMGvyMjvV7R7ksm-SkLwYRrmhjsJLSdSfGRp3UnwcQuUDaAxW_VesJJFkD0dJ-iOcoI8eoZdh-nAf3yp3pUSOUTzs_Q?key=CTeaMc5RhCmEeLiI7Wv-LA",
+  image: "https://lh7-rt.googleusercontent.com/formsz/AN7BsVBU-ixLEDsqAVV378UCDpOnFDu0PBfF2xC7x4dk2Lqg05cpEmi5QYRXKX5x0l8mD5ARaLnDITd9a_umhQvsL4KnTefbZ24Qa-IhJJ_RtBAfbVvcU81AdWjo51D_GR3OgY9fH_t2JIwJR3onVbD9-BYkXP1-Ir1_1qE8BQ?key=QMELdh9ZpzbLaaa6u5zbXg",
   achievement: "أدار المجتمع بكفاءة عالية وحقق أفضل النتائج",
   badge: "👑",
   rank: 1,
