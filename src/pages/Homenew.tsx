@@ -16,6 +16,14 @@ import {
   CheckCircle,
   FileText,
   Target,
+  Brain,
+  Zap,
+  Clock,
+  Lightbulb,
+  Award,
+  MessageSquare,
+  UserCheck,
+  Users2
 } from "lucide-react";
 import { addSystemUpdateNotification } from "@/services/localNotifications";
 import { SHOW_COURSES_BANNER } from '../config/environment';
@@ -31,6 +39,85 @@ const UPDATE_NOTIFICATION_SHOWN_KEY = 'ourgoal_update_notification_shown';
 
 // متغير لإظهار إعلان محاكي الاختبار
 const SHOW_EXAM_SIMULATOR_AD = true;
+
+// Component جديد لقسم أفضل الشخصيات
+const TopMembers2025 = () => {
+  const topMembers = [
+    {
+      name: "اسم الشخصية",
+      title: "أفضل شخصية في المناقشة",
+      icon: <MessageSquare className="w-8 h-8 text-yellow-400" />,
+      //  Placeholder image - استبدلها بالصورة الحقيقية
+      imgSrc: "https://placehold.co/150x150/2d3748/ffffff", 
+    },
+    {
+      name: "اسم الأدمن",
+      title: "أفضل أدمن",
+      icon: <UserCheck className="w-8 h-8 text-yellow-400" />,
+      imgSrc: "https://placehold.co/150x150/2d3748/ffffff",
+    },
+    {
+      name: "اسم العضو",
+      title: "أفضل عضو في التيمات",
+      icon: <Users2 className="w-8 h-8 text-yellow-400" />,
+      imgSrc: "https://placehold.co/150x150/2d3748/ffffff",
+    },
+    {
+      name: "اسم الشخصية",
+      title: "أفضل مساهم", // يمكنك تغيير هذا اللقب
+      icon: <Award className="w-8 h-8 text-yellow-400" />,
+      imgSrc: "https://placehold.co/150x150/2d3748/ffffff",
+    },
+  ];
+
+  return (
+    <section className="py-24 bg-gradient-to-b from-background to-secondary/20 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500">
+            أفضل شخصيات ٢٠٢٥
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            تكريمًا لجهودهم وتفانيهم، هؤلاء هم النجوم الذين أضاءوا مجتمعنا هذا العام.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {topMembers.map((member, index) => (
+            <div
+              key={index}
+              className="group relative flex flex-col items-center text-center p-6 bg-secondary/30 border border-yellow-400/20 rounded-2xl shadow-lg hover:shadow-yellow-400/20 transition-all duration-300 hover:scale-105"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="relative mb-4 p-1.5 bg-gradient-to-br from-yellow-500 via-yellow-300 to-yellow-500 rounded-full shadow-lg">
+                <img
+                  src={member.imgSrc}
+                  alt={member.name}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-background"
+                />
+              </div>
+
+              <h3 className="text-xl font-bold text-foreground mb-1">{member.name}</h3>
+              <p className="text-yellow-400/90 font-medium mb-4 flex items-center gap-2">
+                {member.icon}
+                {member.title}
+              </p>
+              
+              <Badge variant="outline" className="border-yellow-400/50 text-yellow-300">
+                نجم العام
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 
 const Home = () => {
   useEffect(() => {
@@ -123,41 +210,12 @@ const Home = () => {
             }
           }
         ]
-      },
-      "member": [
-        {
-          "@type": "Person",
-          "name": "محمد أحمد",
-          "jobTitle": "أفضل في المناقشة",
-          "description": "يقود النقاشات بذكاء وحماس، يساعد الأعضاء في فهم المواضيع المعقدة ويشارك نصائح قيمة.",
-          "image": "https://ourgoal.site/path-to-discussion-person-image.jpg"
-        },
-        {
-          "@type": "Person",
-          "name": "سارة علي",
-          "jobTitle": "أفضل أدمن",
-          "description": "تدير المجتمع بكفاءة، تحافظ على التنظيم وتوفر بيئة داعمة للجميع.",
-          "image": "https://ourgoal.site/path-to-admin-person-image.jpg"
-        },
-        {
-          "@type": "Person",
-          "name": "خالد عمر",
-          "jobTitle": "أفضل عضو في التيمات",
-          "description": "يعمل بتعاون وإبداع في الفرق، يساهم في نجاح المشاريع الجماعية.",
-          "image": "https://ourgoal.site/path-to-team-member-image.jpg"
-        },
-        {
-          "@type": "Person",
-          "name": "نورا سعيد",
-          "jobTitle": "أفضل مبدع",
-          "description": "تقدم أفكارًا مبتكرة ومبدعة، تساهم في تطوير المجتمع بطرق جديدة.",
-          "image": "https://ourgoal.site/path-to-innovator-image.jpg"
-        }
-      ]
+      }
     }
   };
 
-  return (
+      
+return (
     <Layout>
       <SEO
         title="اور جول - Our Goal | منصة تعليمية لاختبار القدرات"
@@ -173,6 +231,7 @@ const Home = () => {
         showExamAd={SHOW_EXAM_SIMULATOR_AD} 
         showCoursesBanner={SHOW_COURSES_BANNER} 
       />
+
 
       {/* Modern Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
@@ -259,117 +318,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Top 4 Personalities of 2025 Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-background to-secondary/20 relative overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-10 w-80 h-80 bg-gradient-to-r from-primary/15 to-accent/15 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 left-10 w-64 h-64 bg-gradient-to-r from-accent/15 to-primary/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-3 px-8 py-4 mb-8 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 backdrop-blur-sm">
-              <Trophy className="w-5 h-5 text-primary" />
-              <span className="text-primary font-bold text-lg">أفضل الشخصيات لعام 2025</span>
-              <Badge variant="secondary" className="bg-primary/20 text-primary border-0 text-xs">مميزون</Badge>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
-              <span className="block">تعرف على</span>
-              <span className="text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-clip-text animate-gradient">
-                نجوم المجتمع
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              نعرض لكم أفضل أربع شخصيات في مجتمعنا لعام 2025، مميزون في المناقشة، الإدارة، العمل الجماعي، والإبداع!
-            </p>
-          </div>
-
-          {/* Personalities Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Personality 1 - Best in Discussion */}
-            <Card className="relative p-6 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden">
-              <div className="absolute top-4 right-4 w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="text-center">
-                <div className="relative w-32 h-32 mx-auto mb-6">
-                  <div className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 bg-gradient-to-r from-yellow-400/30 to-amber-500/30 blur-sm"></div>
-                  <img
-                    src="/path-to-discussion-person-image.jpg"
-                    alt="أفضل شخصية في المناقشة"
-                    className="w-full h-full rounded-full object-cover relative z-10 border-4 border-transparent group-hover:border-yellow-400 transition-all duration-300"
-                  />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">محمد أحمد</h3>
-                <p className="text-lg text-primary font-semibold mb-2">أفضل في المناقشة</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  يقود النقاشات بذكاء وحماس، يساعد الأعضاء في فهم المواضيع المعقدة ويشارك نصائح قيمة.
-                </p>
-              </div>
-            </Card>
-
-            {/* Personality 2 - Best Admin */}
-            <Card className="relative p-6 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden">
-              <div className="absolute top-4 right-4 w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="text-center">
-                <div className="relative w-32 h-32 mx-auto mb-6">
-                  <div className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 bg-gradient-to-r from-yellow-400/30 to-amber-500/30 blur-sm"></div>
-                  <img
-                    src="/path-to-admin-person-image.jpg"
-                    alt="أفضل أدمن"
-                    className="w-full h-full rounded-full object-cover relative z-10 border-4 border-transparent group-hover:border-yellow-400 transition-all duration-300"
-                  />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">سارة علي</h3>
-                <p className="text-lg text-primary font-semibold mb-2">أفضل أدمن</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  تدير المجتمع بكفاءة، تحافظ على التنظيم وتوفر بيئة داعمة للجميع.
-                </p>
-              </div>
-            </Card>
-
-            {/* Personality 3 - Best Team Member */}
-            <Card className="relative p-6 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden">
-              <div className="absolute top-4 right-4 w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="text-center">
-                <div className="relative w-32 h-32 mx-auto mb-6">
-                  <div className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 bg-gradient-to-r from-yellow-400/30 to-amber-500/30 blur-sm"></div>
-                  <img
-                    src="/path-to-team-member-image.jpg"
-                    alt="أفضل عضو في التيمات"
-                    className="w-full h-full rounded-full object-cover relative z-10 border-4 border-transparent group-hover:border-yellow-400 transition-all duration-300"
-                  />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">خالد عمر</h3>
-                <p className="text-lg text-primary font-semibold mb-2">أفضل عضو في التيمات</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  يعمل بتعاون وإبداع في الفرق، يساهم في نجاح المشاريع الجماعية.
-                </p>
-              </div>
-            </Card>
-
-            {/* Personality 4 - Best Innovator */}
-            <Card className="relative p-6 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden">
-              <div className="absolute top-4 right-4 w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="text-center">
-                <div className="relative w-32 h-32 mx-auto mb-6">
-                  <div className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 bg-gradient-to-r from-yellow-400/30 to-amber-500/30 blur-sm"></div>
-                  <img
-                    src="/path-to-innovator-image.jpg"
-                    alt="أفضل مبدع"
-                    className="w-full h-full rounded-full object-cover relative z-10 border-4 border-transparent group-hover:border-yellow-400 transition-all duration-300"
-                  />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">نورا سعيد</h3>
-                <p className="text-lg text-primary font-semibold mb-2">أفضل مبدع</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  تقدم أفكارًا مبتكرة ومبدعة، تساهم في تطوير المجتمع بطرق جديدة.
-                </p>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
+      {/* ==== القسم الجديد ==== */}
+      <TopMembers2025 />
 
       {/* Beautiful Features Section */}
       <section className="py-32 px-4 relative overflow-hidden">
@@ -598,148 +548,149 @@ const Home = () => {
                 <div className="flex items-center gap-3 text-primary font-bold text-lg group-hover:gap-4 transition-all duration-300">
                   <span>أنشئ خطتك الآن</span>
                   <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-4 h-4 text-black" />
+                      <ArrowRight className="w-4 h-4 text-black" />
+                    </div>
+                  </div>
+
+                  {/* Feature Stats */}
+                  <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">ذكي</div>
+                      <div className="text-xs text-muted-foreground">توزيع تلقائي</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">مخصص</div>
+                      <div className="text-xs text-muted-foreground">حسب وقتك</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">منظم</div>
+                      <div className="text-xs text-muted-foreground">خطة واضحة</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">قابل للتصدير</div>
+                      <div className="text-xs text-muted-foreground">احفظ خطتك</div>
+                    </div>
                   </div>
                 </div>
+              </Card>
+            </Link>
+          </div>
+        </section>
 
-                {/* Feature Stats */}
-                <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">ذكي</div>
-                    <div className="text-xs text-muted-foreground">توزيع تلقائي</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">مخصص</div>
-                    <div className="text-xs text-muted-foreground">حسب وقتك</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">منظم</div>
-                    <div className="text-xs text-muted-foreground">خطة واضحة</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">قابل للتصدير</div>
-                    <div className="text-xs text-muted-foreground">احفظ خطتك</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        </div>
-      </section>
+        {/* Events Section */}
+        <EventsSection />
 
-      {/* Events Section */}
-      <EventsSection />
-
-      {/* Success Stories & CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          {/* Community Success */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
-              نجاحات <span className="text-transparent bg-gradient-to-r from-primary to-accent bg-clip-text">مجتمعنا</span>
-            </h2>
-            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-              مجتمع متعاون من الطلاب والخريجين، نساعد بعضنا البعض في تحقيق الأهداف الأكاديمية
-            </p>
+        {/* Success Stories & CTA Section */}
+        <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl"></div>
           </div>
 
-          {/* Community Metrics */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">+23.7k</div>
-              <div className="text-muted-foreground">طالب في المجتمع</div>
-            </Card>
+          <div className="container mx-auto relative z-10">
+            {/* Community Success */}
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
+                نجاحات <span className="text-transparent bg-gradient-to-r from-primary to-accent bg-clip-text">مجتمعنا</span>
+              </h2>
+              <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+                مجتمع متعاون من الطلاب والخريجين، نساعد بعضنا البعض في تحقيق الأهداف الأكاديمية
+              </p>
+            </div>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">+100</div>
-              <div className="text-muted-foreground">ملف لفظي وكمي</div>
-            </Card>
+            {/* Community Metrics */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">+23.7k</div>
+                <div className="text-muted-foreground">طالب في المجتمع</div>
+              </Card>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Star className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">مجاني</div>
-              <div className="text-muted-foreground">بالكامل</div>
-            </Card>
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">+100</div>
+                <div className="text-muted-foreground">ملف لفظي وكمي</div>
+              </Card>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Calculator className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">دقيق</div>
-              <div className="text-muted-foreground">حاسبة المعادلة</div>
-            </Card>
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Star className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">مجاني</div>
+                <div className="text-muted-foreground">بالكامل</div>
+              </Card>
+
+              <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Calculator className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary mb-2">دقيق</div>
+                <div className="text-muted-foreground">حاسبة المعادلة</div>
+              </Card>
+            </div>
+
+            {/* Final CTA */}
+            <div className="text-center">
+              <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-3xl">
+                <div className="mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Users className="w-10 h-10 text-black" />
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+                    انضم لمجتمعنا المتعاون اليوم
+                  </h3>
+                  <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                    كن جزءاً من مجتمع متعاون، نساعد بعضنا البعض في الدراسة والتحضير الأكاديمي ونشارك التجارب والنصائح
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <a
+                    href="https://linktr.ee/Our_goal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black rounded-xl shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105">
+                      <Users className="w-5 h-5 ml-2" />
+                      انضم للمجتمع الآن
+                    </Button>
+                  </a>
+
+                  <Link to="/files" className="group">
+                    <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
+                      <FileText className="w-5 h-5 ml-2" />
+                      تصفح الملفات
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Community Indicators */}
+                <div className="flex items-center justify-center gap-8 mt-8 pt-8 border-t border-primary/10">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="w-5 h-5 text-primary" />
+                    <span>مجتمع متعاون</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Star className="w-5 h-5 text-primary" />
+                    <span>تجارب حقيقية</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                    <span>دعم شامل</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
+        </section>
 
-          {/* Final CTA */}
-          <div className="text-center">
-            <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-3xl">
-              <div className="mb-8">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-10 h-10 text-black" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                  انضم لمجتمعنا المتعاون اليوم
-                </h3>
-                <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  كن جزءاً من مجتمع متعاون، نساعد بعضنا البعض في الدراسة والتحضير الأكاديمي ونشارك التجارب والنصائح
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="https://linktr.ee/Our_goal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black rounded-xl shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105">
-                    <Users className="w-5 h-5 ml-2" />
-                    انضم للمجتمع الآن
-                  </Button>
-                </a>
-
-                <Link to="/files" className="group">
-                  <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
-                    <FileText className="w-5 h-5 ml-2" />
-                    تصفح الملفات
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Community Indicators */}
-              <div className="flex items-center justify-center gap-8 mt-8 pt-8 border-t border-primary/10">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-5 h-5 text-primary" />
-                  <span>مجتمع متعاون</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Star className="w-5 h-5 text-primary" />
-                  <span>تجارب حقيقية</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle className="w-5 h-5 text-primary" />
-                  <span>دعم شامل</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-    </Layout>
-  );
-};
+      </Layout>
+    );
+  };
 
 export default Home;
