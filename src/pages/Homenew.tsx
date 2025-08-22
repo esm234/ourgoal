@@ -93,7 +93,7 @@ const Home = () => {
   id: 4,
   name: "نور محمود",
   role: "أفضل ادمن لعام 2025",
-  image: "/‏8da40cf6-043d-4b84-b1c3-de2705c326c2.jpeg",
+  image: "https://lh7-rt.googleusercontent.com/formsz/AN7BsVCiS_-DNi_iDZXz6TBXkFjV3XYS-UQyaA87zF6OXSyjlMcfBDnK9gOqSso9ye2p6hfIt-nYXb1JPV6AWwX8qWv1F5UyLbPUfIOaAEbnKaB_KV2qP-UqDZj0yVwCH1I6Vt0pDMlerpny-tW_WkrjwybgfdbkPocoqYYFDA?key=QMELdh9ZpzbLaaa6u5zbXg",
   achievement: "تابعت الجروب باستمرار ، وقدمت دعم مستمر لزملائها وكانت الاخت الأكبر لأعضاء الجروب ، ورغم الصعوبات اللي واجهتها إلا انها استمرّت بتقديم الدعم",
   badge: "💝",
   rank: 4,
