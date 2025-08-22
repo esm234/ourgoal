@@ -1107,4 +1107,4 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleSheet);
 }
 
-export default Home;
+export default Homenew;
