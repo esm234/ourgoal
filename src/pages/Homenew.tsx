@@ -412,7 +412,7 @@ return (
                       <img 
                         src={member.image} 
                         alt={member.name}
-                        className="w-64 h-40 object-cover"
+                        className="w-full h-auto rounded-xl object-contain"
                       />
                     </div>
                   </div>
