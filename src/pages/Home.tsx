@@ -520,7 +520,7 @@ return (
 
         <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
           <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-          شارك في المناقشات
+          شارك في المناقشة
         </Button>
       </div>
 
@@ -812,8 +812,7 @@ return (
         </div>
       </section>
 
-      {/* Events Section */}
-      <EventsSection />
+      
 
       {/* Success Stories & CTA Section */}
       <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">
