@@ -1,931 +1,1981 @@
-import React, { useState, useEffect } from 'react';
-import Layout from "@/components/Layout";
-import SEO from "@/components/SEO";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
-import EventsSection from "@/components/EventsSection";
-import AdsSlider from "@/components/AdsSlider";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Layout from '@/components/Layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import {
-  ArrowRight,
-  Calculator,
-  Trophy,
-  Users,
-  Star,
+  Play,
+  Pause,
+  Square,
+  RotateCcw,
+  Clock,
+  BookOpen,
+  Volume2,
+  VolumeX,
+  Settings,
   CheckCircle,
-  FileText,
+  Timer,
   Target,
+  ArrowLeft,
+  Music,
+  Waves,
+  Trees,
+  AlertCircle,
+  BarChart3,
+  Trophy,
+  Calendar,
+  TrendingUp,
+  Coffee,
   Brain,
   Zap,
-  Clock,
-  Lightbulb,
-  Crown,
   Award,
-  Medal,
-  Sparkles,
-  Heart,
-  MessageCircle,
-  TrendingUp,
-  UserCheck,
-  Flame
-} from "lucide-react";
-import { addSystemUpdateNotification } from "@/services/localNotifications";
-import { SHOW_COURSES_BANNER } from '../config/environment';
+  SkipForward,
+  Plus
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { generateQuranAudioSources, getFallbackQuranSources, QuranAudioSource } from '@/utils/quranAudio';
+import { 
+  generateMP3QuranAudioSources, 
+  getPopularReciters, 
+  getPopularSurahs, 
+  createCustomAudioSource,
+  MP3QuranAudioSource,
+  Reciter,
+  Surah
+} from '@/utils/mp3quranApi';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
 
-// مفتاح التخزين المحلي للإشعارات
-const NOTIFICATIONS_STORAGE_KEY = 'ourgoal_local_notifications';
-
-// رقم الإصدار الحالي
-const CURRENT_VERSION = '2.5.0';
-
-// مفتاح لتتبع ما إذا تم عرض إشعار التحديث
-const UPDATE_NOTIFICATION_SHOWN_KEY = 'ourgoal_update_notification_shown';
-
-// متغير لإظهار إعلان محاكي الاختبار
-const SHOW_EXAM_SIMULATOR_AD = true;
-
-const Home = () => {
-  const [hoveredMember, setHoveredMember] = useState(null);
-
-  // بيانات أفضل الشخصيات - 4 فقط
-  const topMembers = [
-{
-  id: 1,
-  name: "محمد عصام",
-  role: "أفضل مسؤول لعام 2025",
-  image: "https://lh7-rt.googleusercontent.com/formsz/AN7BsVBMOASvteMobnGZZppJjAdUNcbfGFjYCMdQjvvmZKkcHKuEEcCkvAaFe1sxOKWvTlHJIE0p1qEY-m5BYlAwc3KhNHYCNAj-tsT2W1GPzetovCNpiaLQezJFGyvgAKrzkDcZJlfkJvLxta3l_9HuTdBE5_8N-qNEFd88AA?key=QMELdh9ZpzbLaaa6u5zbXg",
-  achievement: "أدار المجتمع بكفاءة عالية وحقق أفضل النتائج",
-  badge: "👑",
-  rank: 1,
-  color: "from-yellow-400 via-amber-400 to-orange-500",
-  borderColor: "from-yellow-500 to-amber-600",
-  icon: Crown,
-  glowColor: "yellow"
-},
-{
-  id: 2,
-  name: "محمد علاء",
-  role: "أفضل شخصية لعام 2025",
-  image: "/IMG_20250822_042926_275.jpg",
-  achievement: "أثبت وجوده بحضوره المميز وأسلوبه الراقي، وكان مصدر إلهام وقدوة لباقي الأعضاء",
-  badge: "🔥",
-  rank: 2,
-  color: "from-purple-400 via-pink-400 to-rose-500",
-  borderColor: "from-purple-500 to-pink-600",
-  icon: Flame,
-  glowColor: "purple"
-},
-{
-  id: 3,
-  name: "عبدالرحمن وليد",
-  role: "أفضل ليدر لعام 2025",
-  image: "/2033920b-73bd-4bf5-9901-d2f4ad1325e8.jpeg",
-  achievement: "أدار تيم التجميعات بروح قياديه وحماسيه ، عرف يوجّه ويدعم كل فرد فيه حتى صنع تيم متكامل مبدع وملهم",
-  badge: "⭐",
-  rank: 3,
-  color: "from-blue-400 via-cyan-400 to-teal-500",
-  borderColor: "from-blue-500 to-cyan-600",
-  icon: Star,
-  glowColor: "blue"
-},
-{
-  id: 4,
-  name: "نور محمود",
-  role: "أفضل ادمن لعام 2025",
-  image: "https://lh7-rt.googleusercontent.com/formsz/AN7BsVCiS_-DNi_iDZXz6TBXkFjV3XYS-UQyaA87zF6OXSyjlMcfBDnK9gOqSso9ye2p6hfIt-nYXb1JPV6AWwX8qWv1F5UyLbPUfIOaAEbnKaB_KV2qP-UqDZj0yVwCH1I6Vt0pDMlerpny-tW_WkrjwybgfdbkPocoqYYFDA?key=QMELdh9ZpzbLaaa6u5zbXg",
-  achievement: "تابعت الجروب باستمرار ، وقدمت دعم مستمر لزملائها وكانت الاخت الأكبر لأعضاء الجروب ، ورغم الصعوبات اللي واجهتها إلا انها استمرّت بتقديم الدعم",
-  badge: "💝",
-  rank: 4,
-  color: "from-green-400 via-emerald-400 to-teal-500",
-  borderColor: "from-green-500 to-emerald-600",
-  icon: Heart,
-  glowColor: "green"
+// Types
+interface Task {
+  id: string;
+  name: string;
+  sessions: number;
+  totalTime: number; // in minutes
+  completedAt: Date;
+  isCompleted: boolean;
 }
+
+interface PomodoroSession {
+  id: string;
+  taskId: string;
+  type: 'work' | 'short-break' | 'long-break';
+  duration: number;
+  completedAt: Date;
+}
+
+interface Settings {
+  workDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  sessionsBeforeLongBreak: number;
+  autoStartBreaks: boolean;
+  autoStartPomodoros: boolean;
+  notificationsEnabled: boolean;
+  soundVolume: number;
+}
+
+interface AudioSource {
+  id: string;
+  name: string;
+  url: string;
+  type: 'quran' | 'nature' | 'generated';
+  category?: string;
+}
+
+type SessionType = 'work' | 'short-break' | 'long-break';
+
+const PomodoroTimer: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Timer states
+  const [minutes, setMinutes] = useState<number>(25);
+  const [seconds, setSeconds] = useState<number>(0);
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const [sessionType, setSessionType] = useState<'work' | 'short-break' | 'long-break'>('work');
+  const [sessionCount, setSessionCount] = useState<number>(0);
+  const [currentTaskId, setCurrentTaskId] = useState<string>('');
+  const [currentTask, setCurrentTask] = useState<Task | null>(null);
+  const [isAddingTask, setIsAddingTask] = useState<boolean>(false);
+
+  // Task management
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [taskInput, setTaskInput] = useState('');
+
+  // Audio states
+  const [selectedAudio, setSelectedAudio] = useState<string>('silence');
+  const [audioVolume, setAudioVolume] = useState(0.3);
+  const [isMuted, setIsMuted] = useState(false);
+  const [audioError, setAudioError] = useState<string>('');
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  // MP3Quran states
+  const [availableReciters, setAvailableReciters] = useState<Reciter[]>([]);
+  const [availableSurahs, setAvailableSurahs] = useState<Surah[]>([]);
+  const [selectedReciter, setSelectedReciter] = useState<Reciter | null>(null);
+  const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
+  const [mp3QuranSources, setMp3QuranSources] = useState<MP3QuranAudioSource[]>([]);
+  const [showQuranSelector, setShowQuranSelector] = useState(false);
+
+  // Settings
+  const [settings, setSettings] = useState<Settings>({
+    workDuration: 25,
+    shortBreakDuration: 5,
+    longBreakDuration: 15,
+    sessionsBeforeLongBreak: 4,
+    autoStartBreaks: false,
+    autoStartPomodoros: false,
+    notificationsEnabled: true,
+    soundVolume: 0.3
+  });
+
+  // Refs
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+
+  // Audio sources - Using working sources and generated audio
+  const audioSources: AudioSource[] = [
+    {
+      id: 'silence',
+      name: 'صمت (بدون صوت)',
+      url: '',
+      type: 'generated'
+    },
+    {
+      id: 'white-noise',
+      name: 'ضوضاء بيضاء للتركيز',
+      url: 'generated',
+      type: 'generated'
+    },
+    {
+      id: 'forest-sounds',
+      name: 'أصوات الغابة الطبيعية',
+      url: '/audio/nature/forest-sounds.mp3',
+      type: 'nature'
+    },
+    {
+      id: 'rain-coffee-fireplace',
+      name: 'مطر وقهوة ونار الموقد ☕',
+      url: '/audio/nature/صوت المطر والرعد وفرقعة الحطب مع كوب قهوة☕ للدراسة والتركيز والتفكير العميق I 4K.mp3',
+      type: 'nature'
+    },
+    {
+      id: 'thunderstorm-heavy-rain',
+      name: 'عاصفة رعدية ومطر غزير ⛈️',
+      url: '/audio/nature/Thunderstorm with Heavy rain sounds for Sleep Study and Relaxation The Hideout Ambience 3 Hours (2).mp3',
+      type: 'nature'
+    },
+    {
+      id: 'brown-noise',
+      name: 'ضوضاء بنية للاسترخاء',
+      url: 'generated',
+      type: 'generated'
+    },
+    // القرآن الكريم - السور المختارة من YouTube
+    ...generateQuranAudioSources(),
+    // MP3Quran API sources
+    ...mp3QuranSources.map(source => ({
+      id: source.id,
+      name: source.name,
+      url: source.url,
+      type: 'quran' as const,
+      category: source.category
+    }))
   ];
 
+  // Load data from localStorage on mount
   useEffect(() => {
-    const updateNotificationShown = localStorage.getItem(UPDATE_NOTIFICATION_SHOWN_KEY);
-    
-    if (updateNotificationShown === CURRENT_VERSION) {
-      return;
-    }
-    
-    const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-    
-    let hasVersionNotification = false;
-    
-    if (storedNotifications) {
+    const savedTasks = localStorage.getItem('pomodoro-tasks');
+    const savedSettings = localStorage.getItem('pomodoro-settings');
+    const savedSessionCount = localStorage.getItem('pomodoro-session-count');
+
+    if (savedTasks) {
       try {
-        const notifications = JSON.parse(storedNotifications);
-        
-        hasVersionNotification = notifications.some(
-          (notification: any) => 
-            notification.type === 'system' && 
-            notification.metadata?.category === 'update' &&
-            notification.metadata?.version === CURRENT_VERSION
-        );
+        const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
+          ...task,
+          completedAt: new Date(task.completedAt)
+        }));
+        setTasks(parsedTasks);
       } catch (error) {
-        console.error('خطأ في تحليل الإشعارات المخزنة:', error);
+        console.error('Error loading tasks:', error);
       }
     }
-    
-    if (!hasVersionNotification) {
-      addSystemUpdateNotification(
-        'تحديث جديد: إصدار 2.5.0',
-        'تم إطلاق تحديث جديد للنظام يتضمن العديد من الميزات والتحسينات الجديدة. انقر لعرض التفاصيل.',
-        [
-          'إضافة صفحة دورات واضافة دورة the last dance - دورة تاسيس لفظي',
-          'تحديث نظام البومودورو مع إضافة إحصائيات متقدمة',
-          'اضافة نظام اشعارات',
-          'تحسينات في الأداء وإصلاح مشكلات متعددة',
-          'دعم وضع الظلام الكامل في جميع صفحات التطبيق'
-        ],
-        '2.5.0',
-        'high'
-      );
+
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
     }
-    
-    localStorage.setItem(UPDATE_NOTIFICATION_SHOWN_KEY, CURRENT_VERSION);
+
+    if (savedSessionCount) {
+      setSessionCount(parseInt(savedSessionCount) || 0);
+    }
+
+    // Initialize timer with work duration
+    setMinutes(settings.workDuration);
+
+    // Initialize MP3Quran data
+    initializeMp3QuranData();
   }, []);
 
-  const homeStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "اور جول - Our Goal",
-    "alternateName": "Our Goal",
-    "description": "منصة تعليمية متخصصة في مساعدة الطلاب على التحضير لاختبار القدرات العامة",
-    "url": "https://ourgoal.site",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://ourgoal.site/files?search={search_term_string}",
-      "query-input": "required name=search_term_string"
-    },
-    "mainEntity": {
-      "@type": "EducationalOrganization",
-      "name": "اور جول - Our Goal",
-      "description": "مجتمع تعليمي متعاون لمساعدة الطلاب في التحضير لاختبار القدرات",
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "خدمات التدريب على اختبار القدرات",
-        "itemListElement": [
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Course",
-              "name": "حاسبة المعادلة",
-              "description": "حاسبة لتحويل درجات اختبار القدرات إلى معدل تقديري"
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Course",
-              "name": "خطة دراسية مخصصة",
-              "description": "مولد خطط دراسية ذكية لاختبار القدرات"
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Course",
-              "name": "ملفات تدريبية",
-              "description": "مواد تعليمية شاملة للقسمين الكمي واللفظي"
-            }
-          }
-        ]
-      }
+  // Initialize MP3Quran data
+  const initializeMp3QuranData = async () => {
+    try {
+      // Load popular reciters and surahs
+      const reciters = getPopularReciters();
+      const surahs = getPopularSurahs();
+      
+      setAvailableReciters(reciters as Reciter[]);
+      setAvailableSurahs(surahs);
+
+      // Generate initial MP3Quran sources
+      const mp3Sources = await generateMP3QuranAudioSources();
+      setMp3QuranSources(mp3Sources);
+
+      console.log('MP3Quran data initialized:', { reciters: reciters.length, surahs: surahs.length, sources: mp3Sources.length });
+    } catch (error) {
+      console.error('Error initializing MP3Quran data:', error);
     }
   };
 
+  // Save data to localStorage
+  useEffect(() => {
+    localStorage.setItem('pomodoro-tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('pomodoro-settings', JSON.stringify(settings));
+  }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem('pomodoro-session-count', sessionCount.toString());
+  }, [sessionCount]);
+
+  // Request notification permission
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Generate audio functions
+  const generateWhiteNoise = useCallback(() => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const bufferSize = audioContext.sampleRate * 2;
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.5; // Reduced volume
+    }
+
+    return buffer;
+  }, []);
+
+  const generateBrownNoise = useCallback(() => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const bufferSize = audioContext.sampleRate * 2;
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    let lastOut = 0.0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      data[i] = (lastOut + (0.02 * white)) / 1.02;
+      lastOut = data[i];
+      data[i] *= 3.5 * 0.3; // Amplify and reduce volume
+    }
+
+    return buffer;
+  }, []);
+
+  const generateRainSound = useCallback(() => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const bufferSize = audioContext.sampleRate * 2;
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      // Create rain-like sound with filtered noise
+      const noise = Math.random() * 2 - 1;
+      const filtered = noise * 0.3 * Math.sin(i * 0.001) * Math.cos(i * 0.003);
+      data[i] = filtered * 0.4; // Reduced volume
+    }
+
+    return buffer;
+  }, []);
+
+  // Timer logic
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isActive) {
+      interval = setInterval(() => {
+        if (seconds > 0) {
+          setSeconds(seconds - 1);
+        } else if (minutes > 0) {
+          setMinutes(minutes - 1);
+          setSeconds(59);
+        } else {
+          handleSessionComplete();
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive, minutes, seconds]);
+
+  const handleSessionComplete = () => {
+    setIsActive(false);
+
+    // Play notification
+    if (settings.notificationsEnabled) {
+      showNotification();
+    }
+
+    // Update session count and determine next session type
+    const newSessionCount = sessionCount + 1;
+    setSessionCount(newSessionCount);
+
+    if (sessionType === 'work') {
+      // Work session completed
+      if (currentTask) {
+        updateTaskProgress();
+      }
+
+      // Determine break type
+      if (newSessionCount % settings.sessionsBeforeLongBreak === 0) {
+        setSessionType('long-break');
+        setMinutes(settings.longBreakDuration);
+        toast.success('🎉 وقت الراحة الطويلة!', {
+          description: `استرح لمدة ${settings.longBreakDuration} دقيقة`
+        });
+      } else {
+        setSessionType('short-break');
+        setMinutes(settings.shortBreakDuration);
+        toast.success('☕ وقت الراحة القصيرة!', {
+          description: `استرح لمدة ${settings.shortBreakDuration} دقيقة`
+        });
+      }
+
+      if (settings.autoStartBreaks) {
+        setIsActive(true);
+      }
+    } else {
+      // Break completed
+      setSessionType('work');
+      setMinutes(settings.workDuration);
+      toast.success('💪 وقت العمل!', {
+        description: `ابدأ جلسة عمل لمدة ${settings.workDuration} دقيقة`
+      });
+
+      if (settings.autoStartPomodoros) {
+        setIsActive(true);
+      }
+    }
+
+    setSeconds(0);
+  };
+
+  const showNotification = () => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const title = sessionType === 'work' ? 'انتهت جلسة العمل!' : 'انتهت فترة الراحة!';
+      const body = sessionType === 'work' ? 'وقت الراحة' : 'وقت العمل';
+
+      new Notification(title, {
+        body,
+        icon: '/favicon.ico'
+      });
+    }
+  };
+
+  // Helper functions
+  const getProgress = () => {
+    const totalDuration = sessionType === 'work' ? settings.workDuration :
+                         sessionType === 'short-break' ? settings.shortBreakDuration :
+                         settings.longBreakDuration;
+    const totalSeconds = totalDuration * 60;
+    const currentSeconds = minutes * 60 + seconds;
+    return ((totalSeconds - currentSeconds) / totalSeconds) * 100;
+  };
+
+  const getTotalTime = () => {
+    return tasks.reduce((total, task) => total + task.totalTime, 0);
+  };
+
+  const getAverageSessionsPerTask = () => {
+    const completedTasks = tasks.filter(t => t.isCompleted);
+    if (completedTasks.length === 0) return 0;
+    const totalSessions = completedTasks.reduce((total, task) => total + task.sessions, 0);
+    return Math.round(totalSessions / completedTasks.length * 10) / 10;
+  };
+
+  const getDailyStats = () => {
+    const last7Days = [];
+    let cumulativeSessions = 0;
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toLocaleDateString('ar-EG', {
+        month: 'short',
+        day: 'numeric',
+        calendar: 'gregory'
+      });
+
+      // حساب عدد الجلسات لهذا اليوم
+      const sessionsForDay = tasks.reduce((total, task) => {
+        const taskDate = new Date(task.completedAt);
+        if (
+          taskDate.getDate() === date.getDate() &&
+          taskDate.getMonth() === date.getMonth() &&
+          taskDate.getFullYear() === date.getFullYear()
+        ) {
+          return total + Math.floor(task.sessions);
+        }
+        return total;
+      }, 0);
+
+      cumulativeSessions += sessionsForDay;
+
+      last7Days.push({
+        date: dateStr,
+        sessions: Math.floor(cumulativeSessions)
+      });
+    }
+    return last7Days;
+  };
+
+  const formatDate = (date: Date) => {
+    // Format as Gregorian calendar in Arabic
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      calendar: 'gregory'
+    };
+
+    try {
+      // Try Arabic formatting first
+      return date.toLocaleDateString('ar-EG', options);
+    } catch (error) {
+      // Fallback to English if Arabic fails
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+  };
+
+  const formatRelativeTime = (date: Date) => {
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMinutes < 1) {
+      return 'الآن';
+    } else if (diffInMinutes < 60) {
+      return `منذ ${diffInMinutes} دقيقة`;
+    } else if (diffInHours < 24) {
+      return `منذ ${diffInHours} ساعة`;
+    } else if (diffInDays === 1) {
+      return 'أمس';
+    } else if (diffInDays < 7) {
+      return `منذ ${diffInDays} أيام`;
+    } else {
+      return formatDate(date);
+    }
+  };
+
+  const getDataSize = () => {
+    const data = { tasks, settings, sessionCount };
+    return Math.round(JSON.stringify(data).length / 1024 * 100) / 100;
+  };
+
+  // Task management functions
+  const addTask = (name: string) => {
+    if (!name.trim()) return;
+    
+    const newTask: Task = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      isCompleted: false,
+      sessions: 0,
+      totalTime: 0,
+      completedAt: new Date()
+    };
+    
+    // إضافة المهمة الجديدة إلى القائمة
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+    
+    // حفظ المهام في localStorage مباشرة
+    localStorage.setItem('pomodoro-tasks', JSON.stringify(updatedTasks));
+    
+    // تعيين المهمة الحالية إذا لم تكن هناك مهمة
+    if (!currentTask) {
+      setCurrentTaskId(newTask.id);
+      setCurrentTask(newTask);
+    }
+    
+    // مسح حقل الإدخال
+    setTaskInput('');
+    
+    toast.success(`تم إضافة مهمة: ${newTask.name}`);
+  };
+
+  const selectExistingTask = (task: Task) => {
+    setCurrentTask(task);
+    setCurrentTaskId(task.id);
+    toast.success(`تم اختيار المهمة: ${task.name}`);
+  };
+
+  const updateTaskProgress = () => {
+    if (!currentTask) return;
+
+    const updatedTask = {
+      ...currentTask,
+      sessions: currentTask.sessions + 1,
+      totalTime: currentTask.totalTime + settings.workDuration,
+      completedAt: new Date()
+    };
+
+    setTasks(prev => prev.map(task =>
+      task.id === currentTask.id ? updatedTask : task
+    ));
+    setCurrentTask(updatedTask);
+  };
+
+  const completeTask = () => {
+    if (!currentTask) return;
+
+    const completedTask = {
+      ...currentTask,
+      isCompleted: true,
+      completedAt: new Date()
+    };
+
+    // تحديث قائمة المهام
+    const updatedTasks = tasks.map(task =>
+      task.id === currentTask.id ? completedTask : task
+    );
+    setTasks(updatedTasks);
+
+    // حفظ المهام في localStorage مباشرة
+    localStorage.setItem('pomodoro-tasks', JSON.stringify(updatedTasks));
+
+    // إعادة تعيين المتغيرات
+    setCurrentTask(null);
+    setCurrentTaskId('');
+    setTaskInput('');
+    setIsActive(false);
+
+    toast.success(`🎉 تم إكمال المهمة: ${completedTask.name}!`, {
+      description: `استغرقت ${completedTask.sessions} جلسة و ${completedTask.totalTime} دقيقة`
+    });
+  };
+
+  // Audio functions
+  const playGeneratedAudio = async (type: 'white-noise' | 'rain' | 'brown-noise') => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+
+      const audioContext = audioContextRef.current;
+
+      // Resume context if suspended
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+
+      // Stop previous audio
+      if (audioSourceRef.current) {
+        audioSourceRef.current.stop();
+        audioSourceRef.current = null;
+      }
+
+      // Generate buffer based on type
+      let buffer;
+      switch (type) {
+        case 'white-noise':
+          buffer = generateWhiteNoise();
+          break;
+        case 'brown-noise':
+          buffer = generateBrownNoise();
+          break;
+        case 'rain':
+          buffer = generateRainSound();
+          break;
+        default:
+          buffer = generateWhiteNoise();
+      }
+
+      // Create source and gain nodes
+      const source = audioContext.createBufferSource();
+      const gainNode = audioContext.createGain();
+
+      source.buffer = buffer;
+      source.loop = true;
+
+      // Set volume with smooth transition
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(
+        isMuted ? 0 : audioVolume,
+        audioContext.currentTime + 0.1
+      );
+
+      // Connect nodes
+      source.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Store references
+      audioSourceRef.current = source;
+      gainNodeRef.current = gainNode;
+
+      // Start playing
+      source.start();
+
+      setAudioError('');
+      toast.success(`تم تشغيل ${type === 'white-noise' ? 'الضوضاء البيضاء' : type === 'brown-noise' ? 'الضوضاء البنية' : 'صوت المطر'}`);
+    } catch (error) {
+      console.error('Generated audio error:', error);
+      setAudioError('فشل في تشغيل الصوت المولد');
+      toast.error('فشل في تشغيل الصوت');
+    }
+  };
+
+  const stopGeneratedAudio = () => {
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current = null;
+    }
+  };
+
+  const playQuranAudio = async (url: string, retryCount = 0, audioType: 'quran' | 'nature' = 'quran') => {
+    const maxRetries = 2;
+
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
+      setAudioLoading(true);
+      setAudioError('');
+
+      if (audioRef.current) {
+        audioRef.current.src = url;
+        audioRef.current.volume = isMuted ? 0 : audioVolume;
+        audioRef.current.loop = true;
+
+        // Add error handling for audio loading
+        audioRef.current.onerror = async () => {
+          if (retryCount < maxRetries) {
+            console.log(`Retrying audio load, attempt ${retryCount + 1}`);
+            setTimeout(() => {
+              playQuranAudio(url, retryCount + 1, audioType);
+            }, 1000);
+            return;
+          }
+
+          const errorMessage = audioType === 'quran' ? 'فشل في تحميل التلاوة - جرب تلاوة أخرى' : 'فشل في تحميل الصوت - جرب صوت آخر';
+          setAudioError(errorMessage);
+          setAudioLoading(false);
+          toast.error(errorMessage);
+        };
+
+        audioRef.current.onloadstart = () => {
+          if (retryCount === 0) {
+            const loadingMessage = audioType === 'quran' ? 'جاري تحميل التلاوة...' : 'جاري تحميل الصوت...';
+            toast.info(loadingMessage);
+          }
+        };
+
+        audioRef.current.oncanplay = () => {
+          if (retryCount === 0) {
+            const successMessage = audioType === 'quran' ? 'تم تحميل التلاوة بنجاح' : 'تم تحميل الصوت بنجاح';
+            toast.success(successMessage);
+          }
+        };
+
+        audioRef.current.onloadeddata = () => {
+          setAudioLoading(false);
+        };
+
+        await audioRef.current.play();
+        if (retryCount === 0) {
+          const playMessage = audioType === 'quran' ? '🎵 تم تشغيل التلاوة المباركة' : '🎵 تم تشغيل الصوت';
+          toast.success(playMessage);
+        }
+      }
+    } catch (error) {
+      console.error('Audio error:', error);
+
+      if (retryCount < maxRetries) {
+        console.log(`Retrying audio play, attempt ${retryCount + 1}`);
+        setTimeout(() => {
+          playQuranAudio(url, retryCount + 1, audioType);
+        }, 1000);
+        return;
+      }
+
+      const errorMessage = audioType === 'quran' ? 'فشل في تشغيل التلاوة - جرب تلاوة أخرى' : 'فشل في تشغيل الصوت - جرب صوت آخر';
+      setAudioError(errorMessage);
+      toast.error(errorMessage);
+      setAudioLoading(false);
+    }
+  };
+
+  // Timer functions
+  const startTimer = () => {
+    if (sessionType === 'work' && !currentTask) {
+      toast.error('يرجى اختيار مهمة أولاً');
+      return;
+    }
+
+    setIsActive(true);
+
+    // Start audio if selected and not silence
+    if (selectedAudio && selectedAudio !== 'silence') {
+      const selectedSource = audioSources.find(a => a.id === selectedAudio);
+
+      if (selectedAudio === 'white-noise') {
+        playGeneratedAudio('white-noise');
+      } else if (selectedAudio === 'rain-sound') {
+        playGeneratedAudio('rain');
+      } else if (selectedAudio === 'brown-noise') {
+        playGeneratedAudio('brown-noise');
+      } else if (selectedSource?.url && (selectedSource.type === 'quran' || selectedSource.type === 'nature')) {
+        playQuranAudio(selectedSource.url, 0, selectedSource.type === 'quran' ? 'quran' : 'nature');
+      }
+    }
+
+    toast.success(`بدء ${sessionType === 'work' ? 'جلسة العمل' : 'فترة الراحة'}!`);
+  };
+
+  const pauseTimer = () => {
+    setIsActive(false);
+
+    // Stop all audio
+    stopGeneratedAudio();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+
+    toast.info('تم إيقاف المؤقت مؤقتاً');
+  };
+
+  const resetTimer = () => {
+    setIsActive(false);
+    const duration = sessionType === 'work' ? settings.workDuration :
+                    sessionType === 'short-break' ? settings.shortBreakDuration :
+                    settings.longBreakDuration;
+    setMinutes(duration);
+    setSeconds(0);
+
+    // Stop all audio
+    stopGeneratedAudio();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    toast.info('تم إعادة تعيين المؤقت');
+  };
+
+  // إضافة دالة لتخطي جلسة الراحة
+  const skipBreak = () => {
+    if (sessionType === 'short-break' || sessionType === 'long-break') {
+      setIsActive(false);
+      setMinutes(settings.workDuration);
+      setSeconds(0);
+      setSessionType('work');
       
-return (
+      // بدء العمل تلقائياً إذا كان الإعداد مفعلاً
+      if (settings.autoStartPomodoros && currentTask) {
+        setTimeout(() => {
+          setIsActive(true);
+        }, 300); // تأخير قصير للتأكد من تحديث الواجهة أولاً
+      }
+      
+      toast.success("تم تخطي الراحة", {
+        description: settings.autoStartPomodoros && currentTask 
+          ? "تم الانتقال إلى جلسة عمل جديدة وبدأت تلقائياً"
+          : "تم الانتقال إلى جلسة عمل جديدة"
+      });
+    }
+  };
+
+  // Settings functions
+  const updateSettings = (newSettings: Partial<Settings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  };
+
+  // Add custom Quran audio source
+  const addCustomQuranSource = () => {
+    if (!selectedReciter || !selectedSurah) {
+      toast.error('يرجى اختيار القارئ والسورة');
+      return;
+    }
+
+    const customSource = createCustomAudioSource(selectedReciter, selectedSurah);
+    
+    // Add to MP3Quran sources if not already exists
+    const exists = mp3QuranSources.find(source => source.id === customSource.id);
+    if (!exists) {
+      setMp3QuranSources(prev => [...prev, customSource]);
+      toast.success(`تم إضافة: ${customSource.name}`);
+    } else {
+      toast.info('هذه التلاوة موجودة بالفعل');
+    }
+
+    // Select the new source
+    setSelectedAudio(customSource.id);
+    setShowQuranSelector(false);
+  };
+
+  // Data management functions
+  const exportData = () => {
+    const data = {
+      tasks,
+      settings,
+      sessionCount,
+      exportDate: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pomodoro-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success('تم تصدير البيانات بنجاح!');
+  };
+
+  const clearAllData = () => {
+    if (confirm('هل أنت متأكد من مسح جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      setTasks([]);
+      setSessionCount(0);
+      setCurrentTask(null);
+      setCurrentTaskId('');
+      setIsActive(false);
+
+      localStorage.removeItem('pomodoro-tasks');
+      localStorage.removeItem('pomodoro-session-count');
+
+      toast.success('تم مسح جميع البيانات');
+    }
+  };
+
+  return (
     <Layout>
-      <SEO
-        title="اور جول - Our Goal | منصة تعليمية لاختبار القدرات"
-        description="منصة تعليمية متخصصة في مساعدة الطلاب على التحضير لاختبار القدرات العامة. نوفر خطط دراسية مخصصة، ملفات تدريبية، وحاسبة المعادلة لضمان نجاحك."
-        keywords="اختبار القدرات, قدرات, تدريب, دراسة, منصة تعليمية, اور جول, Our Goal, قياس, اختبارات, تحضير, خطة دراسية, حاسبة المعادلة, ملفات تدريبية, مجتمع تعليمي"
-        url="/"
-        type="website"
-        structuredData={homeStructuredData}
-      />
-
-      {/* نظام Slider للإعلانات الجديد */}
-      <AdsSlider 
-        showExamAd={SHOW_EXAM_SIMULATOR_AD} 
-        showCoursesBanner={SHOW_COURSES_BANNER} 
-      />
-
-
-      {/* Modern Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-r from-accent/15 to-primary/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10 pt-20">
-          <div className="text-center max-w-5xl mx-auto">
-            {/* Status Badge */}
-            <div className="inline-flex items-center gap-2 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 backdrop-blur-sm">
-              <Users className="w-5 h-5 text-primary" />
-              <span className="text-primary font-medium">مجتمع متعاون للتحضير لقياس</span>
-              <Badge variant="secondary" className="bg-primary/20 text-primary border-0">نساعدك في النجاح</Badge>
-            </div>
-
-            {/* Main Heading */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-              <span className="block text-foreground mb-2">مجموعة تساعدك</span>
-              <span className="block text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-clip-text animate-pulse">
-                في تحقيق هدفك
-              </span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-              مجموعة من الأشخاص الذين اجتازوا اختبار قياس، نشارك تجاربنا ونقدم الدعم والمساعدة لتحقيق أفضل النتائج
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-              <a
-                href="https://linktr.ee/Our_goal"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button size="lg" className="group relative px-8 py-6 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black rounded-2xl shadow-2xl shadow-primary/30 transition-all duration-500 hover:scale-105 hover:shadow-3xl hover:shadow-primary/50">
-                  <span className="flex items-center gap-3">
-                    <Users className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
-                    انضم للمجتمع
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                  </span>
-                </Button>
-              </a>
-
-              <Link to="/equivalency-calculator">
-                <Button variant="outline" size="lg" className="px-8 py-6 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-2xl transition-all duration-300 hover:scale-105">
-                  <Calculator className="w-5 h-5 ml-2" />
-                  حاسبة المعادلة
-                </Button>
-              </Link>
-            </div>
-
-                        {/* Community Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">+23.7k</div>
-                <div className="text-muted-foreground">عضو في المجتمع</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">+150</div>
-                <div className="text-muted-foreground">اختبار متاح</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">+100</div>
-                <div className="text-muted-foreground"> ملفاتنا</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">24/7</div>
-                <div className="text-muted-foreground">مجتمع نشط  </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse"></div>
-          </div>
-        </div>
-      </section>
-
-{/* ⭐⭐⭐ قسم أفضل شخصيات المجتمع لعام 2025 - النسخة المحسنة للهواتف ⭐⭐⭐ */}
-
-<section className="py-16 sm:py-24 md:py-32 px-4 relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
-  {/* خلفية متحركة رائعة */}
-  <div className="absolute inset-0">
-    <div className="absolute top-0 left-0 w-full h-full">
-      {/* نجوم متحركة */}
-      {[...Array(20)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute animate-pulse hidden sm:block"
-          style={{
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 3}s`,
-            animationDuration: `${3 + Math.random() * 2}s`
-          }}
+      <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6 max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <Sparkles className={`w-3 h-3 sm:w-4 sm:h-4 text-yellow-400/30`} />
-        </div>
-      ))}
-    </div>
-
-```
-{/* دوائر متحركة ضخمة - مخفية في الهواتف */}
-<div className="absolute top-10 right-10 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-gradient-to-r from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
-<div className="absolute bottom-10 left-10 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] bg-gradient-to-r from-blue-400/5 to-cyan-400/5 rounded-full blur-3xl animate-pulse delay-500"></div>
-```
-
-  </div>
-
-  <div className="container mx-auto relative z-10">
-    {/* رأس القسم الفخم */}
-    <div className="text-center mb-12 sm:mb-16 md:mb-20">
-      {/* شارة العام الجديد */}
-      <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 mb-6 sm:mb-8 md:mb-10 rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/30 backdrop-blur-sm animate-pulse">
-        <Trophy className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-yellow-500" />
-        <span className="text-yellow-500 font-bold text-sm sm:text-lg md:text-xl">تكريم خاص لعام 2025</span>
-        <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-0 text-xs sm:text-sm font-bold px-2 sm:px-3 py-1">
-          حصري
-        </Badge>
-      </div>
-
-```
-  {/* العنوان الضخم */}
-  <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-4 sm:mb-6 md:mb-8 leading-tight">
-    <span className="block text-transparent bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-500 bg-clip-text animate-gradient mb-2 sm:mb-4">
-      أبطال المجتمع
-    </span>
-    <span className="block text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl text-foreground">
-      لعام 2025
-    </span>
-  </h2>
-
-  <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-8 sm:mb-10 md:mb-12 px-4">
-    تكريم خاص للشخصيات التي صنعت الفرق وساهمت في نجاح آلاف الطلاب
-  </p>
-
-  {/* مؤشرات الإنجاز */}
-  <div className="flex items-center justify-center gap-3 sm:gap-6 md:gap-8 flex-wrap mb-8 sm:mb-12 md:mb-16">
-    <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-full bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20">
-      <Crown className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-500" />
-      <span className="text-yellow-500 font-bold text-xs sm:text-sm">4 أبطال</span>
-    </div>
-    <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-      <Star className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-purple-500" />
-      <span className="text-purple-500 font-bold text-xs sm:text-sm">إنجازات استثنائية</span>
-    </div>
-    <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-      <Award className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-blue-500" />
-      <span className="text-blue-500 font-bold text-xs sm:text-sm">تأثير حقيقي</span>
-    </div>
-  </div>
-</div>
-
-{/* شبكة البطاقات المحسنة للهواتف - 1 عمود في الهاتف، 2 في التابلت، 2 في الديسكتوب */}
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-6xl mx-auto">
-  {topMembers.map((member, index) => (
-    <div
-      key={member.id}
-      className="relative group"
-      onMouseEnter={() => setHoveredMember(member.id)}
-      onMouseLeave={() => setHoveredMember(null)}
-    >
-      {/* هالة متحركة خلف البطاقة */}
-      <div className={`absolute inset-0 bg-gradient-to-r ${member.color} rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-20 group-hover:opacity-40 transition-all duration-700 animate-pulse`}></div>
-      
-      {/* البطاقة الرئيسية */}
-      <Card className="relative p-4 sm:p-6 md:p-8 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-xl border-2 border-primary/20 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:border-primary/40">
-        {/* خلفية متحركة داخل البطاقة */}
-        <div className="absolute inset-0 opacity-10">
-          <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-br ${member.color} opacity-20`}></div>
-        </div>
-
-        {/* رقم الترتيب الفخم */}
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20">
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r ${member.borderColor} rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl transform rotate-12 group-hover:rotate-0 transition-all duration-500`}>
-            <span className="text-sm sm:text-lg md:text-2xl font-black text-black">#{member.rank}</span>
-          </div>
-        </div>
-
-        {/* المحتوى */}
-        <div className="relative z-10">
-          <div className="flex flex-col items-center text-center">
-            {/* الصورة المحسنة للهواتف */}
-            <div className="relative mb-4 sm:mb-6">
-              <div className={`absolute inset-0 bg-gradient-to-r ${member.borderColor} rounded-xl sm:rounded-2xl blur-md opacity-50 animate-pulse`}></div>
-              <div className={`relative w-48 h-32 sm:w-56 sm:h-36 md:w-64 md:h-40 bg-gradient-to-r ${member.borderColor} p-1 rounded-xl sm:rounded-2xl`}>
-                <div className="w-full h-full bg-card rounded-lg sm:rounded-xl overflow-hidden">
-                  <img 
-                    src={member.image} 
-                    alt={member.name}
-                    className="w-full h-full rounded-lg sm:rounded-xl object-contain"
-                  />
-                </div>
-              </div>
-              {/* الشارة */}
-              <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 text-2xl sm:text-3xl md:text-4xl animate-bounce">
-                {member.badge}
-              </div>
-            </div>
-
-            {/* معلومات العضو */}
-            <div className="w-full">
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-black mb-2 sm:mb-3 text-foreground">
-                {member.name}
-              </h3>
-              
-              <div className={`inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-full bg-gradient-to-r ${member.color} mb-3 sm:mb-4`}>
-                <member.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-black" />
-                <span className="text-black font-bold text-xs sm:text-sm">{member.role}</span>
-              </div>
-              
-              <p className="text-muted-foreground leading-relaxed mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
-                {member.achievement}
-              </p>
-
-              {/* شريط التميز */}
-              <div className={`pt-4 sm:pt-6 border-t border-primary/10`}>
-                <div className="flex items-center justify-center gap-2 sm:gap-4 mb-3 sm:mb-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
-                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
-                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
-                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
-                    <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
-                  </div>
-                  <span className="text-xs sm:text-sm text-muted-foreground">عضو متميز</span>
-                </div>
-                
-                <Badge className={`bg-gradient-to-r ${member.color} text-black border-0 font-bold px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm`}>
-                  بطل 2025
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* تأثيرات الهوفر - مخفية في الهواتف الصغيرة */}
-        {hoveredMember === member.id && (
-          <div className="absolute inset-0 pointer-events-none hidden sm:block">
-            <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-r ${member.color} opacity-5 animate-pulse`}></div>
-            {[...Array(5)].map((_, i) => (
-              <Sparkles
-                key={i}
-                className={`absolute text-${member.glowColor}-400 w-3 h-3 sm:w-4 sm:h-4 animate-ping`}
-                style={{
-                  top: `${20 + Math.random() * 60}%`,
-                  left: `${20 + Math.random() * 60}%`,
-                  animationDelay: `${i * 0.2}s`
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </Card>
-    </div>
-  ))}
-</div>
-
-{/* رسالة تحفيزية */}
-<div className="text-center mt-12 sm:mt-16 md:mt-20">
-  <Card className="max-w-4xl mx-auto p-6 sm:p-8 md:p-12 bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 rounded-2xl sm:rounded-3xl relative overflow-hidden">
-    {/* خلفية متحركة */}
-    <div className="absolute inset-0">
-      <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-500"></div>
-    </div>
-
-    <div className="relative z-10">
-      <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-bounce">
-        <Trophy className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-black" />
-      </div>
-
-      <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-foreground">
-        كن البطل القادم!
-      </h3>
-
-      <p className="text-sm sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-        هؤلاء أعضاء من جروب أور جول ساهموا بمساعدة زملائهم بشكل مستمر، وكان لهم دور إيجابي في دعم مئات الطلاب انضم إلينا وشارك بعلمك لتكون جزءاً من هذا العطاء.
-      </p>
-
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-        <a
-          href="https://linktr.ee/Our_goal"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full sm:w-auto"
-        >
-          <Button size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black rounded-xl shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-105">
-            <Users className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-            انضم للأبطال
-          </Button>
-        </a>
-
-        <Button variant="outline" size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
-          <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-          شارك في المناقشات
-        </Button>
-      </div>
-
-      {/* شارات التحفيز */}
-      <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-primary/10 flex-wrap">
-        <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground">
-          <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-500" />
-          <span className="text-xs sm:text-sm">كن متميزاً</span>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground">
-          <Heart className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-pink-500" />
-          <span className="text-xs sm:text-sm">ساعد الآخرين</span>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground">
-          <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-green-500" />
-          <span className="text-xs sm:text-sm">تطور باستمرار</span>
-        </div>
-      </div>
-    </div>
-  </Card>
-</div>
-
-  </div>
-</section>
-
-         
-
-            
-
-                
-
-
-
-
-      {/* Beautiful Features Section */}
-      <section className="py-32 px-4 relative overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          {/* Enhanced Section Header */}
-          <div className="text-center mb-24">
-            <div className="inline-flex items-center gap-3 px-8 py-4 mb-8 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/30 backdrop-blur-sm">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
-                <Users className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-primary font-bold text-lg">مجتمع متعاون ومساعد</span>
-              <Badge variant="secondary" className="bg-primary/20 text-primary border-0 text-xs">نساعدك</Badge>
-            </div>
-
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-              <span className="block text-foreground mb-2">كيف نساعدك</span>
-              <span className="block text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-clip-text animate-gradient">
-                في رحلتك
-              </span>
-            </h2>
-
-            <p className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-8">
-              مجموعة من الأشخاص الذين مروا بنفس التجربة، نشارك معك ما تعلمناه ونساعدك على تجنب الأخطاء وتحقيق أفضل النتائج
-            </p>
-
-            {/* New Features Coming Soon Badge */}
-            <div className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20 backdrop-blur-sm">
-              <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-              <span className="text-accent font-medium">نطور خدمات ومميزات جديدة لتجربة أفضل</span>
-              <Badge variant="secondary" className="bg-accent/20 text-accent border-0 text-xs">قريباً</Badge>
-            </div>
-
-            <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-primary" />
-                <span>تجارب حقيقية</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-primary" />
-                <span>مساعدة شاملة</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-primary" />
-                <span>دعم مستمر</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced Features Grid */}
-          <div className="grid lg:grid-cols-3 gap-12 mb-20">
-            {/* Feature 1 - Calculator */}
-            <Link to="/equivalency-calculator" className="group relative block">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-              <Card className="relative p-10 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm border border-primary/20 rounded-3xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden cursor-pointer">
-                {/* Floating Elements */}
-                <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-xl opacity-30 group-hover:opacity-70 transition-opacity duration-500"></div>
-
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary/30 to-accent/30 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
-                    <Calculator className="w-10 h-10 text-primary" />
-                  </div>
-
-                  <h3 className="text-3xl font-bold mb-6 text-foreground group-hover:text-primary transition-colors duration-300">
-                    حاسبة المعادلة
-                  </h3>
-
-                  <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
-                    احسب معدلك التقديري بدقة عالية باستخدام أحدث معادلات القبول الجامعي، أداة مجانية وسهلة الاستخدام
-                  </p>
-
-                  <div className="flex items-center gap-3 text-primary font-bold text-lg group-hover:gap-4 transition-all duration-300">
-                    <span>احسب معدلك</span>
-                    <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <ArrowRight className="w-4 h-4 text-black" />
-                    </div>
-                  </div>
-
-                  {/* Feature Stats */}
-                  <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">دقيق</div>
-                      <div className="text-xs text-muted-foreground">100%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">سريع</div>
-                      <div className="text-xs text-muted-foreground">فوري</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">مجاني</div>
-                      <div className="text-xs text-muted-foreground">بالكامل</div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            {/* Feature 2 - Educational Resources */}
-            <Link to="/files" className="group relative block">
-              <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-              <Card className="relative p-10 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm border border-primary/20 rounded-3xl hover:border-accent/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-accent/25 group overflow-hidden cursor-pointer">
-                {/* Floating Elements */}
-                <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-xl opacity-30 group-hover:opacity-70 transition-opacity duration-500"></div>
-
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-gradient-to-br from-accent/30 to-primary/30 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 shadow-lg">
-                    <FileText className="w-10 h-10 text-accent" />
-                  </div>
-
-                  <h3 className="text-3xl font-bold mb-6 text-foreground group-hover:text-accent transition-colors duration-300">
-                    ملفات ومواد تعليمية
-                  </h3>
-
-                  <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
-                    مجموعة شاملة من الملفات والمواد التعليمية المفيدة لكلا القسمين الكمي واللفظي، مع شروحات وأمثلة تطبيقية
-                  </p>
-
-                  <div className="flex items-center gap-3 text-accent font-bold text-lg group-hover:gap-4 transition-all duration-300">
-                    <span>تصفح المواد</span>
-                    <div className="w-8 h-8 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <ArrowRight className="w-4 h-4 text-black" />
-                    </div>
-                  </div>
-
-                  {/* Feature Stats */}
-                  <div className="flex items-center gap-6 mt-8 pt-6 border-t border-accent/10">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-accent">الكمي</div>
-                      <div className="text-xs text-muted-foreground">تاسيس ومحوسب</div>
-                    </div>
-                    <div className="text-center">
-                                            <div className="text-2xl font-bold text-accent">اللفظي</div>
-                      <div className="text-xs text-muted-foreground">ملخصات</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-accent">شامل</div>
-                      <div className="text-xs text-muted-foreground">لكلا القسمين</div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-
-            {/* Feature 3 - Community Support */}
-            <a
-              href="https://linktr.ee/Our_goal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative block"
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              onClick={() => navigate('/profile')}
+              variant="outline"
+              size="icon"
+              className="rounded-full flex-shrink-0"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-              <Card className="relative p-10 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm border border-primary/20 rounded-3xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden cursor-pointer">
-                {/* Floating Elements */}
-                <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-xl opacity-30 group-hover:opacity-70 transition-opacity duration-500"></div>
-
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary/30 to-accent/30 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
-                    <Users className="w-10 h-10 text-primary" />
-                  </div>
-
-                  <h3 className="text-3xl font-bold mb-6 text-foreground group-hover:text-primary transition-colors duration-300">
-                    مجتمع داعم ومتفاعل
-                  </h3>
-
-                  <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
-                    انضم لمجتمع من الأشخاص المتحمسين، نساعد بعضنا البعض، نجيب على الأسئلة، ونشارك النصائح والتجارب
-                  </p>
-
-                  <div className="flex items-center gap-3 text-primary font-bold text-lg group-hover:gap-4 transition-all duration-300">
-                    <span>انضم للمجتمع</span>
-                    <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <ArrowRight className="w-4 h-4 text-black" />
-                    </div>
-                  </div>
-
-                  {/* Feature Stats */}
-                  <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">+23.7k</div>
-                      <div className="text-xs text-muted-foreground">عضو</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">نشط</div>
-                      <div className="text-xs text-muted-foreground">دائماً</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">مساعدة</div>
-                      <div className="text-xs text-muted-foreground">فورية</div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </a>
-
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold">مؤقت البومودورو</h1>
+              <p className="text-muted-foreground">تقنية إدارة الوقت للدراسة الفعالة</p>
+            </div>
           </div>
 
-          {/* Study Plan Generator - Featured Section */}
-          <Link to="/study-plan" className="group relative block">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-            <Card className="relative p-10 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm border border-primary/20 rounded-3xl hover:border-primary/40 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 group overflow-hidden cursor-pointer">
-              {/* Floating Elements */}
-              <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-xl opacity-30 group-hover:opacity-70 transition-opacity duration-500"></div>
+          <Tabs defaultValue="timer" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="timer" className="flex items-center gap-2">
+                <Timer className="w-4 h-4" />
+                المؤقت
+              </TabsTrigger>
+              <TabsTrigger value="tasks" className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                المهام
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                الإحصائيات
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                الإعدادات
+              </TabsTrigger>
+            </TabsList>
 
-              <div className="relative z-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary/30 to-accent/30 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
-                  <Target className="w-10 h-10 text-primary" />
+            {/* Timer Tab */}
+            <TabsContent value="timer" className="space-y-6">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Main Timer */}
+                <div className="xl:col-span-2 space-y-6">
+                  {/* Timer Card */}
+                  <Card className="bg-gradient-to-br from-primary/10 to-accent/10">
+                    <CardHeader className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        {sessionType === 'work' && <Brain className="w-6 h-6 text-primary" />}
+                        {sessionType === 'short-break' && <Coffee className="w-6 h-6 text-green-500" />}
+                        {sessionType === 'long-break' && <Zap className="w-6 h-6 text-blue-500" />}
+                        <CardTitle className="text-xl">
+                          {sessionType === 'work' && 'وقت العمل'}
+                          {sessionType === 'short-break' && 'راحة قصيرة'}
+                          {sessionType === 'long-break' && 'راحة طويلة'}
+                        </CardTitle>
+                      </div>
+
+                      {currentTask && sessionType === 'work' && (
+                        <Badge variant="outline" className="mx-auto w-fit">
+                          <Target className="w-3 h-3 mr-1" />
+                          {currentTask.name}
+                        </Badge>
+                      )}
+
+                      <div className="text-sm text-muted-foreground mt-2">
+                        الجلسة {sessionCount + 1} •
+                        {sessionCount > 0 && ` ${Math.floor(sessionCount / settings.sessionsBeforeLongBreak)} دورة مكتملة`}
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="text-center space-y-4 sm:space-y-6 p-4 sm:p-6">
+                      {/* Timer Display */}
+                      <div className="text-4xl sm:text-6xl lg:text-8xl font-bold text-primary font-mono leading-none">
+                        {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-2">
+                        <Progress
+                          value={getProgress()}
+                          className="h-3"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          {Math.round(getProgress())}% مكتمل
+                        </p>
+                      </div>
+
+                      {/* Timer Controls */}
+                      <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                        {/* Primary Action Button */}
+                        <div className="flex justify-center">
+                          {!isActive ? (
+                            <Button
+                              onClick={startTimer}
+                              size="lg"
+                              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 sm:px-8 w-full sm:w-auto"
+                              disabled={sessionType === 'work' && !currentTask}
+                            >
+                              <Play className="w-5 h-5 mr-2" />
+                              بدء
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={pauseTimer}
+                              size="lg"
+                              variant="outline"
+                              className="px-6 sm:px-8 w-full sm:w-auto"
+                            >
+                              <Pause className="w-5 h-5 mr-2" />
+                              إيقاف مؤقت
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Secondary Actions */}
+                        <div className="flex gap-3 justify-center">
+                          <Button
+                            onClick={resetTimer}
+                            size="lg"
+                            variant="outline"
+                            className="px-4 sm:px-6 flex-1 sm:flex-none"
+                          >
+                            <RotateCcw className="w-5 h-5 mr-2" />
+                            <span className="hidden sm:inline">إعادة تعيين</span>
+                            <span className="sm:hidden">إعادة</span>
+                          </Button>
+                          
+                          {sessionType === 'work' && currentTask && (
+                            <Button
+                              onClick={completeTask}
+                              size="lg"
+                              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 sm:px-6 flex-1 sm:flex-none"
+                            >
+                              <CheckCircle className="w-5 h-5 mr-2" />
+                              <span className="hidden sm:inline">إنهاء المهمة</span>
+                              <span className="sm:hidden">إنهاء</span>
+                            </Button>
+                          )}
+                          
+                          {/* زر تخطي الراحة - يظهر فقط خلال جلسات الراحة */}
+                          {(sessionType === 'short-break' || sessionType === 'long-break') && (
+                            <Button
+                              onClick={skipBreak}
+                              size="lg"
+                              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 sm:px-6 flex-1 sm:flex-none"
+                            >
+                              <SkipForward className="w-5 h-5 mr-2" />
+                              <span className="hidden sm:inline">تخطي الراحة</span>
+                              <span className="sm:hidden">تخطي</span>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Task Input */}
+                  {sessionType === 'work' && !currentTask && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5 text-primary" />
+                          ما المهمة التي تريد العمل عليها؟
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+                          <Input
+                            placeholder="اكتب اسم المهمة..."
+                            value={taskInput}
+                            onChange={(e) => setTaskInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && taskInput.trim() && addTask(taskInput.trim())}
+                            className="flex-1"
+                          />
+                          <Button
+                            onClick={() => taskInput.trim() && addTask(taskInput.trim())}
+                            disabled={!taskInput.trim()}
+                            className="w-full sm:w-auto px-6"
+                          >
+                            بدء المهمة
+                          </Button>
+                        </div>
+
+                        {/* Recent Tasks */}
+                        {tasks.filter(t => !t.isCompleted).slice(0, 3).length > 0 && (
+                          <div className="space-y-2">
+                            <Label className="text-sm text-muted-foreground">المهام الحالية:</Label>
+                            <div className="space-y-2">
+                              {tasks.filter(t => !t.isCompleted).slice(0, 3).map((task) => (
+                                <Button
+                                  key={task.id}
+                                  variant="outline"
+                                  onClick={() => selectExistingTask(task)}
+                                  className="w-full justify-start h-auto p-3 text-right"
+                                >
+                                  <div className="text-right w-full">
+                                    <div className="font-medium text-sm sm:text-base truncate">{task.name}</div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      {task.sessions} جلسة • {task.totalTime} دقيقة
+                                    </div>
+                                  </div>
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
 
-                <h3 className="text-3xl font-bold mb-6 text-foreground group-hover:text-primary transition-colors duration-300">
-                  مولد خطة الدراسة الذكي
-                </h3>
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  {/* Session Progress */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-primary" />
+                        تقدم الجلسات
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-primary">
+                          {sessionCount}
+                        </div>
+                        <div className="text-sm text-muted-foreground">جلسة مكتملة</div>
+                      </div>
 
-                <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
-                  أنشئ خطة دراسية مخصصة ومنظمة بناءً على تاريخ اختبارك وعدد مرات المراجعة المطلوبة، مع توزيع ذكي للاختبارات
-                </p>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-500">
+                          {Math.floor(sessionCount / settings.sessionsBeforeLongBreak)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">دورة كاملة</div>
+                      </div>
 
-                <div className="flex items-center gap-3 text-primary font-bold text-lg group-hover:gap-4 transition-all duration-300">
-                  <span>أنشئ خطتك الآن</span>
-                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <ArrowRight className="w-4 h-4 text-black" />
-                  </div>
+                      {/* Progress to next long break */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>الراحة الطويلة القادمة</span>
+                          <span>{sessionCount % settings.sessionsBeforeLongBreak}/{settings.sessionsBeforeLongBreak}</span>
+                        </div>
+                        <Progress
+                          value={(sessionCount % settings.sessionsBeforeLongBreak) / settings.sessionsBeforeLongBreak * 100}
+                          className="h-2"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Audio Controls */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Volume2 className="w-5 h-5 text-primary" />
+                        الأصوات المصاحبة
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Audio Selection */}
+                      <div className="space-y-3">
+                        <div className="max-h-72 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+                          {/* Generated & Nature Sounds Section */}
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground px-2 py-1 bg-muted/30 rounded-md">
+                              🎵 أصوات مصاحبة
+                            </div>
+                            {audioSources.filter(audio => audio.type === 'generated' || audio.type === 'nature').map((audio) => (
+                              <div
+                                key={audio.id}
+                                onClick={() => {
+                                  // Stop current audio first
+                                  stopGeneratedAudio();
+                                  if (audioRef.current) {
+                                    audioRef.current.pause();
+                                    audioRef.current.currentTime = 0;
+                                  }
+
+                                  // Set new selection
+                                  setSelectedAudio(audio.id);
+
+                                  // Play new audio if not silence
+                                  if (audio.id !== 'silence') {
+                                    if (audio.id === 'white-noise') {
+                                      playGeneratedAudio('white-noise');
+                                    } else if (audio.id === 'forest-sounds' || audio.id === 'rain-coffee-fireplace' || audio.id === 'thunderstorm-heavy-rain') {
+                                      playQuranAudio(audio.url, 0, 'nature');
+                                    } else if (audio.id === 'brown-noise') {
+                                      playGeneratedAudio('brown-noise');
+                                    }
+                                  }
+                                }}
+                                className={`
+                                  relative group cursor-pointer rounded-xl p-3 transition-all duration-300 border
+                                  ${selectedAudio === audio.id
+                                    ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
+                                    : 'bg-card/50 border-border/50 hover:bg-card hover:border-border hover:shadow-md'
+                                  }
+                                `}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`
+                                    p-2 rounded-lg transition-colors duration-300
+                                    ${selectedAudio === audio.id
+                                      ? 'bg-primary/20 text-primary'
+                                      : 'bg-muted/50 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
+                                    }
+                                  `}>
+                                    {audio.id === 'silence' && <VolumeX className="w-4 h-4" />}
+                                    {audio.id === 'forest-sounds' && <Trees className="w-4 h-4" />}
+                                    {audio.id === 'rain-coffee-fireplace' && <Coffee className="w-4 h-4" />}
+                                    {audio.id === 'thunderstorm-heavy-rain' && <Zap className="w-4 h-4" />}
+                                    {audio.id !== 'silence' && audio.id !== 'forest-sounds' && audio.id !== 'rain-coffee-fireplace' && audio.id !== 'thunderstorm-heavy-rain' && <Music className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`
+                                      font-medium text-sm transition-colors duration-300
+                                      ${selectedAudio === audio.id ? 'text-foreground' : 'text-foreground/80 group-hover:text-foreground'}
+                                    `}>
+                                      {audio.name}
+                                    </div>
+                                  </div>
+                                  {selectedAudio === audio.id && audio.id !== 'silence' && (
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
+                                      <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
+                                      <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Quran Recitations Section */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="text-xs font-medium text-muted-foreground px-2 py-1 bg-muted/30 rounded-md">
+                                📖 تلاوات القرآن الكريم
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowQuranSelector(!showQuranSelector)}
+                                className="h-6 px-2 text-xs"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                إضافة تلاوة
+                              </Button>
+                            </div>
+
+                            {/* Custom Quran Selector */}
+                            {showQuranSelector && (
+                              <div className="bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20 rounded-xl p-4 space-y-3">
+                                <div className="text-sm font-medium text-green-700 dark:text-green-300 mb-3">
+                                  اختر القارئ والسورة
+                                </div>
+                                
+                                {/* Reciter Selection */}
+                                <div className="space-y-2">
+                                  <Label className="text-xs text-muted-foreground">القارئ</Label>
+                                  <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
+                                    {availableReciters.map((reciter) => (
+                                      <Button
+                                        key={reciter.id}
+                                        variant={selectedReciter?.id === reciter.id ? "default" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setSelectedReciter(reciter)}
+                                        className="justify-start h-8 text-xs"
+                                      >
+                                        {reciter.arabicName || reciter.name}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Surah Selection */}
+                                <div className="space-y-2">
+                                  <Label className="text-xs text-muted-foreground">السورة</Label>
+                                  <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
+                                    {availableSurahs.map((surah) => (
+                                      <Button
+                                        key={surah.id}
+                                        variant={selectedSurah?.id === surah.id ? "default" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setSelectedSurah(surah)}
+                                        className="justify-start h-8 text-xs"
+                                      >
+                                        {surah.arabicName}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Add Button */}
+                                <div className="flex gap-2 pt-2">
+                                  <Button
+                                    onClick={addCustomQuranSource}
+                                    disabled={!selectedReciter || !selectedSurah}
+                                    size="sm"
+                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                                  >
+                                    إضافة التلاوة
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setShowQuranSelector(false)}
+                                    className="px-3"
+                                  >
+                                    إلغاء
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            {audioSources.filter(audio => audio.type === 'quran').map((audio) => (
+                              <div
+                                key={audio.id}
+                                onClick={() => {
+                                  // Stop current audio first
+                                  stopGeneratedAudio();
+                                  if (audioRef.current) {
+                                    audioRef.current.pause();
+                                    audioRef.current.currentTime = 0;
+                                  }
+
+                                  // Set new selection
+                                  setSelectedAudio(audio.id);
+
+                                  // Play Quran audio
+                                  if (audio.type === 'quran') {
+                                    playQuranAudio(audio.url, 0, 'quran');
+                                  }
+                                }}
+                                className={`
+                                  relative group cursor-pointer rounded-xl p-3 transition-all duration-300 border
+                                  ${selectedAudio === audio.id
+                                    ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30 shadow-lg shadow-green-500/10'
+                                    : 'bg-card/50 border-border/50 hover:bg-card hover:border-border hover:shadow-md'
+                                  }
+                                `}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`
+                                    p-2 rounded-lg transition-colors duration-300
+                                    ${selectedAudio === audio.id
+                                      ? 'bg-green-500/20 text-green-600'
+                                      : 'bg-muted/50 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
+                                    }
+                                  `}>
+                                    <BookOpen className="w-4 h-4" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`
+                                      font-medium text-sm transition-colors duration-300
+                                      ${selectedAudio === audio.id ? 'text-foreground' : 'text-foreground/80 group-hover:text-foreground'}
+                                    `}>
+                                      {audio.name}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">
+                                      تلاوة قرآنية مباركة
+                                    </div>
+                                  </div>
+                                  {selectedAudio === audio.id && (
+                                    <div className="flex items-center gap-1">
+                                      {audioLoading ? (
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-100" />
+                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-200" />
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-1">
+                                          <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
+                                          <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
+                                          <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {selectedAudio === audio.id && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Audio Error Display */}
+                      {audioError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                          <div className="flex items-center gap-2 text-red-500">
+                            <AlertCircle className="w-4 h-4" />
+                            <span className="text-sm font-medium">{audioError}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Audio Controls */}
+                      {selectedAudio !== 'silence' && (
+                        <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-4 space-y-4 border border-border/50">
+                          {/* Control Buttons */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                              <Label className="text-sm font-medium">التحكم في الصوت</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  stopGeneratedAudio();
+                                  if (audioRef.current) {
+                                    audioRef.current.pause();
+                                    audioRef.current.currentTime = 0;
+                                  }
+                                  toast.info('تم إيقاف الصوت');
+                                }}
+                                className="h-8 w-8 p-0 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 transition-all duration-200"
+                              >
+                                <Square className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  const newMuted = !isMuted;
+                                  setIsMuted(newMuted);
+
+                                  // Update volume for current audio
+                                  if (gainNodeRef.current) {
+                                    gainNodeRef.current.gain.setValueAtTime(
+                                      newMuted ? 0 : audioVolume,
+                                      gainNodeRef.current.context.currentTime
+                                    );
+                                  }
+                                  if (audioRef.current) {
+                                    audioRef.current.volume = newMuted ? 0 : audioVolume;
+                                  }
+                                }}
+                                className={`h-8 w-8 p-0 rounded-lg transition-all duration-200 ${
+                                  isMuted
+                                    ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 hover:text-orange-400'
+                                    : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 hover:text-blue-400'
+                                }`}
+                              >
+                                {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Volume Slider */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm text-muted-foreground">مستوى الصوت</Label>
+                              <div className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-md">
+                                {Math.round(audioVolume * 100)}%
+                              </div>
+                            </div>
+                            <div className="relative">
+                              <Slider
+                                value={[audioVolume]}
+                                onValueChange={(value) => {
+                                  setAudioVolume(value[0]);
+                                  // Update volume for current audio
+                                  if (gainNodeRef.current) {
+                                    gainNodeRef.current.gain.setValueAtTime(
+                                      isMuted ? 0 : value[0],
+                                      gainNodeRef.current.context.currentTime
+                                    );
+                                  }
+                                  if (audioRef.current) {
+                                    audioRef.current.volume = isMuted ? 0 : value[0];
+                                  }
+                                }}
+                                max={1}
+                                min={0}
+                                step={0.1}
+                                className="w-full"
+                              />
+                              {/* Volume level indicators */}
+                              <div className="flex justify-between mt-1 px-1">
+                                <div className="text-xs text-muted-foreground">🔇</div>
+                                <div className="text-xs text-muted-foreground">🔊</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Quick Stats */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-primary" />
+                        إحصائيات سريعة
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">المهام المكتملة</span>
+                        <span className="font-medium">{tasks.filter(t => t.isCompleted).length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">المهام الجارية</span>
+                        <span className="font-medium">{tasks.filter(t => !t.isCompleted).length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">إجمالي الوقت</span>
+                        <span className="font-medium">{getTotalTime()} دقيقة</span>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-
-                {/* Feature Stats */}
-                <div className="flex items-center gap-6 mt-8 pt-6 border-t border-primary/10">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">ذكي</div>
-                    <div className="text-xs text-muted-foreground">توزيع تلقائي</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">مخصص</div>
-                    <div className="text-xs text-muted-foreground">حسب وقتك</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">منظم</div>
-                    <div className="text-xs text-muted-foreground">خطة واضحة</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">قابل للتصدير</div>
-                    <div className="text-xs text-muted-foreground">احفظ خطتك</div>
-                  </div>
-                </div>
               </div>
-            </Card>
-          </Link>
-        </div>
-      </section>
+            </TabsContent>
 
-      {/* Events Section */}
-      <EventsSection />
+            {/* Tasks Tab */}
+            <TabsContent value="tasks" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Active Tasks */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-5 h-5 text-primary" />
+                      المهام الجارية ({tasks.filter(t => !t.isCompleted).length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {tasks.filter(t => !t.isCompleted).length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        لا توجد مهام جارية
+                      </p>
+                    ) : (
+                      tasks.filter(t => !t.isCompleted).map((task) => (
+                        <div key={task.id} className={`relative p-4 border rounded-xl space-y-3 transition-all duration-300 ${
+                          currentTask?.id === task.id
+                            ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 shadow-lg shadow-primary/10'
+                            : 'bg-card/50 border-border hover:bg-card hover:border-border/80 hover:shadow-md'
+                        }`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1 text-right ml-20">
+                              <h3 className="font-medium text-foreground text-base">{task.name}</h3>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => selectExistingTask(task)}
+                              disabled={currentTask?.id === task.id}
+                              className={currentTask?.id === task.id
+                                ? 'bg-primary/20 text-primary cursor-not-allowed'
+                                : 'bg-primary hover:bg-primary/90'
+                              }
+                            >
+                              {currentTask?.id === task.id ? 'جاري العمل' : 'اختيار'}
+                            </Button>
+                          </div>
 
-      {/* Success Stories & CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-secondary/30 to-background relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full blur-3xl"></div>
-        </div>
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                              <span className="text-foreground/80">{task.sessions} جلسة</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                              <span className="text-foreground/80">{task.totalTime} دقيقة</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                              <span className="text-foreground/80" title={formatDate(task.completedAt)}>
+                                {formatRelativeTime(task.completedAt)}
+                              </span>
+                            </div>
+                          </div>
 
-        <div className="container mx-auto relative z-10">
-          {/* Community Success */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
-              نجاحات <span className="text-transparent bg-gradient-to-r from-primary to-accent bg-clip-text">مجتمعنا</span>
-            </h2>
-            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-              مجتمع متعاون من الطلاب والخريجين، نساعد بعضنا البعض في تحقيق الأهداف الأكاديمية
-            </p>
-          </div>
+                          {/* Active task indicator */}
+                          {currentTask?.id === task.id && (
+                            <div className="absolute top-2 left-2">
+                              <div className="bg-primary/20 text-primary text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                                نشطة
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
 
-          {/* Community Metrics */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-primary" />
+                {/* Completed Tasks */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      المهام المكتملة ({tasks.filter(t => t.isCompleted).length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+                    {tasks.filter(t => t.isCompleted).length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        لم تكمل أي مهمة بعد
+                      </p>
+                    ) : (
+                      tasks
+                        .filter(t => t.isCompleted)
+                        .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
+                        .map((task) => (
+                          <div key={task.id} className="relative p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl space-y-3 hover:from-green-500/15 hover:to-emerald-500/15 transition-all duration-300">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex-1 text-right ml-20">
+                                <h3 className="font-medium text-foreground text-base">{task.name}</h3>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                <span className="text-foreground/80">{task.sessions} جلسة</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                                <span className="text-foreground/80">{task.totalTime} دقيقة</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                                <span className="text-foreground/80" title={formatDate(task.completedAt)}>
+                                  {formatRelativeTime(task.completedAt)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Success badge */}
+                            <div className="absolute top-2 left-2">
+                              <div className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full font-medium">
+                                مكتملة
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </CardContent>
+                </Card>
               </div>
-              <div className="text-3xl font-bold text-primary mb-2">+23.7k</div>
-              <div className="text-muted-foreground">طالب في المجتمع</div>
-            </Card>
+            </TabsContent>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">+100</div>
-              <div className="text-muted-foreground">ملف لفظي وكمي</div>
-            </Card>
+            {/* Stats Tab */}
+            <TabsContent value="stats" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Overview Cards */}
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{tasks.filter(t => t.isCompleted).length}</div>
+                    <div className="text-sm text-muted-foreground">مهام مكتملة</div>
+                  </CardContent>
+                </Card>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Star className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">مجاني</div>
-              <div className="text-muted-foreground">بالكامل</div>
-            </Card>
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <Timer className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{sessionCount}</div>
+                    <div className="text-sm text-muted-foreground">جلسة مكتملة</div>
+                  </CardContent>
+                </Card>
 
-            <Card className="p-6 text-center bg-gradient-to-br from-card to-card/50 border border-primary/10 rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Calculator className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold text-primary mb-2">دقيق</div>
-              <div className="text-muted-foreground">حاسبة المعادلة</div>
-            </Card>
-          </div>
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <Clock className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{getTotalTime()}</div>
+                    <div className="text-sm text-muted-foreground">دقيقة إجمالية</div>
+                  </CardContent>
+                </Card>
 
-          {/* Final CTA */}
-          <div className="text-center">
-            <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-3xl">
-              <div className="mb-8">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-10 h-10 text-black" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                  انضم لمجتمعنا المتعاون اليوم
-                </h3>
-                <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  كن جزءاً من مجتمع متعاون، نساعد بعضنا البعض في الدراسة والتحضير الأكاديمي ونشارك التجارب والنصائح
-                </p>
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <TrendingUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{getAverageSessionsPerTask()}</div>
+                    <div className="text-sm text-muted-foreground">متوسط الجلسات</div>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="https://linktr.ee/Our_goal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-black rounded-xl shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105">
-                    <Users className="w-5 h-5 ml-2" />
-                    انضم للمجتمع الآن
-                  </Button>
-                </a>
+              {/* Detailed Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>الإنتاجية اليومية</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={getDailyStats()}
+                          margin={{
+                            top: 20,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis tickFormatter={(value) => Math.floor(value)} />
+                          <Tooltip formatter={(value) => [Math.floor(Number(value)), 'جلسة']} />
+                          <Line 
+                            type="monotone" 
+                            dataKey="sessions" 
+                            stroke="#FFD700" 
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: "#FFD700" }}
+                            activeDot={{ r: 6, fill: "#FFD700" }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                <Link to="/files" className="group">
-                  <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
-                    <FileText className="w-5 h-5 ml-2" />
-                    تصفح الملفات
-                  </Button>
-                </Link>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>أفضل المهام</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {tasks
+                        .filter(t => t.isCompleted)
+                        .sort((a, b) => b.totalTime - a.totalTime)
+                        .slice(0, 5)
+                        .map((task, index) => (
+                          <div key={task.id} className="flex items-center gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
+                              {index + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">{task.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {task.sessions} جلسة • {task.totalTime} دقيقة
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
+            </TabsContent>
 
-              {/* Community Indicators */}
-              <div className="flex items-center justify-center gap-8 mt-8 pt-8 border-t border-primary/10">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-5 h-5 text-primary" />
-                  <span>مجتمع متعاون</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Star className="w-5 h-5 text-primary" />
-                  <span>تجارب حقيقية</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CheckCircle className="w-5 h-5 text-primary" />
-                  <span>دعم شامل</span>
-                </div>
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Timer Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Timer className="w-5 h-5 text-primary" />
+                      إعدادات المؤقت
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>مدة العمل (دقيقة)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="60"
+                        value={settings.workDuration}
+                        onChange={(e) => updateSettings({ workDuration: parseInt(e.target.value) || 25 })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>مدة الراحة القصيرة (دقيقة)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={settings.shortBreakDuration}
+                        onChange={(e) => updateSettings({ shortBreakDuration: parseInt(e.target.value) || 5 })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>مدة الراحة الطويلة (دقيقة)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="60"
+                        value={settings.longBreakDuration}
+                        onChange={(e) => updateSettings({ longBreakDuration: parseInt(e.target.value) || 15 })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>عدد الجلسات قبل الراحة الطويلة</Label>
+                      <Input
+                        type="number"
+                        min="2"
+                        max="10"
+                        value={settings.sessionsBeforeLongBreak}
+                        onChange={(e) => updateSettings({ sessionsBeforeLongBreak: parseInt(e.target.value) || 4 })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Automation Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-primary" />
+                      إعدادات التشغيل التلقائي
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>بدء الراحة تلقائياً</Label>
+                        <p className="text-sm text-muted-foreground">
+                          بدء فترة الراحة تلقائياً بعد انتهاء العمل
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.autoStartBreaks}
+                        onCheckedChange={(checked) => updateSettings({ autoStartBreaks: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>بدء العمل تلقائياً</Label>
+                        <p className="text-sm text-muted-foreground">
+                          بدء جلسة العمل تلقائياً بعد انتهاء الراحة
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.autoStartPomodoros}
+                        onCheckedChange={(checked) => updateSettings({ autoStartPomodoros: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>التنبيهات</Label>
+                        <p className="text-sm text-muted-foreground">
+                          إظهار تنبيهات المتصفح عند انتهاء الجلسات
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.notificationsEnabled}
+                        onCheckedChange={(checked) => updateSettings({ notificationsEnabled: checked })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Audio Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Volume2 className="w-5 h-5 text-primary" />
+                      إعدادات الصوت
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>مستوى الصوت الافتراضي</Label>
+                      <Slider
+                        value={[settings.soundVolume]}
+                        onValueChange={(value) => {
+                          updateSettings({ soundVolume: value[0] });
+                          setAudioVolume(value[0]);
+                        }}
+                        max={1}
+                        min={0}
+                        step={0.1}
+                        className="w-full"
+                      />
+                      <div className="text-xs text-center text-muted-foreground">
+                        {Math.round(settings.soundVolume * 100)}%
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>الأصوات المتاحة</Label>
+                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                        {audioSources.map((audio) => (
+                          <Button
+                            key={audio.id}
+                            variant={selectedAudio === audio.id ? "default" : "outline"}
+                            onClick={() => setSelectedAudio(audio.id)}
+                            className="justify-start h-auto p-3"
+                            size="sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              {audio.type === 'quran' && <BookOpen className="w-4 h-4" />}
+                              {audio.type === 'nature' && <Waves className="w-4 h-4" />}
+                              {audio.type === 'generated' && audio.id === 'silence' && <VolumeX className="w-4 h-4" />}
+                              {audio.type === 'generated' && audio.id !== 'silence' && <Music className="w-4 h-4" />}
+                              <span className="text-sm">{audio.name}</span>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Data Management */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-primary" />
+                      إدارة البيانات
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>إحصائيات البيانات</Label>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div>المهام المحفوظة: {tasks.length}</div>
+                        <div>الجلسات المكتملة: {sessionCount}</div>
+                        <div>حجم البيانات: {getDataSize()} KB</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        onClick={exportData}
+                        className="w-full"
+                      >
+                        تصدير البيانات
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        onClick={clearAllData}
+                        className="w-full"
+                      >
+                        مسح جميع البيانات
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </Card>
-          </div>
-        </div>
-      </section>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
 
+      {/* Hidden audio element for Quran playback */}
+      <audio
+        ref={audioRef}
+        preload="none"
+        style={{ display: 'none' }}
+      />
     </Layout>
   );
 };
 
-export default Home;
+export default PomodoroTimer;
