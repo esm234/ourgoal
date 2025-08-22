@@ -50,81 +50,58 @@ const Home = () => {
 
   // بيانات أفضل الشخصيات - 4 فقط
   const topMembers = [
-    {
-      id: 1,
-      name: "محمد علاء",
-      role: "أفضل أدمن لعام 2025",
-      image: "/IMG_20250822_042926_275.jpg",
-      achievement: "قدم أكثر من 1000 مساعدة وأدار المجتمع بكفاءة عالية",
-      badge: "👑",
-      rank: 1,
-      color: "from-yellow-400 via-amber-400 to-orange-500",
-      borderColor: "from-yellow-500 to-amber-600",
-      stats: { 
-        helps: "1000+", 
-        posts: "500+", 
-        likes: "10K+",
-        rating: "5.0"
-      },
-      icon: Crown,
-      glowColor: "yellow"
-    },
-    {
-      id: 2,
-      name: "محمد عصام",
-      role: "أنشط عضو في المناقشات",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara2025&backgroundColor=ffd5dc",
-      achievement: "شاركت في أكثر من 800 نقاش وساعدت مئات الطلاب",
-      badge: "🔥",
-      rank: 2,
-      color: "from-purple-400 via-pink-400 to-rose-500",
-      borderColor: "from-purple-500 to-pink-600",
-      stats: { 
-        discussions: "800+", 
-        solutions: "400+", 
-        upvotes: "5K+",
-        rating: "4.9"
-      },
-      icon: Flame,
-      glowColor: "purple"
-    },
-    {
-      id: 3,
-      name: "ابراهيم حسن",
-      role: "أفضل منشئ محتوى",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mohammed2025&backgroundColor=c0aede",
-      achievement: "أنشأ أكثر من 100 ملف تعليمي حقق 20 ألف تحميل",
-      badge: "⭐",
-      rank: 3,
-      color: "from-blue-400 via-cyan-400 to-teal-500",
-      borderColor: "from-blue-500 to-cyan-600",
-      stats: { 
-        files: "100+", 
-        downloads: "20K+", 
-        quality: "98%",
-        rating: "4.9"
-      },
-      icon: Star,
-      glowColor: "blue"
-    },
-    {
-      id: 4,
-      name: "نورا السالم",
-      role: "أفضل داعم للمجتمع",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nora2025&backgroundColor=ffd5dc",
-      achievement: "ساعدت أكثر من 500 طالب وحصلت على أعلى تقييم",
-      badge: "💝",
-      rank: 4,
-      color: "from-green-400 via-emerald-400 to-teal-500",
-      borderColor: "from-green-500 to-emerald-600",
-      stats: { 
-        helped: "500+", 
-        thanks: "2K+", 
-        impact: "95%",
-        rating: "5.0"
-      },
-      icon: Heart,
-      glowColor: "green"
+{
+  id: 1,
+  name: "محمد عصام",
+  role: "أفضل أدمن لعام 2025",
+  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara2025&backgroundColor=ffd5dc",
+  achievement: "أدار المجتمع بكفاءة وكان قدوة في التنظيم والتواصل",
+  badge: "👑",
+  rank: 1,
+  color: "from-yellow-400 via-amber-400 to-orange-500",
+  borderColor: "from-yellow-500 to-amber-600",
+  icon: Crown,
+  glowColor: "yellow"
+},
+{
+  id: 2,
+  name: "محمد علاء",
+  role: "أنشط عضو في المناقشات",
+  image: "/IMG_20250822_042926_275.jpg",
+  achievement: "شارك بفاعلية في النقاشات وكان له أثر مميز بين الزملاء",
+  badge: "🔥",
+  rank: 2,
+  color: "from-purple-400 via-pink-400 to-rose-500",
+  borderColor: "from-purple-500 to-pink-600",
+  icon: Flame,
+  glowColor: "purple"
+},
+{
+  id: 3,
+  name: "ابراهيم حسن",
+  role: "أفضل .......",
+  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mohammed2025&backgroundColor=c0aede",
+  achievement: ".......  ",
+  badge: "⭐",
+  rank: 3,
+  color: "from-blue-400 via-cyan-400 to-teal-500",
+  borderColor: "from-blue-500 to-cyan-600",
+  icon: Star,
+  glowColor: "blue"
+},
+{
+  id: 4,
+  name: "..........",
+  role: "..........",
+  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nora2025&backgroundColor=ffd5dc",
+  achievement: ".........",
+  badge: "💝",
+  rank: 4,
+  color: "from-green-400 via-emerald-400 to-teal-500",
+  borderColor: "from-green-500 to-emerald-600",
+  icon: Heart,
+  glowColor: "green"
+}
     }
   ];
 
