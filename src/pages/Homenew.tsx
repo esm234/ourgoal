@@ -52,9 +52,9 @@ const Home = () => {
   const topMembers = [
     {
       id: 1,
-      name: "أحمد الشمري",
+      name: "محمد علاء",
       role: "أفضل أدمن لعام 2025",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed2025&backgroundColor=b6e3f4",
+      image: "IMG_20250822_042926_275.jpg",
       achievement: "قدم أكثر من 1000 مساعدة وأدار المجتمع بكفاءة عالية",
       badge: "👑",
       rank: 1,
@@ -71,7 +71,7 @@ const Home = () => {
     },
     {
       id: 2,
-      name: "سارة القحطاني",
+      name: "محمد عصام",
       role: "أنشط عضو في المناقشات",
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara2025&backgroundColor=ffd5dc",
       achievement: "شاركت في أكثر من 800 نقاش وساعدت مئات الطلاب",
@@ -90,7 +90,7 @@ const Home = () => {
     },
     {
       id: 3,
-      name: "محمد العتيبي",
+      name: "ابراهيم حسن",
       role: "أفضل منشئ محتوى",
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mohammed2025&backgroundColor=c0aede",
       achievement: "أنشأ أكثر من 100 ملف تعليمي حقق 20 ألف تحميل",
