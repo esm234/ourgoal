@@ -102,7 +102,6 @@ const Home = () => {
   icon: Heart,
   glowColor: "green"
 }
-    }
   ];
 
   useEffect(() => {
