@@ -55,7 +55,7 @@ const Home = () => {
   name: "محمد عصام",
   role: "أفضل أدمن لعام 2025",
   image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara2025&backgroundColor=ffd5dc",
-  achievement: "أدار المجتمع بكفاءة وكان قدوة في التنظيم والتواصل",
+  achievement: "أدار المجتمع بكفاءة عالية وحقق أفضل النتائج",
   badge: "👑",
   rank: 1,
   color: "from-yellow-400 via-amber-400 to-orange-500",
