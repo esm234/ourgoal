@@ -325,244 +325,246 @@ return (
           </div>
         </div>
       </section>
-      {/* ⭐⭐⭐ قسم أفضل شخصيات المجتمع لعام 2025 - التصميم المبسط ⭐⭐⭐ */}
-      <section className="py-32 px-4 relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
-        {/* خلفية متحركة رائعة */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full">
-            {/* نجوم متحركة */}
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-pulse"
-                style={{
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${3 + Math.random() * 2}s`
-                }}
-              >
-                <Sparkles className={`w-${3 + Math.floor(Math.random() * 3)} h-${3 + Math.floor(Math.random() * 3)} text-yellow-400/30`} />
-              </div>
-            ))}
-          </div>
+
+
+
+{/* ⭐⭐⭐ قسم أفضل شخصيات المجتمع لعام 2025 - التصميم المبسط ⭐⭐⭐ */}
+<section className="py-32 px-4 relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
+  {/* خلفية متحركة رائعة */}
+  <div className="absolute inset-0">
+    <div className="absolute top-0 left-0 w-full h-full">
+      {/* نجوم متحركة */}
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-pulse"
+          style={{
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${3 + Math.random() * 2}s`
+          }}
+        >
+          <Sparkles className={`w-${3 + Math.floor(Math.random() * 3)} h-${3 + Math.floor(Math.random() * 3)} text-yellow-400/30`} />
+        </div>
+      ))}
+    </div>
+    
+    {/* دوائر متحركة ضخمة */}
+    <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-r from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
+    <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-400/5 to-cyan-400/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+  </div>
+
+  <div className="container mx-auto relative z-10">
+    {/* رأس القسم الفخم */}
+    <div className="text-center mb-20">
+      {/* شارة العام الجديد */}
+      <div className="inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/30 backdrop-blur-sm animate-pulse">
+        <Trophy className="w-8 h-8 text-yellow-500" />
+        <span className="text-yellow-500 font-bold text-xl">تكريم خاص لعام 2025</span>
+        <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-0 text-sm font-bold px-3 py-1">
+          حصري
+        </Badge>
+      </div>
+
+      {/* العنوان الضخم */}
+      <h2 className="text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
+        <span className="block text-transparent bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-500 bg-clip-text animate-gradient mb-4">
+          أبطال المجتمع
+        </span>
+        <span className="block text-4xl md:text-5xl lg:text-6xl text-foreground">
+          لعام 2025
+        </span>
+      </h2>
+
+      <p className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
+        تكريم خاص للشخصيات التي صنعت الفرق وساهمت في نجاح آلاف الطلاب
+      </p>
+
+      {/* مؤشرات الإنجاز */}
+      <div className="flex items-center justify-center gap-8 flex-wrap mb-16">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20">
+          <Crown className="w-5 h-5 text-yellow-500" />
+          <span className="text-yellow-500 font-bold">4 أبطال</span>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+          <Star className="w-5 h-5 text-purple-500" />
+          <span className="text-purple-500 font-bold">إنجازات استثنائية</span>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+          <Award className="w-5 h-5 text-blue-500" />
+          <span className="text-blue-500 font-bold">تأثير حقيقي</span>
+        </div>
+      </div>
+    </div>
+
+    {/* شبكة البطاقات المبسطة - 2x2 */}
+    <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+      {topMembers.map((member, index) => (
+        <div
+          key={member.id}
+          className="relative group"
+          onMouseEnter={() => setHoveredMember(member.id)}
+          onMouseLeave={() => setHoveredMember(null)}
+        >
+          {/* هالة متحركة خلف البطاقة */}
+          <div className={`absolute inset-0 bg-gradient-to-r ${member.color} rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-all duration-700 animate-pulse`}></div>
           
-          {/* دوائر متحركة ضخمة */}
-          <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-r from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-400/5 to-cyan-400/5 rounded-full blur-3xl animate-pulse delay-500"></div>
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          {/* رأس القسم الفخم */}
-          <div className="text-center mb-20">
-            {/* شارة العام الجديد */}
-            <div className="inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/30 backdrop-blur-sm animate-pulse">
-              <Trophy className="w-8 h-8 text-yellow-500" />
-              <span className="text-yellow-500 font-bold text-xl">تكريم خاص لعام 2025</span>
-              <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-black border-0 text-sm font-bold px-3 py-1">
-                حصري
-              </Badge>
+          {/* البطاقة الرئيسية */}
+          <Card className="relative p-8 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-xl border-2 border-primary/20 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:border-primary/40">
+            {/* خلفية متحركة داخل البطاقة */}
+            <div className="absolute inset-0 opacity-10">
+              <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-br ${member.color} opacity-20`}></div>
             </div>
 
-            {/* العنوان الضخم */}
-            <h2 className="text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
-              <span className="block text-transparent bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-500 bg-clip-text animate-gradient mb-4">
-                أبطال المجتمع
-              </span>
-              <span className="block text-4xl md:text-5xl lg:text-6xl text-foreground">
-                لعام 2025
-              </span>
-            </h2>
-
-            <p className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
-              تكريم خاص للشخصيات التي صنعت الفرق وساهمت في نجاح آلاف الطلاب
-            </p>
-
-            {/* مؤشرات الإنجاز */}
-            <div className="flex items-center justify-center gap-8 flex-wrap mb-16">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/20">
-                <Crown className="w-5 h-5 text-yellow-500" />
-                <span className="text-yellow-500 font-bold">4 أبطال</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-                <Star className="w-5 h-5 text-purple-500" />
-                <span className="text-purple-500 font-bold">إنجازات استثنائية</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                <Award className="w-5 h-5 text-blue-500" />
-                <span className="text-blue-500 font-bold">تأثير حقيقي</span>
+            {/* رقم الترتيب الفخم */}
+            <div className="absolute top-4 right-4 z-20">
+              <div className={`w-16 h-16 bg-gradient-to-r ${member.borderColor} rounded-2xl flex items-center justify-center shadow-2xl transform rotate-12 group-hover:rotate-0 transition-all duration-500`}>
+                <span className="text-2xl font-black text-black">#{member.rank}</span>
               </div>
             </div>
+
+            {/* المحتوى */}
+            <div className="relative z-10">
+              <div className="flex flex-col items-center text-center">
+                {/* الصورة المستطيلة مع إطار فخم */}
+                <div className="relative mb-6">
+                  <div className={`absolute inset-0 bg-gradient-to-r ${member.borderColor} rounded-2xl blur-md opacity-50 animate-pulse`}></div>
+                  <div className={`relative w-64 h-40 bg-gradient-to-r ${member.borderColor} p-1 rounded-2xl`}>
+                    <div className="w-full h-full bg-card rounded-xl overflow-hidden">
+                      <img 
+                        src={member.image} 
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  {/* الشارة */}
+                  <div className="absolute -bottom-2 -right-2 text-4xl animate-bounce">
+                    {member.badge}
+                  </div>
+                </div>
+
+                {/* معلومات العضو */}
+                <div className="w-full">
+                  <h3 className="text-3xl font-black mb-3 text-foreground">
+                    {member.name}
+                  </h3>
+                  
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${member.color} mb-4`}>
+                    <member.icon className="w-5 h-5 text-black" />
+                    <span className="text-black font-bold text-sm">{member.role}</span>
+                  </div>
+                  
+                  <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
+                    {member.achievement}
+                  </p>
+
+                  {/* شريط التميز */}
+                  <div className={`pt-6 border-t border-primary/10`}>
+                    <div className="flex items-center justify-center gap-4 mb-4">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      </div>
+                      <span className="text-sm text-muted-foreground">عضو متميز</span>
+                    </div>
+                    
+                    <Badge className={`bg-gradient-to-r ${member.color} text-black border-0 font-bold px-4 py-2`}>
+                      بطل 2025
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* تأثيرات الهوفر */}
+            {hoveredMember === member.id && (
+              <div className="absolute inset-0 pointer-events-none">
+                <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-r ${member.color} opacity-5 animate-pulse`}></div>
+                {[...Array(5)].map((_, i) => (
+                  <Sparkles
+                    key={i}
+                    className={`absolute text-${member.glowColor}-400 w-4 h-4 animate-ping`}
+                    style={{
+                      top: `${20 + Math.random() * 60}%`,
+                      left: `${20 + Math.random() * 60}%`,
+                      animationDelay: `${i * 0.2}s`
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      ))}
+    </div>
+
+    {/* رسالة تحفيزية */}
+    <div className="text-center mt-20">
+      <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 rounded-3xl relative overflow-hidden">
+        {/* خلفية متحركة */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
+        <div className="relative z-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-bounce">
+            <Trophy className="w-10 h-10 text-black" />
           </div>
 
-          {/* شبكة البطاقات المبسطة - 2x2 */}
-          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            {topMembers.map((member, index) => (
-              <div
-                key={member.id}
-                className="relative group"
-                onMouseEnter={() => setHoveredMember(member.id)}
-                onMouseLeave={() => setHoveredMember(null)}
-              >
-                {/* هالة متحركة خلف البطاقة */}
-                <div className={`absolute inset-0 bg-gradient-to-r ${member.color} rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-all duration-700 animate-pulse`}></div>
-                
-                {/* البطاقة الرئيسية */}
-                <Card className="relative p-8 bg-gradient-to-br from-card/90 to-card/50 backdrop-blur-xl border-2 border-primary/20 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 hover:border-primary/40">
-                  {/* خلفية متحركة داخل البطاقة */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-br ${member.color} opacity-20`}></div>
-                  </div>
+          <h3 className="text-4xl font-bold mb-4 text-foreground">
+            كن البطل القادم!
+          </h3>
 
-                  {/* رقم الترتيب الفخم */}
-                  <div className="absolute top-4 right-4 z-20">
-                    <div className={`w-16 h-16 bg-gradient-to-r ${member.borderColor} rounded-2xl flex items-center justify-center shadow-2xl transform rotate-12 group-hover:rotate-0 transition-all duration-500`}>
-                      <span className="text-2xl font-black text-black">#{member.rank}</span>
-                    </div>
-                  </div>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            هؤلاء الأبطال بدأوا مثلك تماماً، بالعمل الجاد والمساعدة المستمرة وصلوا لهذا المستوى. 
+            انضم لمجتمعنا وكن جزءاً من قصة النجاح القادمة!
+          </p>
 
-                  {/* المحتوى */}
-                  <div className="relative z-10">
-                    <div className="flex flex-col items-center text-center">
-                      {/* الصورة المستطيلة مع إطار فخم */}
-                      <div className="relative mb-6">
-                        <div className={`absolute inset-0 bg-gradient-to-r ${member.borderColor} rounded-2xl blur-md opacity-50 animate-pulse`}></div>
-                        <div className={`relative w-48 h-32 bg-gradient-to-r ${member.borderColor} p-1 rounded-2xl`}>
-                          <div className="w-full h-full bg-card rounded-xl overflow-hidden">
-                            <img 
-                              src={member.image} 
-                              alt={member.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </div>
-                        {/* الشارة */}
-                        <div className="absolute -bottom-2 -right-2 text-4xl animate-bounce">
-                          {member.badge}
-                        </div>
-                      </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="https://linktr.ee/Our_goal"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black rounded-xl shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-105">
+                <Users className="w-5 h-5 ml-2" />
+                انضم للأبطال
+              </Button>
+            </a>
 
-                      {/* معلومات العضو */}
-                      <div className="w-full">
-                        <h3 className="text-3xl font-black mb-3 text-foreground">
-                          {member.name}
-                        </h3>
-                        
-                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${member.color} mb-4`}>
-                          <member.icon className="w-5 h-5 text-black" />
-                          <span className="text-black font-bold text-sm">{member.role}</span>
-                        </div>
-                        
-                        <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
-                          {member.achievement}
-                        </p>
-
-                        {/* شريط التميز */}
-                        <div className={`pt-6 border-t border-primary/10`}>
-                          <div className="flex items-center justify-center gap-4 mb-4">
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            </div>
-                            <span className="text-sm text-muted-foreground">عضو متميز</span>
-                          </div>
-                          
-                          <Badge className={`bg-gradient-to-r ${member.color} text-black border-0 font-bold px-4 py-2`}>
-                            بطل 2025
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* تأثيرات الهوفر */}
-                  {hoveredMember === member.id && (
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-r ${member.color} opacity-5 animate-pulse`}></div>
-                      {[...Array(5)].map((_, i) => (
-                        <Sparkles
-                          key={i}
-                          className={`absolute text-${member.glowColor}-400 w-4 h-4 animate-ping`}
-                          style={{
-                            top: `${20 + Math.random() * 60}%`,
-                            left: `${20 + Math.random() * 60}%`,
-                            animationDelay: `${i * 0.2}s`
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </Card>
-              </div>
-            ))}
+            <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
+              <MessageCircle className="w-5 h-5 ml-2" />
+              شارك في المناقشات
+            </Button>
           </div>
 
-          {/* رسالة تحفيزية */}
-          <div className="text-center mt-20">
-            <Card className="max-w-4xl mx-auto p-12 bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 rounded-3xl relative overflow-hidden">
-              {/* خلفية متحركة */}
-              <div className="absolute inset-0">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-500"></div>
-              </div>
-
-              <div className="relative z-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-bounce">
-                  <Trophy className="w-10 h-10 text-black" />
-                </div>
-
-                <h3 className="text-4xl font-bold mb-4 text-foreground">
-                  كن البطل القادم!
-                </h3>
-
-                <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  هؤلاء الأبطال بدأوا مثلك تماماً، بالعمل الجاد والمساعدة المستمرة وصلوا لهذا المستوى. 
-                  انضم لمجتمعنا وكن جزءاً من قصة النجاح القادمة!
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href="https://linktr.ee/Our_goal"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button size="lg" className="px-8 py-4 text-lg font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black rounded-xl shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-105">
-                      <Users className="w-5 h-5 ml-2" />
-                      انضم للأبطال
-                    </Button>
-                  </a>
-
-                  <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-2 border-primary/30 hover:border-primary hover:bg-primary/5 rounded-xl transition-all duration-300">
-                    <MessageCircle className="w-5 h-5 ml-2" />
-                    شارك في المناقشات
-                  </Button>
-                </div>
-
-                {/* شارات التحفيز */}
-                <div className="flex items-center justify-center gap-6 mt-8 pt-8 border-t border-primary/10">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Sparkles className="w-5 h-5 text-yellow-500" />
-                    <span>كن متميزاً</span>
-                  </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                    <Heart className="w-5 h-5 text-pink-500" />
-                    <span>ساعد الآخرين</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                    <span>تطور باستمرار</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+          {/* شارات التحفيز */}
+          <div className="flex items-center justify-center gap-6 mt-8 pt-8 border-t border-primary/10">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Sparkles className="w-5 h-5 text-yellow-500" />
+              <span>كن متميزاً</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Heart className="w-5 h-5 text-pink-500" />
+              <span>ساعد الآخرين</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <TrendingUp className="w-5 h-5 text-green-500" />
+              <span>تطور باستمرار</span>
+            </div>
           </div>
         </div>
-      </section>
-
+      </Card>
+    </div>
+  </div>
+</section>
 
 
                 
