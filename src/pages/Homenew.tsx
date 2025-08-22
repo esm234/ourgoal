@@ -54,7 +54,7 @@ const Home = () => {
   id: 1,
   name: "محمد عصام",
   role: "أفضل مسؤول لعام 2025",
-  image: "/‏Essam.jpg",
+  image: "https://lh7-rt.googleusercontent.com/formsz/AN7BsVDSIsGO2RFSIjDsJvmu5OVAzxQUaXEzRIHC9PqSAobxGMPs0b4R_jJHtiYbj_ub2gSeG59-h-PtMGvyMjvV7R7ksm-SkLwYRrmhjsJLSdSfGRp3UnwcQuUDaAxW_VesJJFkD0dJ-iOcoI8eoZdh-nAf3yp3pUSOUTzs_Q?key=CTeaMc5RhCmEeLiI7Wv-LA",
   achievement: "أدار المجتمع بكفاءة عالية وحقق أفضل النتائج",
   badge: "👑",
   rank: 1,
