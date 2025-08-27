@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,12 +36,15 @@ import {
   Zap,
   Award,
   SkipForward,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateQuranAudioSources, getFallbackQuranSources, QuranAudioSource } from '@/utils/quranAudio';
+import { AddRecitationDialog } from '@/components/AddRecitationDialog';
+import Layout from '@/components/Layout';
 import {
   LineChart,
   Line,
@@ -118,6 +120,10 @@ const PomodoroTimer: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [audioError, setAudioError] = useState<string>('');
   const [audioLoading, setAudioLoading] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
+  // Custom recitations state
+  const [customRecitations, setCustomRecitations] = useState<QuranAudioSource[]>([]);
 
   // Settings
   const [settings, setSettings] = useState<Settings>({
@@ -176,7 +182,9 @@ const PomodoroTimer: React.FC = () => {
       type: 'generated'
     },
     // القرآن الكريم - السور المختارة من YouTube
-    ...generateQuranAudioSources()
+    ...generateQuranAudioSources(),
+    // التلاوات المخصصة
+    ...customRecitations
   ];
 
   // Load data from localStorage on mount
@@ -209,6 +217,16 @@ const PomodoroTimer: React.FC = () => {
       setSessionCount(parseInt(savedSessionCount) || 0);
     }
 
+    // Load custom recitations
+    const savedCustomRecitations = localStorage.getItem('custom-recitations');
+    if (savedCustomRecitations) {
+      try {
+        setCustomRecitations(JSON.parse(savedCustomRecitations));
+      } catch (error) {
+        console.error('Error loading custom recitations:', error);
+      }
+    }
+
     // Initialize timer with work duration
     setMinutes(settings.workDuration);
   }, []);
@@ -225,6 +243,10 @@ const PomodoroTimer: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('pomodoro-session-count', sessionCount.toString());
   }, [sessionCount]);
+
+  useEffect(() => {
+    localStorage.setItem('custom-recitations', JSON.stringify(customRecitations));
+  }, [customRecitations]);
 
   // Request notification permission
   useEffect(() => {
@@ -636,6 +658,8 @@ const PomodoroTimer: React.FC = () => {
     const maxRetries = 2;
 
     try {
+      console.log('Attempting to play audio:', url);
+
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -684,6 +708,7 @@ const PomodoroTimer: React.FC = () => {
         };
 
         await audioRef.current.play();
+        setIsAudioPlaying(true);
         if (retryCount === 0) {
           const playMessage = audioType === 'quran' ? '🎵 تم تشغيل التلاوة المباركة' : '🎵 تم تشغيل الصوت';
           toast.success(playMessage);
@@ -737,10 +762,11 @@ const PomodoroTimer: React.FC = () => {
   const pauseTimer = () => {
     setIsActive(false);
 
-    // Stop all audio
+    // Pause audio without resetting position
     stopGeneratedAudio();
     if (audioRef.current) {
       audioRef.current.pause();
+      // Don't reset currentTime to keep position
     }
 
     toast.info('تم إيقاف المؤقت مؤقتاً');
@@ -1094,6 +1120,49 @@ const PomodoroTimer: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      {/* Add Custom Recitation */}
+                      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Music className="w-4 h-4" />
+                          <span className="text-sm font-medium">الأصوات المصاحبة</span>
+                        </div>
+                        <AddRecitationDialog
+                          onRecitationAdded={(recitation) => {
+                            const newAudioSource: QuranAudioSource = {
+                              id: recitation.id,
+                              name: recitation.name,
+                              url: recitation.url,
+                              type: 'quran',
+                              surahName: recitation.surahName,
+                              surahNumber: recitation.surahNumber,
+                              reciter: recitation.reciter,
+                              category: recitation.category
+                            };
+
+                            setCustomRecitations(prev => [...prev, newAudioSource]);
+
+                            // Save to localStorage
+                            const updatedCustom = [...customRecitations, newAudioSource];
+                            localStorage.setItem('custom-recitations', JSON.stringify(updatedCustom));
+                          }}
+                          onClearAllRecitations={() => {
+                            setCustomRecitations([]);
+                            localStorage.removeItem('custom-recitations');
+                            // Reset audio selection if it was a custom recitation
+                            if (selectedAudio.startsWith('custom-')) {
+                              setSelectedAudio('silence');
+                              // Stop current audio
+                              stopGeneratedAudio();
+                              if (audioRef.current) {
+                                audioRef.current.pause();
+                                audioRef.current.currentTime = 0;
+                              }
+                            }
+                          }}
+                          hasCustomRecitations={customRecitations.length > 0}
+                        />
+                      </div>
+
                       {/* Audio Selection */}
                       <div className="space-y-3">
                         <div className="max-h-72 overflow-y-auto pr-2 space-y-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
@@ -1110,7 +1179,7 @@ const PomodoroTimer: React.FC = () => {
                                   stopGeneratedAudio();
                                   if (audioRef.current) {
                                     audioRef.current.pause();
-                                    audioRef.current.currentTime = 0;
+                                    audioRef.current.currentTime = 0; // Reset when changing audio
                                   }
 
                                   // Set new selection
@@ -1182,7 +1251,7 @@ const PomodoroTimer: React.FC = () => {
                                   stopGeneratedAudio();
                                   if (audioRef.current) {
                                     audioRef.current.pause();
-                                    audioRef.current.currentTime = 0;
+                                    audioRef.current.currentTime = 0; // Reset when changing audio
                                   }
 
                                   // Set new selection
@@ -1222,23 +1291,44 @@ const PomodoroTimer: React.FC = () => {
                                       تلاوة قرآنية مباركة
                                     </div>
                                   </div>
-                                  {selectedAudio === audio.id && (
-                                    <div className="flex items-center gap-1">
-                                      {audioLoading ? (
-                                        <div className="flex items-center gap-1">
-                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
-                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-100" />
-                                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-200" />
-                                        </div>
-                                      ) : (
-                                        <div className="flex items-center gap-1">
-                                          <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
-                                          <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
-                                          <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
+                                  <div className="flex items-center gap-2">
+                                    {selectedAudio === audio.id && (
+                                      <div className="flex items-center gap-1">
+                                        {audioLoading ? (
+                                          <div className="flex items-center gap-1">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-100" />
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce animation-delay-200" />
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center gap-1">
+                                            <div className="w-1 h-3 bg-green-500 rounded-full animate-pulse" />
+                                            <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse animation-delay-100" />
+                                            <div className="w-1 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                    {audio.id.startsWith('custom-') && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (confirm('هل تريد حذف هذه التلاوة؟')) {
+                                            setCustomRecitations(prev => prev.filter(r => r.id !== audio.id));
+                                            if (selectedAudio === audio.id) {
+                                              setSelectedAudio('silence');
+                                            }
+                                            toast.success('تم حذف التلاوة');
+                                          }
+                                        }}
+                                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </div>
                                   {selectedAudio === audio.id && (
                                     <div className="absolute top-2 right-2">
                                       <div className="w-2 h-2 bg-green-500 rounded-full" />
@@ -1252,107 +1342,136 @@ const PomodoroTimer: React.FC = () => {
                       </div>
 
                       {/* Audio Error Display */}
-                      {audioError && (
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                          <div className="flex items-center gap-2 text-red-500">
-                            <AlertCircle className="w-4 h-4" />
-                            <span className="text-sm font-medium">{audioError}</span>
-                          </div>
-                        </div>
-                      )}
 
-                      {/* Audio Controls */}
-                      {selectedAudio !== 'silence' && (
-                        <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-4 space-y-4 border border-border/50">
-                          {/* Control Buttons */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                              <Label className="text-sm font-medium">التحكم في الصوت</Label>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  stopGeneratedAudio();
-                                  if (audioRef.current) {
-                                    audioRef.current.pause();
-                                    audioRef.current.currentTime = 0;
-                                  }
-                                  toast.info('تم إيقاف الصوت');
-                                }}
-                                className="h-8 w-8 p-0 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 transition-all duration-200"
-                              >
-                                <Square className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  const newMuted = !isMuted;
-                                  setIsMuted(newMuted);
-
-                                  // Update volume for current audio
-                                  if (gainNodeRef.current) {
-                                    gainNodeRef.current.gain.setValueAtTime(
-                                      newMuted ? 0 : audioVolume,
-                                      gainNodeRef.current.context.currentTime
-                                    );
-                                  }
-                                  if (audioRef.current) {
-                                    audioRef.current.volume = newMuted ? 0 : audioVolume;
-                                  }
-                                }}
-                                className={`h-8 w-8 p-0 rounded-lg transition-all duration-200 ${
-                                  isMuted
-                                    ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 hover:text-orange-400'
-                                    : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 hover:text-blue-400'
-                                }`}
-                              >
-                                {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                              </Button>
+                        {/* Audio Error Display */}
+                        {audioError && (
+                          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                            <div className="flex items-center gap-2 text-red-500">
+                              <AlertCircle className="w-4 h-4" />
+                              <span className="text-sm font-medium">{audioError}</span>
                             </div>
                           </div>
+                        )}
 
-                          {/* Volume Slider */}
-                          <div className="space-y-3">
+                        {/* Audio Controls */}
+                        {selectedAudio !== 'silence' && (
+                          <div className="bg-gradient-to-r from-muted/30 to-muted/20 rounded-xl p-4 space-y-4 border border-border/50">
+                            {/* Control Buttons */}
                             <div className="flex items-center justify-between">
-                              <Label className="text-sm text-muted-foreground">مستوى الصوت</Label>
-                              <div className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-md">
-                                {Math.round(audioVolume * 100)}%
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                <Label className="text-sm font-medium">التحكم في الصوت</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (isAudioPlaying) {
+                                      // Pause without resetting
+                                      if (audioRef.current) {
+                                        audioRef.current.pause();
+                                      }
+                                      stopGeneratedAudio();
+                                      setIsAudioPlaying(false);
+                                      toast.info('تم إيقاف الصوت مؤقتاً');
+                                    } else {
+                                      // Resume from current position
+                                      if (audioRef.current) {
+                                        audioRef.current.play();
+                                      }
+                                      setIsAudioPlaying(true);
+                                      toast.info('تم استئناف الصوت');
+                                    }
+                                  }}
+                                  className="h-8 w-8 p-0 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 hover:text-blue-400 transition-all duration-200"
+                                >
+                                  {isAudioPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    stopGeneratedAudio();
+                                    if (audioRef.current) {
+                                      audioRef.current.pause();
+                                      audioRef.current.currentTime = 0;
+                                    }
+                                    setIsAudioPlaying(false);
+                                    toast.info('تم إيقاف الصوت نهائياً');
+                                  }}
+                                  className="h-8 w-8 p-0 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 transition-all duration-200"
+                                >
+                                  <Square className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newMuted = !isMuted;
+                                    setIsMuted(newMuted);
+
+                                    // Update volume for current audio
+                                    if (gainNodeRef.current) {
+                                      gainNodeRef.current.gain.setValueAtTime(
+                                        newMuted ? 0 : audioVolume,
+                                        gainNodeRef.current.context.currentTime
+                                      );
+                                    }
+                                    if (audioRef.current) {
+                                      audioRef.current.volume = newMuted ? 0 : audioVolume;
+                                    }
+                                  }}
+                                  className={`h-8 w-8 p-0 rounded-lg transition-all duration-200 ${
+                                    isMuted
+                                      ? 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 hover:text-orange-400'
+                                      : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 hover:text-blue-400'
+                                  }`}
+                                >
+                                  {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                                </Button>
                               </div>
                             </div>
-                            <div className="relative">
-                              <Slider
-                                value={[audioVolume]}
-                                onValueChange={(value) => {
-                                  setAudioVolume(value[0]);
-                                  // Update volume for current audio
-                                  if (gainNodeRef.current) {
-                                    gainNodeRef.current.gain.setValueAtTime(
-                                      isMuted ? 0 : value[0],
-                                      gainNodeRef.current.context.currentTime
-                                    );
-                                  }
-                                  if (audioRef.current) {
-                                    audioRef.current.volume = isMuted ? 0 : value[0];
-                                  }
-                                }}
-                                max={1}
-                                min={0}
-                                step={0.1}
-                                className="w-full"
-                              />
-                              {/* Volume level indicators */}
-                              <div className="flex justify-between mt-1 px-1">
-                                <div className="text-xs text-muted-foreground">🔇</div>
-                                <div className="text-xs text-muted-foreground">🔊</div>
+
+                            {/* Volume Slider */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-sm text-muted-foreground">مستوى الصوت</Label>
+                                <div className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-md">
+                                  {Math.round(audioVolume * 100)}%
+                                </div>
+                              </div>
+                              <div className="relative">
+                                <Slider
+                                  value={[audioVolume]}
+                                  onValueChange={(value) => {
+                                    setAudioVolume(value[0]);
+                                    // Update volume for current audio
+                                    if (gainNodeRef.current) {
+                                      gainNodeRef.current.gain.setValueAtTime(
+                                        isMuted ? 0 : value[0],
+                                        gainNodeRef.current.context.currentTime
+                                      );
+                                    }
+                                    if (audioRef.current) {
+                                      audioRef.current.volume = isMuted ? 0 : value[0];
+                                    }
+                                  }}
+                                  max={1}
+                                  min={0}
+                                  step={0.1}
+                                  className="w-full"
+                                />
+                                {/* Volume level indicators */}
+                                <div className="flex justify-between mt-1 px-1">
+                                  <div className="text-xs text-muted-foreground">🔇</div>
+                                  <div className="text-xs text-muted-foreground">🔊</div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </CardContent>
                   </Card>
 
@@ -1572,7 +1691,7 @@ const PomodoroTimer: React.FC = () => {
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="date" />
-                          <YAxis tickFormatter={(value) => Math.floor(value)} />
+                          <YAxis tickFormatter={(value) => Math.floor(Number(value)).toString()} />
                           <Tooltip formatter={(value) => [Math.floor(Number(value)), 'جلسة']} />
                           <Line 
                             type="monotone" 
@@ -1826,6 +1945,8 @@ const PomodoroTimer: React.FC = () => {
         preload="none"
         style={{ display: 'none' }}
       />
+
+
     </Layout>
   );
 };
