@@ -5,6 +5,12 @@ const getMay26WithTime = (hour: number, minute: number): string => {
   return may26.toISOString();
 };
 
+const getAugust26WithTime = (hour: number, minute: number): string => {
+  const august26 = new Date(2025, 7, 26); // August is month 7 (0-indexed)
+  august26.setHours(hour, minute, 0, 0);
+  return august26.toISOString();
+};
+
 // Helper function لإنشاء تاريخ ثابت 29 مايو مع وقت محدد (ميلادي)
 const getMay29WithTime = (hour: number, minute: number): string => {
   const may29 = new Date(2025, 4, 29); // May is month 4 (0-indexed)
@@ -48,7 +54,7 @@ export const localFiles: LocalFile[] = [
     file_url: "https://drive.google.com/uc?export=download&id=1nigAlfxIBRQk2JxjXaHHfk4Cnky3SqhQ",
     file_size: "3.6 MB",
     downloads: 1567,
-    created_at: getMay26WithTime(8, 0),
+    created_at: getAugust26WithTime(8, 0),
     exams: [
 
     ]
@@ -1120,6 +1126,84 @@ export const incrementDownloads = (fileId: number): void => {
   }
 };
 
+// بيانات التجميعات
+export interface Collection {
+  id: number;
+  title: string;
+  description: string;
+  category: 'verbal' | 'quantitative';
+  pdf_url: string;
+  video_url?: string;
+  file_size: string;
+  downloads: number;
+  created_at: string;
+  exams: LocalExam[];
+  difficulty: 'easy' | 'medium' | 'hard';
+  questions_count: number;
+}
+
+export const collections: Collection[] = [
+  
+  {
+    id: 2,
+    title: "تجميعات الكمي - 1",
+    description: "مجموعة من الأسئلة التي وردت للمختبرين",
+    category: "quantitative",
+    pdf_url: "https://drive.google.com/uc?export=download&id=1amVZvUfhxfHuJJX7gjYRvdNP7KW8MW66",
+    video_url: "https://m.youtube.com/watch?v=u0WeAINjSEM&feature=youtu.be",
+    file_size: "2.8 MB",
+    downloads: 200,
+    created_at: getAugust26WithTime(9, 0),
+    difficulty: "hard",
+    questions_count: 48,
+    exams: [
+      {
+        id: 10002,
+        title: "اختبار التجميعات الكمي - 1",
+        description: "اختبار على من ملف التجميعات",
+        google_form_url: "https://forms.gle/Q62Qzu37MTdX1gwTA",
+        difficulty: "hard",
+        estimated_time: 50,
+        questions_count: 48
+      }
+    ]
+  },
+];
+
+// دالة للبحث في التجميعات
+export const searchCollections = (query: string, category?: string): Collection[] => {
+  let filteredCollections = collections;
+
+  // تصفية حسب الفئة
+  if (category && category !== 'all') {
+    filteredCollections = filteredCollections.filter(collection => collection.category === category);
+  }
+
+  // البحث في العنوان والوصف
+  if (query.trim()) {
+    const searchTerm = query.toLowerCase();
+    filteredCollections = filteredCollections.filter(collection =>
+      collection.title.toLowerCase().includes(searchTerm) ||
+      collection.description.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  return filteredCollections;
+};
+
+// دالة للحصول على تجميعة بالـ ID
+export const getCollectionById = (id: number): Collection | undefined => {
+  return collections.find(collection => collection.id === id);
+};
+
+// دالة لزيادة عدد تحميلات التجميعة
+export const incrementCollectionDownloads = (collectionId: number): void => {
+  const collection = collections.find(c => c.id === collectionId);
+  if (collection) {
+    collection.downloads += 1;
+  }
+};
+
 // إحصائيات سريعة
 export const getFilesStats = () => {
   const totalFiles = localFiles.length;
@@ -1138,5 +1222,24 @@ export const getFilesStats = () => {
     totalDownloads,
     totalExams,
     categoryCounts
+  };
+};
+
+// إحصائيات التجميعات
+export const getCollectionsStats = () => {
+  const totalCollections = collections.length;
+  const totalCollectionDownloads = collections.reduce((sum, collection) => sum + collection.downloads, 0);
+  const totalCollectionExams = collections.reduce((sum, collection) => sum + collection.exams.length, 0);
+
+  const collectionCategoryCounts = {
+    verbal: collections.filter(c => c.category === 'verbal').length,
+    quantitative: collections.filter(c => c.category === 'quantitative').length,
+  };
+
+  return {
+    totalCollections,
+    totalCollectionDownloads,
+    totalCollectionExams,
+    collectionCategoryCounts
   };
 };

@@ -26,6 +26,8 @@ import {
   BookOpen,
   GraduationCap,
   MonitorPlay,
+  Star,
+
 } from "lucide-react";
 import NotificationBell from "./notifications/NotificationBell";
 import {
@@ -142,7 +144,7 @@ const Navbar = () => {
                     onClick={handleLinkClick}
                   >
                     <FileText className="w-4 h-4 mr-2" />
-                    <span>الملفات</span>
+                    <span>الملفات والتجميعات</span>
                   </Link>
                 </DropdownMenuItem>
                 {SHOW_COURSES_BANNER && (
@@ -303,7 +305,7 @@ const Navbar = () => {
                 onClick={handleMobileLinkClick}
               >
                 <FileText size={18} className="ml-2" />
-                <span>الملفات</span>
+                <span>الملفات والتجميعات</span>
               </Link>
               {SHOW_COURSES_BANNER && (
                 <Link

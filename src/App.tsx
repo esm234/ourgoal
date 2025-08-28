@@ -11,6 +11,7 @@ import EquivalencyCalculator from "@/pages/EquivalencyCalculator";
 import Files from "@/pages/Files";
 import FileDetails from "@/pages/FileDetails";
 import LocalFileDetails from "@/pages/LocalFileDetails";
+import CollectionDetails from "@/pages/CollectionDetails";
 import StudyPlan from "@/pages/StudyPlan";
 import Profile from "@/pages/Profile";
 import Welcome from "@/pages/Welcome";
@@ -45,7 +46,7 @@ import NotificationsPage from "@/pages/notifications";
 import MockExam from "@/pages/MockExam";
 import MockExamExam from './pages/MockExamExam';
 import MockExamResult from './pages/MockExamResult';
-import Homenew from './pages/Homenew';
+
 import { SHOW_COURSES_PAGE, SHOW_NOTIFICATIONS_PAGE } from './config/environment';
 
 
@@ -75,11 +76,11 @@ const App = () => {
               <RedirectHandler />
               <Routes>
               <Route path="/" element={<Home />} />
-                             <Route path="Homenew" element={<Homenew />} /> 
               <Route path="/equivalency-calculator" element={<EquivalencyCalculator />} />
               <Route path="/files" element={<Files />} />
               <Route path="/files/:id" element={<FileDetails />} />
               <Route path="/local-file-details/:id" element={<LocalFileDetails />} />
+              <Route path="/collections/:id" element={<CollectionDetails />} />
               <Route path="/courses" element={SHOW_COURSES_PAGE ? <Courses /> : null} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
               <Route path="/courses/:courseId/lesson/:lessonId" element={<CourseLesson />} />

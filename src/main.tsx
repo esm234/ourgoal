@@ -4,7 +4,6 @@ import './index.css'
 import { initCacheManagement, registerServiceWorker } from './utils/cacheUtils'
 import { autoRestoreOnLoad } from './utils/dataBackup'
 import MockExamExam from './pages/MockExamExam'
-import { initConsoleProtection } from './utils/consoleProtection'
 
 // @ts-ignore
 declare const chrome: any;
@@ -30,7 +29,6 @@ autoRestoreOnLoad();
 // Initialize cache management
 initCacheManagement();
 // Initialize console protection
-initConsoleProtection();
 // Register service worker
 registerServiceWorker();
 

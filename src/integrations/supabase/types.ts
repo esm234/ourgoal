@@ -324,6 +324,47 @@ export type Database = {
           }
         ]
       }
+      quran_playlists: {
+        Row: {
+          id: number
+          user_id: string
+          name: string
+          description: string | null
+          is_default: boolean
+          playlist_items: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          name: string
+          description?: string | null
+          is_default?: boolean
+          playlist_items: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          user_id?: string
+          name?: string
+          description?: string | null
+          is_default?: boolean
+          playlist_items?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quran_playlists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       leaderboard_view: {
