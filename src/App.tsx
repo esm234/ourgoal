@@ -46,7 +46,10 @@ import NotificationsPage from "@/pages/notifications";
 import MockExam from "@/pages/MockExam";
 import MockExamExam from './pages/MockExamExam';
 import MockExamResult from './pages/MockExamResult';
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9b70aa3465933cbdecb33f35ce1e6e8876807455
 import { SHOW_COURSES_PAGE, SHOW_NOTIFICATIONS_PAGE } from './config/environment';
 
 
